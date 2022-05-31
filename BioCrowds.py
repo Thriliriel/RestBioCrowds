@@ -8,12 +8,18 @@ from ObstacleClass import ObstacleClass
 import pandas as pd
 
 class BioCrowds():
-	def run(self):
-		writeResult = "Yay"
+	def run(self, data):
+		writeResult = ["yay"]
+
+		#from Json
+		terrainSizeJson = data['terrains'][0]['terrain_size']
+		goalsJson = data['goals']
+		agentsJson = data #spawn areas. Gab, take a look
+		obstaclesJson = data['obstacles']
 
 		#default values
 		#size of the scenario
-		mapSize = Vector3(20, 20, 0)
+		mapSize = Vector3(terrainSizeJson[0], terrainSizeJson[2], terrainSizeJson[1])
 		#markers density
 		PORC_QTD_Marcacoes = 0.65
 		#FPS (default: 50FPS)
@@ -38,9 +44,9 @@ class BioCrowds():
 				#size of each square cell
 				cellSize = int(line)
 			elif lineCount == 4:
-				#size of the scenario
+				#size of the scenario (comes from json, so no needed)
 				sp = line.split(',')
-				mapSize = Vector3(int(sp[0]), int(sp[1]), int(sp[2]))
+				#mapSize = Vector3(int(sp[0]), int(sp[1]), int(sp[2]))
 			elif lineCount == 5:
 				#using path planning?
 				if line.lower() == 'false':
@@ -53,19 +59,23 @@ class BioCrowds():
 		#goals
 		goals = []
 
-		#read the goals file
-		for line in open("Input/goals.txt", "r"):
-			if '#' in line:
-				continue
+		#read the goals file (comes from json)
+		#for line in open("Input/goals.txt", "r"):
+		#	if '#' in line:
+		#		continue
 
-			#create goal
-			gl = line.split(',')
-			goals.append(GoalClass(int(gl[0]), Vector3(float(gl[1]), float(gl[2]), float(gl[3]))))
+		#	#create goal
+		#	gl = line.split(',')
+		#	goals.append(GoalClass(int(gl[0]), Vector3(float(gl[1]), float(gl[2]), float(gl[3]))))
+		idGoal = 1
+		for gl in goalsJson:
+			goals.append(GoalClass(idGoal, Vector3(gl['position'][0], gl['position'][2], gl['position'][1])))
+			idGoal += 1
 
 		#agents
 		agents = []
 
-		#read the agents file
+		#read the agents file (comes from json)
 		for line in open("Input/agents.txt", "r"):
 			if '#' in line:
 				continue
@@ -82,27 +92,40 @@ class BioCrowds():
 
 			agents.append(AgentClass(int(ag[0]), gl, float(ag[2]), float(ag[3]), pathPlanning, Vector3(float(ag[4]), float(ag[5]), float(ag[6]))))
 
+
+
 		#obstacles
 		obstacles = []
 
-		#read the obstacles file
-		for line in open("Input/obstacles.txt", "r"):
-			if '#' in line:
-				continue
+		#read the obstacles file (comes from json)
+		#for line in open("Input/obstacles.txt", "r"):
+		#	if '#' in line:
+		#		continue
 
-			#create obstacle
-			ob = line.split(',')
+		#	#create obstacle
+		#	ob = line.split(',')
 
-			#if size is one, it is the id
-			if len(ob) == 1:
-				obstacles.append(ObstacleClass(int(ob[0])))
-			#if size is three, it is one of the points
-			elif len(ob) == 3:
-				obstacles[len(obstacles)-1].AddPoint(Vector3(float(ob[0]), float(ob[1]), float(ob[2])))
-			#else, something is wrong
-			else:
-				print("Error: input size is wrong!")
-				exit
+		#	#if size is one, it is the id
+		#	if len(ob) == 1:
+		#		obstacles.append(ObstacleClass(int(ob[0])))
+		#	#if size is three, it is one of the points
+		#	elif len(ob) == 3:
+		#		obstacles[len(obstacles)-1].AddPoint(Vector3(float(ob[0]), float(ob[1]), float(ob[2])))
+		#	#else, something is wrong
+		#	else:
+		#		print("Error: input size is wrong!")
+		#		exit
+
+		#points??
+		idObs = 1
+		for ob in obstaclesJson:
+			obstacles.append(ObstacleClass(idObs))
+			obstacles[len(obstacles)-1].AddPoint(Vector3(ob['transform']['position'][0], 
+												ob['transform']['position'][2], 
+												ob['transform']['position'][1]))
+			print(obstacles[len(obstacles)-1].points[0].x)
+
+			idObs += 1
 
 		#cells
 		cells = []
@@ -168,6 +191,7 @@ class BioCrowds():
 		resultFile = open("resultFile.csv", "w")
 
 		#walking loop
+		#check the distance to see if agent is stuck (TODO)
 		while True:
 			#if no agents anymore, break
 			if len(agents) == 0:
@@ -233,6 +257,22 @@ class BioCrowds():
 				print(agents[i].id, " -- Dist: ", dist, " -- Radius: ", agents[i].radius, " -- Agent: ", agents[i].position.x, agents[i].position.y)
 				#print(agents[i].speed.x, agents[i].speed.y)
 				if dist < agents[i].radius / 4:
+					agentsToKill.append(i)
+
+				#update lastdist (max = 5)
+				if len(agents[i].lastDist) == 5:
+					agents[i].lastDist.pop(0)
+
+				agents[i].lastDist.append(dist)
+
+				#check them all
+				qntFound = 0
+				for ck in agents[i].lastDist:
+					if ck == dist:
+						qntFound += 1
+
+				#if distances does not change, assume agent is stuck
+				if qntFound == 5:
 					agentsToKill.append(i)
 
 				i += 1

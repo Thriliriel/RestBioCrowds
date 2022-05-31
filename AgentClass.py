@@ -20,6 +20,7 @@ class AgentClass:
 		self.speed = Vector3.Zero()
 		self.cell = None
 		self.usePathPlanning = usePathPlanning
+		self.lastDist = [] # to check if agent is stuck
 		if self.usePathPlanning:
 			self.pathPlanning = PathPlanningClass(10000) #10000 = max iterations allowed to find a path
 			self.path = []

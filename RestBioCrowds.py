@@ -25,9 +25,9 @@ class RestBioCrowds(object):
 
 		data = cherrypy.request.json
 		#print(data)
-		df = pd.DataFrame(data)
+		#df = pd.DataFrame(data)
 		#output = biocrowds.run(df)
-		output = biocrowds.run()
+		output = biocrowds.run(data)
 		return output.to_json()
 
 if __name__ == '__main__':
@@ -38,3 +38,4 @@ if __name__ == '__main__':
 
 #running: 
 #curl -d "{\"text\" : [\"i am not feeling good\"]}" -H "Content-Type: application/json" -X POST http://localhost:5000/runSim
+#curl -d "{\"text\" : [\"i am not feeling good\"]}" -H "Content-Type: application/json" -X POST https://serene-beach-46283.herokuapp.com/runSim
