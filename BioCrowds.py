@@ -190,6 +190,9 @@ class BioCrowds():
 		#open file to write
 		resultFile = open("resultFile.csv", "w")
 
+		#heat map
+		heatMapFile = open("heatMapFile.csv", "w")
+
 		#walking loop
 		#check the distance to see if agent is stuck (TODO)
 		while True:

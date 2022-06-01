@@ -31,6 +31,11 @@ class PathPlanningClass:
 			#order the list
 			self.ReorderCheckList()
 
+			#if wall, continue
+			if self.nodesToCheck[0].cell.isWall:
+				self.nodesToCheck.pop(0)
+				continue
+
 			#check the neighbour cells of the first node of the list and create their nodes
 			self.FindNodes(self.nodesToCheck[0])
             
