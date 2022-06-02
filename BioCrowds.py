@@ -8,12 +8,13 @@ from ObstacleClass import ObstacleClass
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import base64
 
 domain = "https://serene-beach-46283.herokuapp.com/"
 
 class BioCrowds():
 	def run(self, data):
-		writeResult = ["yay"]
+		writeResult = []
 
 		#from Json
 		terrainSizeJson = data['terrains'][0]['terrain_size']
@@ -357,8 +358,13 @@ class BioCrowds():
 		plt.savefig("heatmap.png", dpi=75)
 
 		#html
-		html = "<html><body><img src='"+domain+"heatmap.png' width='480' height='360' border='0'></body></html>"
+		#html = "<html><body><img src='"+domain+"heatmap.png' width='480' height='360' border='0'></body></html>"
+		hm = []
+		with open("heatmap.png", "rb") as img_file:
+			hm = ["heatmap", base64.b64encode(img_file.read())]
 		#end heatmap
 
+		writeResult.append(hm)
+
 		#return plt
-		return pd.DataFrame([html])
+		return pd.DataFrame(writeResult)
