@@ -1,4 +1,4 @@
-from os import path
+import os
 from AgentClass import AgentClass
 from Vector3Class import Vector3
 from CellClass import CellClass
@@ -8,6 +8,8 @@ from ObstacleClass import ObstacleClass
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+
+domain = "https://serene-beach-46283.herokuapp.com/"
 
 class BioCrowds():
 	def run(self, data):
@@ -192,6 +194,8 @@ class BioCrowds():
 		#open file to write
 		resultFile = open("resultFile.csv", "w")
 
+		simulationFrame = 0
+
 		#walking loop
 		#check the distance to see if agent is stuck (TODO)
 		while True:
@@ -256,7 +260,7 @@ class BioCrowds():
 
 				#verify agent position, in relation to the goal. If arrived, bye
 				dist = Vector3.Distance(agents[i].goal.position, agents[i].position)
-				print(agents[i].id, " -- Dist: ", dist, " -- Radius: ", agents[i].radius, " -- Agent: ", agents[i].position.x, agents[i].position.y)
+				#print(agents[i].id, " -- Dist: ", dist, " -- Radius: ", agents[i].radius, " -- Agent: ", agents[i].position.x, agents[i].position.y)
 				#print(agents[i].speed.x, agents[i].speed.y)
 				if dist < agents[i].radius / 4:
 					agentsToKill.append(i)
@@ -284,8 +288,14 @@ class BioCrowds():
 				for i in range(0, len(agentsToKill)):
 					agents.pop(agentsToKill[i])
 
+			print("Simulation Frame:", simulationFrame, end='\r')
+			simulationFrame += 1
+
 		#close file
 		resultFile.close()
+
+		simulationTime = (simulationFrame+1) * timeStep
+		print(f'Total Simulation Time: {simulationTime} "seconds. ({simulationFrame+1} frames)')
 
 		#save the cells, for heatmap
 		resultCellsFile = open("resultCellFile.txt", "w")
@@ -316,11 +326,12 @@ class BioCrowds():
 			dataTemp = []
 
 			for af in strip:
-				dataTemp.append(float(af))
+				dataTemp.insert(0, float(af))
 
 			data.append(dataTemp)
 
 		heatmap = np.array(data)
+		heatmap = heatmap.transpose()
 
 		fig, ax = plt.subplots()
 		im = ax.imshow(heatmap)
@@ -341,7 +352,13 @@ class BioCrowds():
 
 		ax.set_title("HeatMap")
 		fig.tight_layout()
-		plt.show()
+		#plt.show()
+
+		plt.savefig("heatmap.png", dpi=75)
+
+		#html
+		html = "<html><body><img src='"+domain+"heatmap.png' width='480' height='360' border='0'></body></html>"
 		#end heatmap
 
-		return pd.DataFrame(writeResult)
+		#return plt
+		return pd.DataFrame([html])

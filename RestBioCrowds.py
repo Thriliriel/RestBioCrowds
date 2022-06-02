@@ -28,6 +28,7 @@ class RestBioCrowds(object):
 		#df = pd.DataFrame(data)
 		#output = biocrowds.run(df)
 		output = biocrowds.run(data)
+		#output.show()
 		return output.to_json()
 
 if __name__ == '__main__':
