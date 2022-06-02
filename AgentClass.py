@@ -186,6 +186,9 @@ class AgentClass:
 
 			self.cell = cellToChange
 
+			#add to cell passed agents
+			self.cell.AddPassedAgent(self.id)
+
 	#walk
 	def Walk(self, timeStep):
 		self.position = Vector3.Add_vec(self.position, Vector3.Mul_vec(self.speed, timeStep, 1))

@@ -25,7 +25,9 @@
   <ItemGroup>
     <Compile Include="AgentClass.py" />
     <Compile Include="BioCrowds.py" />
+    <Compile Include="CellClass.py" />
     <Compile Include="ObstacleClass.py" />
+    <Compile Include="PathPlanningClass.py" />
     <Compile Include="RestBioCrowds.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />

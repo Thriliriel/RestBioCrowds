@@ -6,6 +6,8 @@ from MarkerClass import MarkerClass
 from GoalClass import GoalClass
 from ObstacleClass import ObstacleClass
 import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
 class BioCrowds():
 	def run(self, data):
@@ -190,9 +192,6 @@ class BioCrowds():
 		#open file to write
 		resultFile = open("resultFile.csv", "w")
 
-		#heat map
-		heatMapFile = open("heatMapFile.csv", "w")
-
 		#walking loop
 		#check the distance to see if agent is stuck (TODO)
 		while True:
@@ -287,5 +286,62 @@ class BioCrowds():
 
 		#close file
 		resultFile.close()
+
+		#save the cells, for heatmap
+		resultCellsFile = open("resultCellFile.txt", "w")
+		thisX = 0
+		firstColumn = True
+		for cell in cells:
+			if thisX != cell.position.x:
+				thisX = cell.position.x
+				resultCellsFile.write("\n")
+				firstColumn = True
+
+			if firstColumn:
+				resultCellsFile.write(str(len(cell.passedAgents)))
+				firstColumn = False
+			else:
+				resultCellsFile.write("," + str(len(cell.passedAgents)))
+
+
+		resultCellsFile.close()
+
+		#generate heatmap
+		data = []
+
+		#open file to read
+		for line in open("resultCellFile.txt"):
+			stripLine = line.replace('\n', '')
+			strip = stripLine.split(',')
+			dataTemp = []
+
+			for af in strip:
+				dataTemp.append(float(af))
+
+			data.append(dataTemp)
+
+		heatmap = np.array(data)
+
+		fig, ax = plt.subplots()
+		im = ax.imshow(heatmap)
+
+		# Show all ticks and label them with the respective list entries
+		ax.set_xticks(np.arange(mapSize.x/cellSize))
+		ax.set_yticks(np.arange(mapSize.y/cellSize))
+
+		# Rotate the tick labels and set their alignment.
+		plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+				 rotation_mode="anchor")
+
+		# Loop over data dimensions and create text annotations.
+		for i in range(int(mapSize.x/cellSize)):
+			for j in range(int(mapSize.y/cellSize)):
+				text = ax.text(j, i, heatmap[i, j],
+								ha="center", va="center", color="w")
+
+		ax.set_title("HeatMap")
+		fig.tight_layout()
+		plt.show()
+		#end heatmap
 
 		return pd.DataFrame(writeResult)

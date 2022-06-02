@@ -18,6 +18,7 @@ class CellClass:
 		self.neighborCells = []
 		self.qntMarkers = 0
 		self.isWall = False
+		self.passedAgents = []
 
 	def DartThrow(self, obstacles):
 		#flag to break the loop if it is taking too long (maybe out of space)
@@ -203,3 +204,7 @@ class CellClass:
          
 		# Return true if count is odd, false otherwise
 		return (count % 2 == 1)
+
+	def AddPassedAgent(self, newAgent):
+		if newAgent not in self.passedAgents:
+			self.passedAgents.append(newAgent)
