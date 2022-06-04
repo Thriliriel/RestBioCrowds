@@ -5,10 +5,12 @@ from CellClass import CellClass
 from MarkerClass import MarkerClass
 from GoalClass import GoalClass
 from ObstacleClass import ObstacleClass
+from Parsing.ParserJSON import ParserJSON
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import base64
+import argparse
 
 domain = "https://serene-beach-46283.herokuapp.com/"
 
@@ -17,14 +19,14 @@ class BioCrowds():
 		writeResult = []
 
 		#from Json
-		terrainSizeJson = data['terrains'][0]['terrain_size']
-		goalsJson = data['goals']
-		agentsJson = data #spawn areas. Gab, take a look
-		obstaclesJson = data['obstacles']
+		#terrainSizeJson = data['terrains'][0]['terrain_size']
+		#goalsJson = data['goals']
+		#agentsJson = data
+		#obstaclesJson = data['obstacles']
 
 		#default values
 		#size of the scenario
-		mapSize = Vector3(terrainSizeJson[0], terrainSizeJson[2], terrainSizeJson[1])
+		mapSize = Vector3.Zero
 		#markers density
 		PORC_QTD_Marcacoes = 0.65
 		#FPS (default: 50FPS)
@@ -51,7 +53,7 @@ class BioCrowds():
 			elif lineCount == 4:
 				#size of the scenario (comes from json, so no needed)
 				sp = line.split(',')
-				#mapSize = Vector3(int(sp[0]), int(sp[1]), int(sp[2]))
+				mapSize = Vector3(int(sp[0]), int(sp[1]), int(sp[2]))
 			elif lineCount == 5:
 				#using path planning?
 				if line.lower() == 'false':
@@ -72,30 +74,30 @@ class BioCrowds():
 		#	#create goal
 		#	gl = line.split(',')
 		#	goals.append(GoalClass(int(gl[0]), Vector3(float(gl[1]), float(gl[2]), float(gl[3]))))
-		idGoal = 1
-		for gl in goalsJson:
-			goals.append(GoalClass(idGoal, Vector3(gl['position'][0], gl['position'][2], gl['position'][1])))
-			idGoal += 1
+		#idGoal = 1
+		#for gl in goalsJson:
+		#	goals.append(GoalClass(idGoal, Vector3(gl['position'][0], gl['position'][2], gl['position'][1])))
+		#	idGoal += 1
 
 		#agents
 		agents = []
 
 		#read the agents file (comes from json)
-		for line in open("Input/agents.txt", "r"):
-			if '#' in line:
-				continue
+		#for line in open("Input/agents.txt", "r"):
+		#	if '#' in line:
+		#		continue
 
-			#create agent
-			ag = line.split(',')
+		#	#create agent
+		#	ag = line.split(',')
 
-			#find the goal with this id
-			gl = None
-			for i in range(0, len(goals)):
-				if goals[i].id == int(ag[1]):
-					gl = goals[i]
-					break
+		#	#find the goal with this id
+		#	gl = None
+		#	for i in range(0, len(goals)):
+		#		if goals[i].id == int(ag[1]):
+		#			gl = goals[i]
+		#			break
 
-			agents.append(AgentClass(int(ag[0]), gl, float(ag[2]), float(ag[3]), pathPlanning, Vector3(float(ag[4]), float(ag[5]), float(ag[6]))))
+		#	agents.append(AgentClass(int(ag[0]), gl, float(ag[2]), float(ag[3]), pathPlanning, Vector3(float(ag[4]), float(ag[5]), float(ag[6]))))
 
 
 
@@ -120,17 +122,6 @@ class BioCrowds():
 		#	else:
 		#		print("Error: input size is wrong!")
 		#		exit
-
-		#points??
-		idObs = 1
-		for ob in obstaclesJson:
-			obstacles.append(ObstacleClass(idObs))
-			obstacles[len(obstacles)-1].AddPoint(Vector3(ob['transform']['position'][0], 
-												ob['transform']['position'][2], 
-												ob['transform']['position'][1]))
-			print(obstacles[len(obstacles)-1].points[0].x)
-
-			idObs += 1
 
 		#cells
 		cells = []
@@ -158,6 +149,10 @@ class BioCrowds():
 				for j in range(0, len(cells[i].markers)):
 					markerFile.write(cells[i].id + ";" + str(cells[i].markers[j].position.x) + ";" + str(cells[i].markers[j].position.y) + ";" + str(cells[i].markers[j].position.z) + "\n")
 			markerFile.close()
+
+		#from json
+		#mapSize, goals, agents, obstacles = ParserJSON.ParseFile(args['f'])
+		mapSize, goals, agents, obstacles = ParserJSON.ParseJsonContent(data)
 
 		CreateMap()
 		CreateMarkers()
