@@ -2,3 +2,4 @@ pandas
 cherrypy
 cherrypy_cors
 matplotlib
+psycopg2
