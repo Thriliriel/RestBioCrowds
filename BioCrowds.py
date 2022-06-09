@@ -10,13 +10,19 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import base64
-import argparse
-
-domain = "https://serene-beach-46283.herokuapp.com/"
+#import argparse
+#import mysql.connector
+#from mysql.connector import Error
+import time
+import psycopg2
 
 class BioCrowds():
-	def run(self, data):
+	def run(self, data, ip):
+		self.ip = ip
 		writeResult = []
+		startTime = time.time()
+
+		self.ConnectDB()
 
 		#from Json
 		#terrainSizeJson = data['terrains'][0]['terrain_size']
@@ -26,15 +32,15 @@ class BioCrowds():
 
 		#default values
 		#size of the scenario
-		mapSize = Vector3.Zero
+		self.mapSize = Vector3.Zero
 		#markers density
-		PORC_QTD_Marcacoes = 0.65
+		self.PORC_QTD_Marcacoes = 0.65
 		#FPS (default: 50FPS)
-		timeStep = 0.02
+		self.timeStep = 0.02
 		#size of each square cell (Ex: 2 -> cell 2x2)
-		cellSize = 2
+		self.cellSize = 2
 		#using path planning?
-		pathPlanning = True
+		self.pathPlanning = True
 
 		#read the config file
 		lineCount = 1
@@ -43,149 +49,102 @@ class BioCrowds():
 				continue
 			if lineCount == 1:
 				#markers density
-				PORC_QTD_Marcacoes = float(line)
+				self.PORC_QTD_Marcacoes = float(line)
 			elif lineCount == 2:
 				#FPS
-				timeStep = float(line)
+				self.timeStep = float(line)
 			elif lineCount == 3:
 				#size of each square cell
-				cellSize = int(line)
+				self.cellSize = int(line)
 			elif lineCount == 4:
 				#size of the scenario (comes from json, so no needed)
 				sp = line.split(',')
-				mapSize = Vector3(int(sp[0]), int(sp[1]), int(sp[2]))
+				self.mapSize = Vector3(int(sp[0]), int(sp[1]), int(sp[2]))
 			elif lineCount == 5:
 				#using path planning?
 				if line.lower() == 'false':
-					pathPlanning = False
+					self.pathPlanning = False
 				else:
-					pathPlanning = True
+					self.pathPlanning = True
 
 			lineCount += 1
 
 		#goals
-		goals = []
-
-		#read the goals file (comes from json)
-		#for line in open("Input/goals.txt", "r"):
-		#	if '#' in line:
-		#		continue
-
-		#	#create goal
-		#	gl = line.split(',')
-		#	goals.append(GoalClass(int(gl[0]), Vector3(float(gl[1]), float(gl[2]), float(gl[3]))))
-		#idGoal = 1
-		#for gl in goalsJson:
-		#	goals.append(GoalClass(idGoal, Vector3(gl['position'][0], gl['position'][2], gl['position'][1])))
-		#	idGoal += 1
+		self.goals = []
 
 		#agents
-		agents = []
-
-		#read the agents file (comes from json)
-		#for line in open("Input/agents.txt", "r"):
-		#	if '#' in line:
-		#		continue
-
-		#	#create agent
-		#	ag = line.split(',')
-
-		#	#find the goal with this id
-		#	gl = None
-		#	for i in range(0, len(goals)):
-		#		if goals[i].id == int(ag[1]):
-		#			gl = goals[i]
-		#			break
-
-		#	agents.append(AgentClass(int(ag[0]), gl, float(ag[2]), float(ag[3]), pathPlanning, Vector3(float(ag[4]), float(ag[5]), float(ag[6]))))
-
-
+		self.agents = []
 
 		#obstacles
-		obstacles = []
-
-		#read the obstacles file (comes from json)
-		#for line in open("Input/obstacles.txt", "r"):
-		#	if '#' in line:
-		#		continue
-
-		#	#create obstacle
-		#	ob = line.split(',')
-
-		#	#if size is one, it is the id
-		#	if len(ob) == 1:
-		#		obstacles.append(ObstacleClass(int(ob[0])))
-		#	#if size is three, it is one of the points
-		#	elif len(ob) == 3:
-		#		obstacles[len(obstacles)-1].AddPoint(Vector3(float(ob[0]), float(ob[1]), float(ob[2])))
-		#	#else, something is wrong
-		#	else:
-		#		print("Error: input size is wrong!")
-		#		exit
+		self.obstacles = []
 
 		#cells
-		cells = []
+		self.cells = []
 
 		#create the cells and markers
 		def CreateMap():
 			i = j = 0
-			while i < mapSize.x:
-				while j < mapSize.y:
-					cells.append(CellClass(str(i)+"-"+str(j), Vector3(i, j, 0), cellSize, PORC_QTD_Marcacoes, []))
-					j += cellSize
-				i += cellSize
+			while i < self.mapSize.x:
+				while j < self.mapSize.y:
+					self.cells.append(CellClass(str(i)+"-"+str(j), Vector3(i, j, 0), self.cellSize, self.PORC_QTD_Marcacoes, []))
+					j += self.cellSize
+				i += self.cellSize
 				j = 0
 
 		#create markers
 		def CreateMarkers():
-			for i in range(0, len(cells)):
-				cells[i].CreateMarkers(obstacles)
-				#print("Qnt created: ", len(cells[i].markers))
+			for i in range(0, len(self.cells)):
+				self.cells[i].CreateMarkers(self.obstacles)
+				#print("Qnt created: ", len(self.cells[i].markers))
 
 		#save markers in file
 		def SaveMarkers():
 			markerFile = open("markers.csv", "w")
-			for i in range(0, len(cells)):
-				for j in range(0, len(cells[i].markers)):
-					markerFile.write(cells[i].id + ";" + str(cells[i].markers[j].position.x) + ";" + str(cells[i].markers[j].position.y) + ";" + str(cells[i].markers[j].position.z) + "\n")
+			for i in range(0, len(self.cells)):
+				for j in range(0, len(self.cells[i].markers)):
+					markerFile.write(self.cells[i].id + ";" + str(self.cells[i].markers[j].position.x) + ";" + str(self.cells[i].markers[j].position.y) + ";" + str(self.cells[i].markers[j].position.z) + "\n")
 			markerFile.close()
 
 		#from json
-		#mapSize, goals, agents, obstacles = ParserJSON.ParseFile(args['f'])
-		mapSize, goals, agents, obstacles = ParserJSON.ParseJsonContent(data)
+		#json or database?
+		if data['terrains'] == 'db':
+			self.LoadDatabase()
+		else:
+			self.mapSize, self.goals, self.agents, self.obstacles = ParserJSON.ParseJsonContent(data)
+			CreateMap()
 
-		CreateMap()
+		#print(self.cells[0].id)
 		CreateMarkers()
 		SaveMarkers()
 
 		#for each goal, vinculate the cell
-		for i in range(0, len(goals)):
-			totalDistance = cellSize * 2
-			for j in range(0, len(cells)):
-				distance = Vector3.Distance(goals[i].position, cells[j].position)
+		for i in range(0, len(self.goals)):
+			totalDistance = self.cellSize * 2
+			for j in range(0, len(self.cells)):
+				distance = Vector3.Distance(self.goals[i].position, self.cells[j].position)
 
 				#if distance is lower than total, change
 				if distance < totalDistance:
 					totalDistance = distance
-					goals[i].cell = cells[j]
+					self.goals[i].cell = self.cells[j]
 
 		#for each cell, find its neighbors
-		for i in range(0, len(cells)):
-			cells[i].FindNeighbor(cells)
+		for i in range(0, len(self.cells)):
+			self.cells[i].FindNeighbor(self.cells)
 
 		#for each agent, find its initial cell
-		for i in range(0, len(agents)):
+		for i in range(0, len(self.agents)):
 			minDis = 5
-			for c in range(0, len(cells)):
-				dist = Vector3.Distance(agents[i].position, cells[c].position)
+			for c in range(0, len(self.cells)):
+				dist = Vector3.Distance(self.agents[i].position, self.cells[c].position)
 				if dist < minDis:
 					minDis = dist
-					agents[i].cell = cells[c]
+					self.agents[i].cell = self.cells[c]
 
 		#for each agent, calculate the path, if true
-		if pathPlanning:
-			for i in range(0, len(agents)):
-				agents[i].FindPath()
+		if self.pathPlanning:
+			for i in range(0, len(self.agents)):
+				self.agents[i].FindPath()
 
 		#open file to write
 		resultFile = open("resultFile.csv", "w")
@@ -193,24 +152,24 @@ class BioCrowds():
 		simulationFrame = 0
 
 		#walking loop
-		#check the distance to see if agent is stuck (TODO)
+		timeout = False
 		while True:
 			#if no agents anymore, break
-			if len(agents) == 0:
+			if len(self.agents) == 0:
 				break
 
 			#for each agent, we reset their info
-			for i in range(0, len(agents)):
-				agents[i].ClearAgent()
+			for i in range(0, len(self.agents)):
+				self.agents[i].ClearAgent()
 			#print("markers", len(agents[0].markers))
 			#reset the markers
-			for i in range(0, len(cells)):
-				for j in range(0, len(cells[i].markers)):
-					cells[i].markers[j].ResetMarker()
+			for i in range(0, len(self.cells)):
+				for j in range(0, len(self.cells[i].markers)):
+					self.cells[i].markers[j].ResetMarker()
 	
 			#find nearest markers for each agent
-			for i in range(0, len(agents)):
-				agents[i].FindNearMarkers()
+			for i in range(0, len(self.agents)):
+				self.agents[i].FindNearMarkers()
 			#	print(sum([len(c.markers) for c in cells]), len(agents[i].markers))
 
 			#/*to find where the agent must move, we need to get the vectors from the agent to each auxin he has, and compare with 
@@ -231,45 +190,45 @@ class BioCrowds():
 
 			agentsToKill = []
 			i = 0
-			while i < len(agents):
-				agentMarkers = agents[i].markers
+			while i < len(self.agents):
+				agentMarkers = self.agents[i].markers
 
 				#vector for each marker
 				for j in range(0, len(agentMarkers)):
 					#add the distance vector between it and the agent
 					#print (agents[i].position, agentMarkers[j].position)
-					agents[i].vetorDistRelacaoMarcacao.append(Vector3.Sub_vec(agentMarkers[j].position, agents[i].position))
+					self.agents[i].vetorDistRelacaoMarcacao.append(Vector3.Sub_vec(agentMarkers[j].position, self.agents[i].position))
 
 				#print("total", len(agents[i].vetorDistRelacaoMarcacao))
 				#calculate the movement vector
-				agents[i].CalculateMotionVector()
+				self.agents[i].CalculateMotionVector()
 
 				#print(agents[i].m)
 				#calculate speed vector
-				agents[i].CalculateSpeed()
+				self.agents[i].CalculateSpeed()
 
 				#walk
-				agents[i].Walk(timeStep)
+				self.agents[i].Walk(self.timeStep)
 
 				#write in file
-				resultFile.write(str(agents[i].id) + ";" + str(agents[i].position.x) + ";" + str(agents[i].position.y) + ";" + str(agents[i].position.z) + "\n")
+				resultFile.write(str(self.agents[i].id) + ";" + str(self.agents[i].position.x) + ";" + str(self.agents[i].position.y) + ";" + str(self.agents[i].position.z) + "\n")
 
 				#verify agent position, in relation to the goal. If arrived, bye
-				dist = Vector3.Distance(agents[i].goal.position, agents[i].position)
+				dist = Vector3.Distance(self.agents[i].goal.position, self.agents[i].position)
 				#print(agents[i].id, " -- Dist: ", dist, " -- Radius: ", agents[i].radius, " -- Agent: ", agents[i].position.x, agents[i].position.y)
 				#print(agents[i].speed.x, agents[i].speed.y)
-				if dist < agents[i].radius / 4:
+				if dist < self.agents[i].radius / 4:
 					agentsToKill.append(i)
 
 				#update lastdist (max = 5)
-				if len(agents[i].lastDist) == 5:
-					agents[i].lastDist.pop(0)
+				if len(self.agents[i].lastDist) == 5:
+					self.agents[i].lastDist.pop(0)
 
-				agents[i].lastDist.append(dist)
+				self.agents[i].lastDist.append(dist)
 
 				#check them all
 				qntFound = 0
-				for ck in agents[i].lastDist:
+				for ck in self.agents[i].lastDist:
 					if ck == dist:
 						qntFound += 1
 
@@ -282,84 +241,306 @@ class BioCrowds():
 			#die!
 			if len(agentsToKill) > 0:
 				for i in range(0, len(agentsToKill)):
-					agents.pop(agentsToKill[i])
+					self.agents.pop(agentsToKill[i])
 
 			print("Simulation Frame:", simulationFrame, end='\r')
 			simulationFrame += 1
 
+			#check the total time. If higher than 20 seconds, save in Database and leaves
+			if time.time() - startTime > 20:
+				timeout = True
+				break
+
 		#close file
 		resultFile.close()
 
-		simulationTime = (simulationFrame+1) * timeStep
-		print(f'Total Simulation Time: {simulationTime} "seconds. ({simulationFrame+1} frames)')
+		#if timeout, need to keep going later
+		if timeout:
+			self.SaveDatabase()
+			return pd.DataFrame(["nope"])
+		#otherwise, it is done
+		else:
+			simulationTime = (simulationFrame+1) * self.timeStep
+			print(f'Total Simulation Time: {simulationTime} "seconds. ({simulationFrame+1} frames)')
 
-		#save the cells, for heatmap
-		resultCellsFile = open("resultCellFile.txt", "w")
-		thisX = 0
-		firstColumn = True
-		for cell in cells:
-			if thisX != cell.position.x:
-				thisX = cell.position.x
-				resultCellsFile.write("\n")
-				firstColumn = True
+			#save the cells, for heatmap
+			resultCellsFile = open("resultCellFile.txt", "w")
+			thisX = 0
+			firstColumn = True
+			for cell in self.cells:
+				if thisX != cell.position.x:
+					thisX = cell.position.x
+					resultCellsFile.write("\n")
+					firstColumn = True
 
-			if firstColumn:
-				resultCellsFile.write(str(len(cell.passedAgents)))
-				firstColumn = False
-			else:
-				resultCellsFile.write("," + str(len(cell.passedAgents)))
+				if firstColumn:
+					resultCellsFile.write(str(len(cell.passedAgents)))
+					firstColumn = False
+				else:
+					resultCellsFile.write("," + str(len(cell.passedAgents)))
 
 
-		resultCellsFile.close()
+			resultCellsFile.close()
 
-		#generate heatmap
-		data = []
+			#generate heatmap
+			data = []
 
-		#open file to read
-		for line in open("resultCellFile.txt"):
-			stripLine = line.replace('\n', '')
-			strip = stripLine.split(',')
-			dataTemp = []
+			#open file to read
+			for line in open("resultCellFile.txt"):
+				stripLine = line.replace('\n', '')
+				strip = stripLine.split(',')
+				dataTemp = []
 
-			for af in strip:
-				dataTemp.insert(0, float(af))
+				for af in strip:
+					dataTemp.insert(0, float(af))
 
-			data.append(dataTemp)
+				data.append(dataTemp)
 
-		heatmap = np.array(data)
-		heatmap = heatmap.transpose()
+			heatmap = np.array(data)
+			heatmap = heatmap.transpose()
 
-		fig, ax = plt.subplots()
-		im = ax.imshow(heatmap)
+			fig, ax = plt.subplots()
+			im = ax.imshow(heatmap)
 
-		# Show all ticks and label them with the respective list entries
-		ax.set_xticks(np.arange(mapSize.x/cellSize))
-		ax.set_yticks(np.arange(mapSize.y/cellSize))
+			# Show all ticks and label them with the respective list entries
+			ax.set_xticks(np.arange(self.mapSize.x/self.cellSize))
+			ax.set_yticks(np.arange(self.mapSize.y/self.cellSize))
 
-		# Rotate the tick labels and set their alignment.
-		plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-				 rotation_mode="anchor")
+			# Rotate the tick labels and set their alignment.
+			plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+					 rotation_mode="anchor")
 
-		# Loop over data dimensions and create text annotations.
-		for i in range(int(mapSize.x/cellSize)):
-			for j in range(int(mapSize.y/cellSize)):
-				text = ax.text(j, i, heatmap[i, j],
-								ha="center", va="center", color="w")
+			# Loop over data dimensions and create text annotations.
+			for i in range(int(self.mapSize.x/self.cellSize)):
+				for j in range(int(self.mapSize.y/self.cellSize)):
+					text = ax.text(j, i, heatmap[i, j],
+									ha="center", va="center", color="w")
 
-		ax.set_title("HeatMap")
-		fig.tight_layout()
-		#plt.show()
+			ax.set_title("HeatMap")
+			fig.tight_layout()
+			#plt.show()
 
-		plt.savefig("heatmap.png", dpi=75)
+			plt.savefig("heatmap.png", dpi=75)
+			
+			hm = []
+			with open("heatmap.png", "rb") as img_file:
+				hm = ["heatmap", base64.b64encode(img_file.read())]
+			#end heatmap
 
-		#html
-		#html = "<html><body><img src='"+domain+"heatmap.png' width='480' height='360' border='0'></body></html>"
-		hm = []
-		with open("heatmap.png", "rb") as img_file:
-			hm = ["heatmap", base64.b64encode(img_file.read())]
-		#end heatmap
+			writeResult.append(hm)
 
-		writeResult.append(hm)
+			#clear Database, just to be sure
+			self.ClearDatabase()
 
-		#return plt
-		return pd.DataFrame(writeResult)
+			self.conn.close()
+
+			#return plt
+			return pd.DataFrame(writeResult)
+
+	def ConnectDB(self):
+		#self.conn = mysql.connector.connect(host='localhost',
+  #                                       database='biocrowds',
+  #                                       user='root',
+  #                                       password='')
+		self.conn = psycopg2.connect(host="localhost",
+								database="biocrowds",
+								user="postgres",
+								password="postgres")
+
+	def ClearDatabase(self):
+		cursor = self.conn.cursor()
+		cursor.execute("delete from config where id = '" + self.ip + "'")
+		self.conn.commit()
+		cursor.close()
+
+		cursor = self.conn.cursor()
+		cursor.execute("delete from agents where ip = '" + self.ip + "'")
+		self.conn.commit()
+		cursor.close()
+
+		cursor = self.conn.cursor()
+		cursor.execute("delete from goals where ip = '" + self.ip + "'")
+		self.conn.commit()
+		cursor.close()
+
+		cursor = self.conn.cursor()
+		cursor.execute("delete from obstacles where ip = '" + self.ip + "'")
+		self.conn.commit()
+		cursor.close()
+
+		cursor = self.conn.cursor()
+		cursor.execute("delete from obstacles_points where ip = '" + self.ip + "'")
+		self.conn.commit()
+		cursor.close()
+
+		cursor = self.conn.cursor()
+		cursor.execute("delete from cells where ip = '" + self.ip + "'")
+		self.conn.commit()
+		cursor.close()
+
+	def LoadDatabase(self):
+		cursor = self.conn.cursor()
+
+		#config
+		cursor.execute("SELECT * FROM config where id = '" + self.ip + "'")
+		myresult = cursor.fetchall()
+		cursor.close()
+		#print(myresult)
+		self.mapSize = Vector3(float(myresult[0][1]), float(myresult[0][2]), float(myresult[0][3]))
+		self.PORC_QTD_Marcacoes = float(myresult[0][4])
+		self.timeStep = float(myresult[0][5])
+		self.cellSize = float(myresult[0][6])
+		if int(myresult[0][7]) == 0:
+			self.pathPlanning =  False
+		else:
+			self.pathPlanning =  True
+
+		cursor = self.conn.cursor()
+
+		#goals
+		cursor.execute("SELECT id, x, y, z FROM goals where ip = '" + self.ip + "'")
+		myresult = cursor.fetchall()
+		cursor.close()
+
+		for res in myresult:
+			self.goals.append(GoalClass(int(res[0]), Vector3(float(res[1]), float(res[2]), float(res[3]))))
+
+		cursor = self.conn.cursor()
+
+		#obstacles
+		cursor.execute("SELECT id FROM obstacles where ip = '" + self.ip + "'")
+		myresultObs = cursor.fetchall()
+		cursor.close()
+
+		for res in myresultObs:
+			self.obstacles.append(ObstacleClass(int(res[0])))
+
+			cursor = self.conn.cursor()
+			#points
+			cursor.execute("SELECT x, y, z FROM obstacles_points where ip = '"+self.ip+"' and id_obstacle = "+str(res[0]))
+			myresult = cursor.fetchall()
+			cursor.close()
+
+			for pnt in myresult:
+				self.obstacles[len(self.obstacles)-1].AddPoint(Vector3(float(pnt[0]), float(pnt[1]), float(pnt[2])))
+
+		#agents
+		cursor = self.conn.cursor()
+		cursor.execute("SELECT id, x, y, z, goal, radius, maxspeed FROM agents where ip = '" + self.ip + "'")
+		myresult = cursor.fetchall()
+		cursor.close()
+
+		for res in myresult:
+			goalId = int(res[4])
+			thisGoal = self.goals[0]
+			for gl in self.goals:
+				if goalId == gl.id:
+					thisGoal = gl
+					break
+
+			self.agents.append(AgentClass(int(res[0]), thisGoal, float(res[5]), float(res[6]), self.pathPlanning, Vector3(float(res[1]), float(res[2]), float(res[3]))))
+
+		#cells
+		cursor = self.conn.cursor()
+		cursor.execute("SELECT name, x, y, z, radius, density, passedAgents FROM cells where ip = '" + self.ip + "' order by id asc")
+		myresult = cursor.fetchall()
+		cursor.close()
+
+		for res in myresult:
+			self.cells.append(CellClass(str(res[0]), Vector3(float(res[1]), float(res[2]), float(res[3])), float(res[4]), float(res[5]), []))
+
+			#passed agents
+			pas = str(res[6])
+			if pas != "":
+				passed = pas.split(',')
+				for pa in passed:
+					self.cells[len(self.cells)-1].AddPassedAgent(int(pa))
+					
+		#it is loaded, we can clear now
+		self.ClearDatabase()
+
+	def SaveDatabase(self):
+		cursor = self.conn.cursor()
+
+		#config
+		sqlString = 'insert into config (id, mapx, mapy, mapz, markerdensity, timestep, cellsize, usepp) values(%s,%s,%s,%s,%s,%s,%s,%s);'
+		records = (self.ip, self.mapSize.x, self.mapSize.y, self.mapSize.z, self.PORC_QTD_Marcacoes, self.timeStep, self.cellSize, int(self.pathPlanning == True))
+		cursor.execute(sqlString, records)
+		self.conn.commit()
+
+		cursor.close() 
+		cursor = self.conn.cursor() 
+		
+		#goals
+		sqlString = 'insert into goals (ip, id, x, y, z) values (%s, %s, %s, %s, %s);'
+		records = []
+		for gl in self.goals:
+			rec = [self.ip, gl.id, gl.position.x, gl.position.y, gl.position.z]
+			records.append(rec)
+
+		#print(sqlString)
+		cursor.executemany(sqlString, records)
+		self.conn.commit()
+
+		cursor.close() 
+		cursor = self.conn.cursor()
+
+		#obstacles
+		for ob in self.obstacles:
+			sqlString = 'insert into obstacles (ip, id) values (%s, %s);'
+			records = (self.ip, ob.id)
+			cursor.execute(sqlString, records)
+			self.conn.commit()
+			cursor.close() 
+			cursor = self.conn.cursor()
+
+			#points
+			sqlString = 'insert into obstacles_points (ip, id_obstacle, x, y, z) values (%s, %s, %s, %s, %s);'
+			records = []
+			for po in ob.points:
+				rec = [self.ip, ob.id, po.x, po.y, po.z]
+				records.append(rec)
+
+			cursor.executemany(sqlString, records)
+			self.conn.commit()
+
+			cursor.close() 
+			cursor = self.conn.cursor()
+
+		#agents
+		sqlString = 'insert into agents (ip, id, x, y, z, goal, radius, maxspeed) values (%s, %s, %s, %s, %s, %s, %s, %s);'
+		records = []
+		for ag in self.agents:
+			rec = [self.ip, ag.id, ag.position.x, ag.position.y, ag.position.z, ag.goal.id, ag.radius, ag.maxSpeed]
+			records.append(rec)
+
+		#print(sqlString)
+		cursor.executemany(sqlString, records)
+		self.conn.commit()
+
+		cursor.close() 
+		cursor = self.conn.cursor()
+
+		#cells
+		sqlString = 'insert into cells (ip, id, name, x, y, z, radius, density, passedAgents) values (%s, %s, %s, %s, %s, %s, %s, %s, %s);'
+		records = []
+		idc = 0
+		for cl in self.cells:
+			#string for passed agents
+			passed = ""
+			for pa in cl.passedAgents:
+				if passed == "":
+					passed += str(pa)
+				else:
+					passed += "," + str(pa)
+
+			#print(cl.id)
+			rec = [self.ip, idc, cl.id, cl.position.x, cl.position.y, cl.position.z, cl.cellRadius, cl.density, passed]
+			records.append(rec)
+			idc += 1
+
+		#print(sqlString)
+		cursor.executemany(sqlString, records)
+		self.conn.commit()
+
+		cursor.close()

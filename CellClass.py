@@ -66,9 +66,10 @@ class CellClass:
 			i += 1
 
 	def CreateMarkers(self, obstacles):
-		self.density *= (self.cellRadius) / (2.0 * self.markerRadius)
-		self.density *= (self.cellRadius) / (2.0 * self.markerRadius)
-		self.qntMarkers = math.floor(self.density)
+		dens = self.density
+		dens *= (self.cellRadius) / (2.0 * self.markerRadius)
+		dens *= (self.cellRadius) / (2.0 * self.markerRadius)
+		self.qntMarkers = math.floor(dens)
 		#print("Self - " + str(self.qntMarkers))
 		self.DartThrow(obstacles)
 
