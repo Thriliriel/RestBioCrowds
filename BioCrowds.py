@@ -396,14 +396,14 @@ class BioCrowds():
 			return pd.DataFrame(writeResult)
 
 	def ConnectDB(self):
-		self.conn = psycopg2.connect(host="localhost",
-								database="biocrowds",
-								user="postgres",
-								password="postgres")
+		#self.conn = psycopg2.connect(host="localhost",
+		#						database="biocrowds",
+		#						user="postgres",
+		#						password="postgres")
 		
 		#heroku
-		#DATABASE_URL = os.environ.get('DATABASE_URL')
-		#self.conn = psycopg2.connect(DATABASE_URL)
+		DATABASE_URL = os.environ.get('DATABASE_URL')
+		self.conn = psycopg2.connect(DATABASE_URL)
 
 	def ClearDatabase(self):
 		cursor = self.conn.cursor()
