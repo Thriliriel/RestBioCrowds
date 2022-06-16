@@ -30,6 +30,9 @@
     <Compile Include="ObstacleClass.py" />
     <Compile Include="PathPlanningClass.py" />
     <Compile Include="RestBioCrowds.py" />
+    <Compile Include="VisualizeJSON.py" />
+    <Compile Include="VisualizeMarkers.py" />
+    <Compile Include="VisualizeMarkersJSON.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

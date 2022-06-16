@@ -110,6 +110,7 @@ class BioCrowds():
 		if data['terrains'] == 'db':
 			self.LoadDatabase()
 		else:
+			self.simulationTime = 0
 			self.mapSize, self.goals, self.agents, self.obstacles = ParserJSON.ParseJsonContent(data)
 			CreateMap()
 
@@ -141,13 +142,19 @@ class BioCrowds():
 					minDis = dist
 					self.agents[i].cell = self.cells[c]
 
-		#for each agent, calculate the path, if true
+		#for each agent, calculate the path, if true (comes from Json, dont need to calculate)
+		#if self.pathPlanning:
+		#	for i in range(0, len(self.agents)):
+		#		self.agents[i].FindPath()
 		if self.pathPlanning:
 			for i in range(0, len(self.agents)):
-				self.agents[i].FindPath()
+				self.agents[i].FindPathJson(self.cells)
 
-		#open file to write
-		resultFile = open("resultFile.csv", "w")
+		#open file to write or keep writing
+		if data['terrains'] == 'db':
+			resultFile = open("resultFile.csv", "a")
+		else:
+			resultFile = open("resultFile.csv", "w")
 
 		simulationFrame = 0
 
@@ -254,14 +261,15 @@ class BioCrowds():
 		#close file
 		resultFile.close()
 
+		self.simulationTime += (simulationFrame+1) * self.timeStep
+
 		#if timeout, need to keep going later
 		if timeout:
 			self.SaveDatabase()
 			return pd.DataFrame(["nope"])
 		#otherwise, it is done
 		else:
-			simulationTime = (simulationFrame+1) * self.timeStep
-			print(f'Total Simulation Time: {simulationTime} "seconds. ({simulationFrame+1} frames)')
+			print(f'Total Simulation Time: {self.simulationTime} "seconds. ({simulationFrame+1} frames)')
 
 			#save the cells, for heatmap
 			resultCellsFile = open("resultCellFile.txt", "w")
@@ -283,7 +291,7 @@ class BioCrowds():
 			resultCellsFile.close()
 
 			#generate heatmap
-			data = []
+			dataFig = []
 
 			#open file to read
 			for line in open("resultCellFile.txt"):
@@ -294,9 +302,9 @@ class BioCrowds():
 				for af in strip:
 					dataTemp.insert(0, float(af))
 
-				data.append(dataTemp)
+				dataFig.append(dataTemp)
 
-			heatmap = np.array(data)
+			heatmap = np.array(dataFig)
 			heatmap = heatmap.transpose()
 
 			fig, ax = plt.subplots()
@@ -325,8 +333,58 @@ class BioCrowds():
 			hm = []
 			with open("heatmap.png", "rb") as img_file:
 				hm = ["heatmap", base64.b64encode(img_file.read())]
+
+			writeResult.append(hm)
 			#end heatmap
 
+			#trajectories
+			plt.close()
+			dataFig = []
+			# values on x-axis
+			x = []
+			# values on y-axis
+			y = []
+
+			#goals
+			for _goal in self.goals:
+				x.append(_goal.position.x)
+				y.append(_goal.position.y)
+
+			#open file to read
+			for line in open("resultFile.csv"):
+				csv_row = line.split(';')
+				x.append(float(csv_row[1]))
+				y.append(float(csv_row[2]))
+
+			plt.axis([0, self.mapSize.x, 0, self.mapSize.y])
+
+			# naming the x and y axis
+			plt.xlabel('x - axis')
+			plt.ylabel('y - axis')
+
+			#draw obstacles
+			for obs in range(0, len(self.obstacles)):
+				coord = []
+				for pnt in range(0, len(self.obstacles[obs].points)):
+					coord.append([self.obstacles[obs].points[pnt].x, self.obstacles[obs].points[pnt].y])
+				coord.append(coord[0]) #repeat the first point to create a 'closed loop'
+				xs, ys = zip(*coord) #create lists of x and y values
+				plt.plot(xs,ys)
+
+			# plotting a line plot with it's default size
+			plt.plot(x, y, 'r*')
+
+			plt.savefig("trajectories.png", dpi=75)
+			
+			hm = []
+			with open("trajectories.png", "rb") as img_file:
+				hm = ["trajectories", base64.b64encode(img_file.read())]
+
+			writeResult.append(hm)
+			#end trajectories
+
+			#sim time
+			hm = ["simTime", self.simulationTime]
 			writeResult.append(hm)
 
 			#clear Database, just to be sure
@@ -338,14 +396,14 @@ class BioCrowds():
 			return pd.DataFrame(writeResult)
 
 	def ConnectDB(self):
-		#self.conn = psycopg2.connect(host="localhost",
-		#						database="biocrowds",
-		#						user="postgres",
-		#						password="postgres")
+		self.conn = psycopg2.connect(host="localhost",
+								database="biocrowds",
+								user="postgres",
+								password="postgres")
 		
 		#heroku
-		DATABASE_URL = os.environ.get('DATABASE_URL')
-		self.conn = psycopg2.connect(DATABASE_URL)
+		#DATABASE_URL = os.environ.get('DATABASE_URL')
+		#self.conn = psycopg2.connect(DATABASE_URL)
 
 	def ClearDatabase(self):
 		cursor = self.conn.cursor()
@@ -378,6 +436,11 @@ class BioCrowds():
 		self.conn.commit()
 		cursor.close()
 
+		cursor = self.conn.cursor()
+		cursor.execute("delete from agents_paths where ip = '" + self.ip + "'")
+		self.conn.commit()
+		cursor.close()
+
 	def LoadDatabase(self):
 		cursor = self.conn.cursor()
 
@@ -394,6 +457,8 @@ class BioCrowds():
 			self.pathPlanning =  False
 		else:
 			self.pathPlanning =  True
+
+		self.simulationTime = float(myresult[0][8])
 
 		cursor = self.conn.cursor()
 
@@ -427,10 +492,10 @@ class BioCrowds():
 		#agents
 		cursor = self.conn.cursor()
 		cursor.execute("SELECT id, x, y, z, goal, radius, maxspeed FROM agents where ip = '" + self.ip + "'")
-		myresult = cursor.fetchall()
+		myresultag = cursor.fetchall()
 		cursor.close()
 
-		for res in myresult:
+		for res in myresultag:
 			goalId = int(res[4])
 			thisGoal = self.goals[0]
 			for gl in self.goals:
@@ -439,6 +504,15 @@ class BioCrowds():
 					break
 
 			self.agents.append(AgentClass(int(res[0]), thisGoal, float(res[5]), float(res[6]), self.pathPlanning, Vector3(float(res[1]), float(res[2]), float(res[3]))))
+
+			cursor = self.conn.cursor()
+			#paths
+			cursor.execute("SELECT x, y, z FROM agents_paths where ip = '"+self.ip+"' and id_agent = "+str(res[0]))
+			myresult = cursor.fetchall()
+			cursor.close()
+
+			for pnt in myresult:
+				self.agents[len(self.agents)-1].AddTempPath(Vector3(float(pnt[0]), float(pnt[1]), float(pnt[2])))
 
 		#cells
 		cursor = self.conn.cursor()
@@ -463,8 +537,8 @@ class BioCrowds():
 		cursor = self.conn.cursor()
 
 		#config
-		sqlString = 'insert into config (id, mapx, mapy, mapz, markerdensity, timestep, cellsize, usepp) values(%s,%s,%s,%s,%s,%s,%s,%s);'
-		records = (self.ip, self.mapSize.x, self.mapSize.y, self.mapSize.z, self.PORC_QTD_Marcacoes, self.timeStep, self.cellSize, int(self.pathPlanning == True))
+		sqlString = 'insert into config (id, mapx, mapy, mapz, markerdensity, timestep, cellsize, usepp, simtime) values(%s,%s,%s,%s,%s,%s,%s,%s,%s);'
+		records = (self.ip, self.mapSize.x, self.mapSize.y, self.mapSize.z, self.PORC_QTD_Marcacoes, self.timeStep, self.cellSize, int(self.pathPlanning == True), self.simulationTime)
 		cursor.execute(sqlString, records)
 		self.conn.commit()
 
@@ -508,19 +582,27 @@ class BioCrowds():
 			cursor = self.conn.cursor()
 
 		#agents
-		sqlString = 'insert into agents (ip, id, x, y, z, goal, radius, maxspeed) values (%s, %s, %s, %s, %s, %s, %s, %s);'
-		records = []
 		for ag in self.agents:
-			rec = [self.ip, ag.id, ag.position.x, ag.position.y, ag.position.z, ag.goal.id, ag.radius, ag.maxSpeed]
-			records.append(rec)
+			sqlString = 'insert into agents (ip, id, x, y, z, goal, radius, maxspeed) values (%s, %s, %s, %s, %s, %s, %s, %s);'
+			records = [self.ip, ag.id, ag.position.x, ag.position.y, ag.position.z, ag.goal.id, ag.radius, ag.maxSpeed]
+			cursor.execute(sqlString, records)
+			self.conn.commit()
+			cursor.close() 
+			cursor = self.conn.cursor()
 
-		#print(sqlString)
-		cursor.executemany(sqlString, records)
-		self.conn.commit()
+			#paths
+			sqlString = 'insert into agents_paths (ip, id_agent, x, y, z) values (%s, %s, %s, %s, %s);'
+			records = []
+			for po in ag.path:
+				rec = [self.ip, ag.id, po.position.x, po.position.y, po.position.z]
+				records.append(rec)
 
-		cursor.close() 
-		cursor = self.conn.cursor()
+			cursor.executemany(sqlString, records)
+			self.conn.commit()
 
+			cursor.close() 
+			cursor = self.conn.cursor()
+			
 		#cells
 		sqlString = 'insert into cells (ip, id, name, x, y, z, radius, density, passedAgents) values (%s, %s, %s, %s, %s, %s, %s, %s, %s);'
 		records = []

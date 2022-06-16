@@ -9,6 +9,10 @@ from ObstacleClass import ObstacleClass
 class ParserJSON:
 	#def ParseJsonContent(str_content:str):
 	def ParseJsonContent(content):
+		#save file
+		with open('json_data.json', 'w') as outfile:
+			json.dump(content, outfile)
+
 		goals:list[GoalClass] = []
 		agents:list[AgentClass] = []
 		obstacles:list[ObstacleClass] = []
@@ -29,6 +33,7 @@ class ParserJSON:
 		for _agent in content['agents']:
 			_pos = _agent['position']
 			_goalID = _agent['goal_list'][0]
+			_ppGoals = _agent['path_planning_goals']
 
 			agents.append(AgentClass(id=len(agents), 
 				goal=goals[_goalID], 
@@ -36,6 +41,14 @@ class ParserJSON:
 				maxSpeed=1.2, 
 				usePathPlanning=True, 
 				position=Vector3(_pos[0],_pos[2],0.0)))
+
+			#first one is the position
+			first = True
+			for _subG in _ppGoals:
+				if first:
+					first = False
+					continue
+				agents[len(agents)-1].AddTempPath(Vector3(_subG[0],_subG[2],0.0))
 
 		#obstacles
 		for _obstacles in content['obstacles']:

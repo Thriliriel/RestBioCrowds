@@ -21,6 +21,7 @@ class AgentClass:
 		self.cell = None
 		self.usePathPlanning = usePathPlanning
 		self.lastDist = [] # to check if agent is stuck
+		self.tempPath = []
 		if self.usePathPlanning:
 			self.pathPlanning = PathPlanningClass(10000) #10000 = max iterations allowed to find a path
 			self.path = []
@@ -38,8 +39,27 @@ class AgentClass:
 		if self.usePathPlanning:
 			self.CheckSubGoalDistance()
 
+	#calculate the path planning using A*
 	def FindPath(self):
 		self.path = self.pathPlanning.FindPath(self.cell, self.goal.cell)
+		pt = self.path[0]
+		self.goalPosition = Vector3(pt.position.x, pt.position.y, pt.position.z)
+
+	def AddTempPath(self, tp):
+		self.tempPath.append(tp)
+
+	def FindPathJson(self, allCells):
+		for tp in self.tempPath:
+			fc = allCells[0]
+			dist = 10
+			for cl in allCells:
+				thisDist = Vector3.Distance(tp, cl.position)
+				if thisDist < dist:
+					dist = thisDist
+					fc = cl
+
+			self.path.append(fc)
+
 		pt = self.path[0]
 		self.goalPosition = Vector3(pt.position.x, pt.position.y, pt.position.z)
 
