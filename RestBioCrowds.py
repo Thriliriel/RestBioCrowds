@@ -1,6 +1,7 @@
 import cherrypy
 import pandas as pd
 import os
+import gc
 
 import cherrypy_cors
 
@@ -29,6 +30,9 @@ class RestBioCrowds(object):
 		#output = biocrowds.run(df)
 		output = biocrowds.run(data, cherrypy.request.remote.ip)
 		#output.show()
+		
+		gc.collect()
+
 		return output.to_json()
 
 if __name__ == '__main__':

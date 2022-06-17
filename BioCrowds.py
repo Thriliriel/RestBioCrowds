@@ -15,6 +15,7 @@ import base64
 #from mysql.connector import Error
 import time
 import psycopg2
+#import gc
 
 class BioCrowds():
 	def run(self, data, ip):
@@ -391,6 +392,10 @@ class BioCrowds():
 			self.ClearDatabase()
 
 			self.conn.close()
+
+			plt.close()
+
+			#gc.collect()
 
 			#return plt
 			return pd.DataFrame(writeResult)
