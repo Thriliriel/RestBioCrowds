@@ -315,18 +315,27 @@ class BioCrowds():
 			ax.set_xticks(np.arange(self.mapSize.x/self.cellSize))
 			ax.set_yticks(np.arange(self.mapSize.y/self.cellSize))
 
+			#plt.axis([0, self.mapSize.x, 0, self.mapSize.y])
+
 			# Rotate the tick labels and set their alignment.
 			plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
 					 rotation_mode="anchor")
 
-			# Loop over data dimensions and create text annotations.
-			for i in range(int(self.mapSize.x/self.cellSize)):
-				for j in range(int(self.mapSize.y/self.cellSize)):
-					text = ax.text(j, i, heatmap[i, j],
-									ha="center", va="center", color="w")
+			ax.get_xaxis().set_visible(False)
+			ax.get_yaxis().set_visible(False)
 
-			ax.set_title("HeatMap")
-			fig.tight_layout()
+			# Loop over data dimensions and create text annotations.
+			#for i in range(int(self.mapSize.x/self.cellSize)):
+			#	for j in range(int(self.mapSize.y/self.cellSize)):
+			#		text = ax.text(j, i, heatmap[i, j],
+			#						ha="center", va="center", color="w")
+
+			ax.set_title("Mapa de Densidades")
+
+			#ax.legend(title='Colors',title_fontsize=16,loc='center left', bbox_to_anchor=(1, 0.5))
+
+			fig.tight_layout()	
+
 			#plt.show()
 
 			plt.savefig("heatmap.png", dpi=75)
@@ -346,22 +355,23 @@ class BioCrowds():
 			# values on y-axis
 			y = []
 
-			#goals
-			for _goal in self.goals:
-				x.append(_goal.position.x)
-				y.append(_goal.position.y)
-
 			#open file to read
 			for line in open("resultFile.csv"):
 				csv_row = line.split(';')
 				x.append(float(csv_row[1]))
 				y.append(float(csv_row[2]))
 
+			fig = plt.figure()
+			ax = fig.add_subplot(1, 1, 1)
+			major_ticks = np.arange(0, self.mapSize.x + 1, self.cellSize)
+			ax.set_xticks(major_ticks)
+			ax.set_yticks(major_ticks)
+
 			plt.axis([0, self.mapSize.x, 0, self.mapSize.y])
 
 			# naming the x and y axis
-			plt.xlabel('x - axis')
-			plt.ylabel('y - axis')
+			plt.xlabel('x')
+			plt.ylabel('y')
 
 			#draw obstacles
 			for obs in range(0, len(self.obstacles)):
@@ -371,9 +381,23 @@ class BioCrowds():
 				coord.append(coord[0]) #repeat the first point to create a 'closed loop'
 				xs, ys = zip(*coord) #create lists of x and y values
 				plt.plot(xs,ys)
+				
+			plt.title("Trajetorias dos Agentes")
 
 			# plotting a line plot with it's default size
-			plt.plot(x, y, 'r*')
+			plt.plot(x, y, 'ro', markersize=1)
+
+			x = []
+			y = []
+
+			#goals
+			for _goal in self.goals:
+				x.append(_goal.position.x)
+				y.append(_goal.position.y)
+
+			plt.plot(x, y, 'bo', markersize=10)
+
+			plt.grid()
 
 			plt.savefig("trajectories.png", dpi=75)
 			
