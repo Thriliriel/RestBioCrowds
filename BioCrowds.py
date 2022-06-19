@@ -18,8 +18,8 @@ import psycopg2
 #import gc
 
 class BioCrowds():
-	def run(self, data, ip):
-		self.ip = ip
+	def run(self, data):
+		self.ip = ''
 		writeResult = []
 		startTime = time.time()
 
@@ -109,10 +109,11 @@ class BioCrowds():
 		#from json
 		#json or database?
 		if data['terrains'] == 'db':
+			self.ip = data['time_stamp']
 			self.LoadDatabase()
 		else:
 			self.simulationTime = 0
-			self.mapSize, self.goals, self.agents, self.obstacles = ParserJSON.ParseJsonContent(data)
+			self.mapSize, self.goals, self.agents, self.obstacles, self.ip = ParserJSON.ParseJsonContent(data)
 			CreateMap()
 
 		#print(self.cells[0].id)

@@ -28,7 +28,7 @@ class RestBioCrowds(object):
 		#print(data)
 		#df = pd.DataFrame(data)
 		#output = biocrowds.run(df)
-		output = biocrowds.run(data, cherrypy.request.remote.ip)
+		output = biocrowds.run(data)
 		#output.show()
 		
 		gc.collect()
