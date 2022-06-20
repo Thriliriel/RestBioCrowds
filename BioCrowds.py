@@ -414,7 +414,7 @@ class BioCrowds():
 			red_patch = mpatches.Patch(color='red', label='Trajetória')
 			blue_dot = mlines.Line2D([0], [0], marker='o', color='w', label='Objetivo',
 				 markerfacecolor='b', markersize=10)
-			ax.legend(handles=[red_patch, blue_dot], loc='low center', bbox_to_anchor=(0.85, 1))
+			ax.legend(handles=[red_patch, blue_dot], loc='lower center', bbox_to_anchor=(0.85, 1))
 			
 			plt.grid()
 
