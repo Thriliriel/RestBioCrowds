@@ -8,6 +8,8 @@ from ObstacleClass import ObstacleClass
 from Parsing.ParserJSON import ParserJSON
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import matplotlib.lines as mlines
 import numpy as np
 import base64
 #import argparse
@@ -23,7 +25,7 @@ class BioCrowds():
 		writeResult = []
 		startTime = time.time()
 
-		self.ConnectDB()
+		#self.ConnectDB()
 
 		#from Json
 		#terrainSizeJson = data['terrains'][0]['terrain_size']
@@ -256,9 +258,9 @@ class BioCrowds():
 			simulationFrame += 1
 
 			#check the total time. If higher than 20 seconds, save in Database and leaves
-			if time.time() - startTime > 20:
-				timeout = True
-				break
+			#if time.time() - startTime > 2000:
+			#	timeout = True
+			#	break
 
 		#close file
 		resultFile.close()
@@ -267,7 +269,7 @@ class BioCrowds():
 
 		#if timeout, need to keep going later
 		if timeout:
-			self.SaveDatabase()
+		#	self.SaveDatabase()
 			return pd.DataFrame(["nope"])
 		#otherwise, it is done
 		else:
@@ -330,7 +332,8 @@ class BioCrowds():
 			#	for j in range(int(self.mapSize.y/self.cellSize)):
 			#		text = ax.text(j, i, heatmap[i, j],
 			#						ha="center", va="center", color="w")
-
+			cbar = ax.figure.colorbar(im, ax=ax)
+			cbar.ax.set_ylabel("Densidade", rotation=-90, va="bottom")
 			ax.set_title("Mapa de Densidades")
 
 			#ax.legend(title='Colors',title_fontsize=16,loc='center left', bbox_to_anchor=(1, 0.5))
@@ -367,7 +370,7 @@ class BioCrowds():
 			major_ticks = np.arange(0, self.mapSize.x + 1, self.cellSize)
 			ax.set_xticks(major_ticks)
 			ax.set_yticks(major_ticks)
-
+			
 			plt.axis([0, self.mapSize.x, 0, self.mapSize.y])
 
 			# naming the x and y axis
@@ -386,7 +389,7 @@ class BioCrowds():
 			plt.title("Trajetorias dos Agentes")
 
 			# plotting a line plot with it's default size
-			plt.plot(x, y, 'ro', markersize=1)
+			plt.plot(x, y, 'ro', markersize=1, label = "Trajetória")
 
 			x = []
 			y = []
@@ -396,7 +399,12 @@ class BioCrowds():
 				x.append(_goal.position.x)
 				y.append(_goal.position.y)
 
-			plt.plot(x, y, 'bo', markersize=10)
+			plt.plot(x, y, 'bo', markersize=10, label = "Objetivo")
+
+			red_patch = mpatches.Patch(color='red', label='Trajetória')
+			blue_dot = mlines.Line2D([0], [0], marker='o', color='w', label='Objetivo',
+                          markerfacecolor='b', markersize=10)
+			ax.legend(handles=[red_patch, blue_dot])
 
 			plt.grid()
 
@@ -414,9 +422,9 @@ class BioCrowds():
 			writeResult.append(hm)
 
 			#clear Database, just to be sure
-			self.ClearDatabase()
+			#self.ClearDatabase()
 
-			self.conn.close()
+			#self.conn.close()
 
 			plt.close()
 
@@ -426,14 +434,14 @@ class BioCrowds():
 			return pd.DataFrame(writeResult)
 
 	def ConnectDB(self):
-		#self.conn = psycopg2.connect(host="localhost",
-		#						database="biocrowds",
-		#						user="postgres",
-		#						password="postgres")
+		self.conn = psycopg2.connect(host="localhost",
+								database="biocrowds",
+								user="postgres",
+								password="postgres")
 		
 		#heroku
-		DATABASE_URL = os.environ.get('DATABASE_URL')
-		self.conn = psycopg2.connect(DATABASE_URL)
+		#DATABASE_URL = os.environ.get('DATABASE_URL')
+		#self.conn = psycopg2.connect(DATABASE_URL)
 
 	def ClearDatabase(self):
 		cursor = self.conn.cursor()
