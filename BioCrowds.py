@@ -8,6 +8,8 @@ from ObstacleClass import ObstacleClass
 from Parsing.ParserJSON import ParserJSON
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import matplotlib.lines as mlines
 import numpy as np
 import base64
 #import argparse
@@ -110,10 +112,14 @@ class BioCrowds():
 		#json or database?
 		if data['terrains'] == 'db':
 			self.ip = data['time_stamp']
+			#take the : out
+			self.ip = self.ip.replace(':', '')
 			self.LoadDatabase()
 		else:
 			self.simulationTime = 0
 			self.mapSize, self.goals, self.agents, self.obstacles, self.ip = ParserJSON.ParseJsonContent(data)
+			#take the : out
+			self.ip = self.ip.replace(':', '')
 			CreateMap()
 
 		#print(self.cells[0].id)
@@ -154,9 +160,9 @@ class BioCrowds():
 
 		#open file to write or keep writing
 		if data['terrains'] == 'db':
-			resultFile = open("resultFile.csv", "a")
+			resultFile = open("resultFile"+self.ip+".csv", "a")
 		else:
-			resultFile = open("resultFile.csv", "w")
+			resultFile = open("resultFile"+self.ip+".csv", "w")
 
 		simulationFrame = 0
 
@@ -274,7 +280,7 @@ class BioCrowds():
 			print(f'Total Simulation Time: {self.simulationTime} "seconds. ({simulationFrame+1} frames)')
 
 			#save the cells, for heatmap
-			resultCellsFile = open("resultCellFile.txt", "w")
+			resultCellsFile = open("resultCellFile"+self.ip+".txt", "w")
 			thisX = 0
 			firstColumn = True
 			for cell in self.cells:
@@ -296,7 +302,7 @@ class BioCrowds():
 			dataFig = []
 
 			#open file to read
-			for line in open("resultCellFile.txt"):
+			for line in open("resultCellFile"+self.ip+".txt"):
 				stripLine = line.replace('\n', '')
 				strip = stripLine.split(',')
 				dataTemp = []
@@ -331,6 +337,8 @@ class BioCrowds():
 			#		text = ax.text(j, i, heatmap[i, j],
 			#						ha="center", va="center", color="w")
 
+			cbar = ax.figure.colorbar(im, ax=ax)
+			cbar.ax.set_ylabel("Densidade", rotation=-90, va="bottom")
 			ax.set_title("Mapa de Densidades")
 
 			#ax.legend(title='Colors',title_fontsize=16,loc='center left', bbox_to_anchor=(1, 0.5))
@@ -339,13 +347,14 @@ class BioCrowds():
 
 			#plt.show()
 
-			plt.savefig("heatmap.png", dpi=75)
+			plt.savefig("heatmap"+self.ip+".png", dpi=75)
 			
 			hm = []
-			with open("heatmap.png", "rb") as img_file:
+			with open("heatmap"+self.ip+".png", "rb") as img_file:
 				hm = ["heatmap", base64.b64encode(img_file.read())]
 
 			writeResult.append(hm)
+			os.remove("heatmap"+self.ip+".png")
 			#end heatmap
 
 			#trajectories
@@ -357,10 +366,14 @@ class BioCrowds():
 			y = []
 
 			#open file to read
-			for line in open("resultFile.csv"):
+			for line in open("resultFile"+self.ip+".csv"):
 				csv_row = line.split(';')
 				x.append(float(csv_row[1]))
 				y.append(float(csv_row[2]))
+
+			#once it is read and done, we can delete it
+			os.remove("resultFile"+self.ip+".csv")
+			os.remove("resultCellFile"+self.ip+".txt")
 
 			fig = plt.figure()
 			ax = fig.add_subplot(1, 1, 1)
@@ -397,16 +410,22 @@ class BioCrowds():
 				y.append(_goal.position.y)
 
 			plt.plot(x, y, 'bo', markersize=10)
-
+			
+			red_patch = mpatches.Patch(color='red', label='Trajetória')
+			blue_dot = mlines.Line2D([0], [0], marker='o', color='w', label='Objetivo',
+				 markerfacecolor='b', markersize=10)
+			ax.legend(handles=[red_patch, blue_dot], loc='low center', bbox_to_anchor=(0.85, 1))
+			
 			plt.grid()
 
-			plt.savefig("trajectories.png", dpi=75)
+			plt.savefig("trajectories"+self.ip+".png", dpi=75)
 			
 			hm = []
-			with open("trajectories.png", "rb") as img_file:
+			with open("trajectories"+self.ip+".png", "rb") as img_file:
 				hm = ["trajectories", base64.b64encode(img_file.read())]
 
 			writeResult.append(hm)
+			os.remove("trajectories"+self.ip+".png")
 			#end trajectories
 
 			#sim time
@@ -475,6 +494,7 @@ class BioCrowds():
 		cursor = self.conn.cursor()
 
 		#config
+		#print("SELECT * FROM config where id = '" + self.ip + "'")
 		cursor.execute("SELECT * FROM config where id = '" + self.ip + "'")
 		myresult = cursor.fetchall()
 		cursor.close()
