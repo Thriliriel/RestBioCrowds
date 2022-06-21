@@ -280,37 +280,50 @@ class BioCrowds():
 			print(f'Total Simulation Time: {self.simulationTime} "seconds. ({simulationFrame+1} frames)')
 
 			#save the cells, for heatmap
-			resultCellsFile = open("resultCellFile"+self.ip+".txt", "w")
-			thisX = 0
-			firstColumn = True
-			for cell in self.cells:
-				if thisX != cell.position.x:
-					thisX = cell.position.x
-					resultCellsFile.write("\n")
-					firstColumn = True
+			#resultCellsFile = open("resultCellFile"+self.ip+".txt", "w")
+			#thisX = 0
+			#firstColumn = True
+			#for cell in self.cells:
+			#	if thisX != cell.position.x:
+			#		thisX = cell.position.x
+			#		resultCellsFile.write("\n")
+			#		firstColumn = True
 
-				if firstColumn:
-					resultCellsFile.write(str(len(cell.passedAgents)))
-					firstColumn = False
-				else:
-					resultCellsFile.write("," + str(len(cell.passedAgents)))
+			#	if firstColumn:
+			#		resultCellsFile.write(str(len(cell.passedAgents)))
+			#		firstColumn = False
+			#	else:
+			#		resultCellsFile.write("," + str(len(cell.passedAgents)))
 
 
-			resultCellsFile.close()
+			#resultCellsFile.close()
 
 			#generate heatmap
 			dataFig = []
+			dataTemp = []
 
-			#open file to read
-			for line in open("resultCellFile"+self.ip+".txt"):
-				stripLine = line.replace('\n', '')
-				strip = stripLine.split(',')
-				dataTemp = []
+			thisX = 0
+			for cell in self.cells:
+				if thisX != cell.position.x:
+					thisX = cell.position.x
+					dataFig.append(dataTemp)
+					dataTemp = []
 
-				for af in strip:
-					dataTemp.insert(0, float(af))
+				dataTemp.insert(0, float(len(cell.passedAgents)))
 
-				dataFig.append(dataTemp)
+			#last line
+			dataFig.append(dataTemp)
+
+			##open file to read
+			#for line in open("resultCellFile"+self.ip+".txt"):
+			#	stripLine = line.replace('\n', '')
+			#	strip = stripLine.split(',')
+			#	dataTemp = []
+
+			#	for af in strip:
+			#		dataTemp.insert(0, float(af))
+
+			#	dataFig.append(dataTemp)
 
 			heatmap = np.array(dataFig)
 			heatmap = heatmap.transpose()
@@ -373,7 +386,7 @@ class BioCrowds():
 
 			#once it is read and done, we can delete it
 			os.remove("resultFile"+self.ip+".csv")
-			os.remove("resultCellFile"+self.ip+".txt")
+			#os.remove("resultCellFile"+self.ip+".txt")
 
 			fig = plt.figure()
 			ax = fig.add_subplot(1, 1, 1)
