@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from AgentClass import AgentClass
 from Vector3Class import Vector3
 from CellClass import CellClass
@@ -22,6 +23,7 @@ import psycopg2
 class BioCrowds():
 	def run(self, data):
 		self.ip = ''
+		self.outputDir = os.path.abspath(os.path.dirname(__file__)) + "/OutputData/"
 		writeResult = []
 		startTime = time.time()
 
@@ -102,7 +104,8 @@ class BioCrowds():
 
 		#save markers in file
 		def SaveMarkers():
-			markerFile = open("markers.csv", "w")
+			# markerFile = open("markers.csv", "w")
+			markerFile = open(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv", "w")
 			for i in range(0, len(self.cells)):
 				for j in range(0, len(self.cells[i].markers)):
 					markerFile.write(self.cells[i].id + ";" + str(self.cells[i].markers[j].position.x) + ";" + str(self.cells[i].markers[j].position.y) + ";" + str(self.cells[i].markers[j].position.z) + "\n")
@@ -155,10 +158,14 @@ class BioCrowds():
 				self.agents[i].FindPathJson(self.cells)
 
 		#open file to write or keep writing
+		cSVPath = self.outputDir + "/resultFile_" + (self.ip.replace(":", "_")) + ".csv"
 		if data['terrains'] == 'db':
-			resultFile = open("resultFile.csv", "a")
+
+			resultFile = open(cSVPath, "a")
+			# resultFile = open("resultFile.csv", "a")
 		else:
-			resultFile = open("resultFile.csv", "w")
+			resultFile = open(cSVPath, "w")
+			# resultFile = open("resultFile.csv", "w")
 
 		simulationFrame = 0
 
@@ -276,7 +283,8 @@ class BioCrowds():
 			print(f'Total Simulation Time: {self.simulationTime} "seconds. ({simulationFrame+1} frames)')
 
 			#save the cells, for heatmap
-			resultCellsFile = open("resultCellFile.txt", "w")
+			#resultCellsFile = open("resultCellFile.txt", "w")
+			resultCellsFile = open(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt", "w")
 			thisX = 0
 			firstColumn = True
 			for cell in self.cells:
@@ -298,7 +306,8 @@ class BioCrowds():
 			dataFig = []
 
 			#open file to read
-			for line in open("resultCellFile.txt"):
+			# for line in open("resultCellFile.txt"):
+			for line in open(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt"):
 				stripLine = line.replace('\n', '')
 				strip = stripLine.split(',')
 				dataTemp = []
@@ -342,10 +351,12 @@ class BioCrowds():
 
 			#plt.show()
 
-			plt.savefig("heatmap.png", dpi=75)
-			
+			# plt.savefig("heatmap.png", dpi=75)
+			plt.savefig(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png", dpi=75)
+
 			hm = []
-			with open("heatmap.png", "rb") as img_file:
+			# with open("heatmap.png", "rb") as img_file:
+			with open(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png", "rb") as img_file:
 				hm = ["heatmap", base64.b64encode(img_file.read())]
 
 			writeResult.append(hm)
@@ -360,7 +371,8 @@ class BioCrowds():
 			y = []
 
 			#open file to read
-			for line in open("resultFile.csv"):
+			#for line in open("resultFile.csv"):
+			for line in open(self.outputDir + "/resultFile_" + self.ip.replace(":", "_") + ".csv"):
 				csv_row = line.split(';')
 				x.append(float(csv_row[1]))
 				y.append(float(csv_row[2]))
@@ -408,10 +420,12 @@ class BioCrowds():
 
 			plt.grid()
 
-			plt.savefig("trajectories.png", dpi=75)
-			
+			# plt.savefig("trajectories.png", dpi=75)
+			plt.savefig(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png", dpi=75)
+
 			hm = []
-			with open("trajectories.png", "rb") as img_file:
+			# with open("trajectories.png", "rb") as img_file:
+			with open(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png", "rb") as img_file:
 				hm = ["trajectories", base64.b64encode(img_file.read())]
 
 			writeResult.append(hm)
@@ -427,6 +441,26 @@ class BioCrowds():
 			#self.conn.close()
 
 			plt.close()
+
+			# resultFile.csv
+			if os.path.isfile(self.outputDir + "/resultFile_" + self.ip.replace(":", "_") + ".csv"):
+				os.remove(self.outputDir + "/resultFile_" + self.ip.replace(":", "_") + ".csv")
+
+			# heatmap.png
+			if os.path.isfile(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png"):
+				os.remove(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png")
+
+			# markers.csv
+			if os.path.isfile(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv"):
+				os.remove(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv")
+
+			# resultCellFile.txt
+			if os.path.isfile(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt"):
+				os.remove(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt")
+
+			# trajectories.png
+			if os.path.isfile(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png"):
+				os.remove(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png")
 
 			#gc.collect()
 
