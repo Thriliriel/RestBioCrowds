@@ -11,6 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.lines as mlines
+import plotly.express as px
 import numpy as np
 import base64
 #import argparse
@@ -184,13 +185,13 @@ class BioCrowds():
 			for i in range(0, len(self.cells)):
 				for j in range(0, len(self.cells[i].markers)):
 					self.cells[i].markers[j].ResetMarker()
-	
+
 			#find nearest markers for each agent
 			for i in range(0, len(self.agents)):
 				self.agents[i].FindNearMarkers()
 			#	print(sum([len(c.markers) for c in cells]), len(agents[i].markers))
 
-			#/*to find where the agent must move, we need to get the vectors from the agent to each auxin he has, and compare with 
+			#/*to find where the agent must move, we need to get the vectors from the agent to each auxin he has, and compare with
 			#   the vector from agent to goal, generating a angle which must lie between 0 (best case) and 180 (worst case)
 			#   The calculation formula was taken from the Bicho´s mastery tesis and from Paravisi algorithm, all included
 			#   in AgentController.
@@ -198,7 +199,7 @@ class BioCrowds():
 
 			#   /*for each agent, we:
 			#   1 - verify existence
-			#   2 - find him 
+			#   2 - find him
 			#   3 - for each marker near him, find the distance vector between it and the agent
 			#   4 - calculate the movement vector (CalculateMotionVector())
 			#   5 - calculate speed vector (CalculateSpeed())
@@ -323,6 +324,10 @@ class BioCrowds():
 			fig, ax = plt.subplots()
 			im = ax.imshow(heatmap)
 
+			figHeatmap = px.imshow(heatmap, color_continuous_scale="Viridis")
+
+
+
 			# Show all ticks and label them with the respective list entries
 			ax.set_xticks(np.arange(self.mapSize.x/self.cellSize))
 			ax.set_yticks(np.arange(self.mapSize.y/self.cellSize))
@@ -347,12 +352,23 @@ class BioCrowds():
 
 			#ax.legend(title='Colors',title_fontsize=16,loc='center left', bbox_to_anchor=(1, 0.5))
 
-			fig.tight_layout()	
+			fig.tight_layout()
+
+			# Plotly configs
+
+			figHeatmap.update_layout(
+				template = "simple_white",
+				title = "Mapa de Densidades",
+				title_x=0.5,
+				labels=dict(color="Densidade")
+			)
 
 			#plt.show()
+			#figHeatmap.show()
 
 			# plt.savefig("heatmap.png", dpi=75)
 			plt.savefig(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png", dpi=75)
+			figHeatmap.write_image(self.outputDir + "/NEW_heatmap_" + self.ip.replace(":", "_") + ".png")
 
 			hm = []
 			# with open("heatmap.png", "rb") as img_file:
@@ -382,7 +398,7 @@ class BioCrowds():
 			major_ticks = np.arange(0, self.mapSize.x + 1, self.cellSize)
 			ax.set_xticks(major_ticks)
 			ax.set_yticks(major_ticks)
-			
+
 			plt.axis([0, self.mapSize.x, 0, self.mapSize.y])
 
 			# naming the x and y axis
@@ -397,7 +413,7 @@ class BioCrowds():
 				coord.append(coord[0]) #repeat the first point to create a 'closed loop'
 				xs, ys = zip(*coord) #create lists of x and y values
 				plt.plot(xs,ys)
-				
+
 			plt.title("Trajetorias dos Agentes")
 
 			# plotting a line plot with it's default size
@@ -472,7 +488,7 @@ class BioCrowds():
 								database="biocrowds",
 								user="postgres",
 								password="postgres")
-		
+
 		#heroku
 		#DATABASE_URL = os.environ.get('DATABASE_URL')
 		#self.conn = psycopg2.connect(DATABASE_URL)
@@ -601,7 +617,7 @@ class BioCrowds():
 				passed = pas.split(',')
 				for pa in passed:
 					self.cells[len(self.cells)-1].AddPassedAgent(int(pa))
-					
+
 		#it is loaded, we can clear now
 		self.ClearDatabase()
 
@@ -614,9 +630,9 @@ class BioCrowds():
 		cursor.execute(sqlString, records)
 		self.conn.commit()
 
-		cursor.close() 
-		cursor = self.conn.cursor() 
-		
+		cursor.close()
+		cursor = self.conn.cursor()
+
 		#goals
 		sqlString = 'insert into goals (ip, id, x, y, z) values (%s, %s, %s, %s, %s);'
 		records = []
@@ -628,7 +644,7 @@ class BioCrowds():
 		cursor.executemany(sqlString, records)
 		self.conn.commit()
 
-		cursor.close() 
+		cursor.close()
 		cursor = self.conn.cursor()
 
 		#obstacles
@@ -637,7 +653,7 @@ class BioCrowds():
 			records = (self.ip, ob.id)
 			cursor.execute(sqlString, records)
 			self.conn.commit()
-			cursor.close() 
+			cursor.close()
 			cursor = self.conn.cursor()
 
 			#points
@@ -650,7 +666,7 @@ class BioCrowds():
 			cursor.executemany(sqlString, records)
 			self.conn.commit()
 
-			cursor.close() 
+			cursor.close()
 			cursor = self.conn.cursor()
 
 		#agents
@@ -659,7 +675,7 @@ class BioCrowds():
 			records = [self.ip, ag.id, ag.position.x, ag.position.y, ag.position.z, ag.goal.id, ag.radius, ag.maxSpeed]
 			cursor.execute(sqlString, records)
 			self.conn.commit()
-			cursor.close() 
+			cursor.close()
 			cursor = self.conn.cursor()
 
 			#paths
@@ -672,9 +688,9 @@ class BioCrowds():
 			cursor.executemany(sqlString, records)
 			self.conn.commit()
 
-			cursor.close() 
+			cursor.close()
 			cursor = self.conn.cursor()
-			
+
 		#cells
 		sqlString = 'insert into cells (ip, id, name, x, y, z, radius, density, passedAgents) values (%s, %s, %s, %s, %s, %s, %s, %s, %s);'
 		records = []
