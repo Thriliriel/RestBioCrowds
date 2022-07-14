@@ -324,7 +324,7 @@ class BioCrowds():
 			fig, ax = plt.subplots()
 			im = ax.imshow(heatmap)
 
-			figHeatmap = px.imshow(heatmap, color_continuous_scale="Viridis")
+			figHeatmap = px.imshow(heatmap, color_continuous_scale="Viridis", labels=dict(color="Densidade"))
 
 
 
@@ -360,15 +360,18 @@ class BioCrowds():
 				template = "simple_white",
 				title = "Mapa de Densidades",
 				title_x=0.5,
-				labels=dict(color="Densidade")
+				legend_title = "Densidade"
 			)
+
+			figHeatmap.update_xaxes(visible = False)
+			figHeatmap.update_yaxes(visible = False)
 
 			#plt.show()
 			#figHeatmap.show()
 
 			# plt.savefig("heatmap.png", dpi=75)
-			plt.savefig(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png", dpi=75)
-			figHeatmap.write_image(self.outputDir + "/NEW_heatmap_" + self.ip.replace(":", "_") + ".png")
+			# plt.savefig(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png", dpi=75)
+			figHeatmap.write_image(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png")
 
 			hm = []
 			# with open("heatmap.png", "rb") as img_file:
