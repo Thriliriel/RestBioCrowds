@@ -351,8 +351,8 @@ class BioCrowds():
 			#						ha="center", va="center", color="w")
 
 			cbar = ax.figure.colorbar(im, ax=ax)
-			cbar.ax.set_ylabel("Densidade", rotation=-90, va="bottom")
-			ax.set_title("Mapa de Densidades")
+			cbar.ax.set_ylabel("Density", rotation=-90, va="bottom")
+			ax.set_title("Density Map")
 
 			#ax.legend(title='Colors',title_fontsize=16,loc='center left', bbox_to_anchor=(1, 0.5))
 
@@ -409,7 +409,7 @@ class BioCrowds():
 				xs, ys = zip(*coord) #create lists of x and y values
 				plt.plot(xs,ys)
 				
-			plt.title("Trajetorias dos Agentes")
+			plt.title("Agents Trajectory")
 
 			# plotting a line plot with it's default size
 			plt.plot(x, y, 'ro', markersize=1)
@@ -424,8 +424,8 @@ class BioCrowds():
 
 			plt.plot(x, y, 'bo', markersize=10)
 			
-			red_patch = mpatches.Patch(color='red', label='Trajetória')
-			blue_dot = mlines.Line2D([0], [0], marker='o', color='w', label='Objetivo',
+			red_patch = mpatches.Patch(color='red', label='Trajectory')
+			blue_dot = mlines.Line2D([0], [0], marker='o', color='w', label='Goal',
 				 markerfacecolor='b', markersize=10)
 			ax.legend(handles=[red_patch, blue_dot], loc='lower center', bbox_to_anchor=(0.85, 1))
 			
