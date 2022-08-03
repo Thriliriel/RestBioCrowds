@@ -365,8 +365,11 @@ class BioCrowds():
 				legend_title = "Densidade"
 			)
 
-			figHeatmap.update_xaxes(visible = False)
-			figHeatmap.update_yaxes(visible = False)
+			figHeatmap.update_xaxes(range=[-0.5, 14.5], visible = False)
+			figHeatmap.update_yaxes(range=[-0.5, 14.5], visible = False)
+
+			figHeatmap.update_layout(xaxis=dict(tickmode='linear', tick0=0, dtick=1))
+			figHeatmap.update_layout(yaxis=dict(tickmode='linear', tick0=0, dtick=1))
 
 			#plt.show()
 			#figHeatmap.show()
