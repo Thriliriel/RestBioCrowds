@@ -8,9 +8,9 @@ from GoalClass import GoalClass
 from ObstacleClass import ObstacleClass
 from Parsing.ParserJSON import ParserJSON
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-import matplotlib.lines as mlines
+# import matplotlib.pyplot as plt
+# import matplotlib.patches as mpatches
+# import matplotlib.lines as mlines
 import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
@@ -323,38 +323,38 @@ class BioCrowds():
 			heatmap = np.array(dataFig)
 			heatmap = heatmap.transpose()
 
-			fig, ax = plt.subplots()
-			im = ax.imshow(heatmap)
+			# fig, ax = plt.subplots()
+			# im = ax.imshow(heatmap)
 
 			figHeatmap = px.imshow(heatmap, color_continuous_scale="Viridis", labels=dict(color="Densidade"))
 
 
 
 			# Show all ticks and label them with the respective list entries
-			ax.set_xticks(np.arange(self.mapSize.x/self.cellSize))
-			ax.set_yticks(np.arange(self.mapSize.y/self.cellSize))
+			# ax.set_xticks(np.arange(self.mapSize.x/self.cellSize))
+			# ax.set_yticks(np.arange(self.mapSize.y/self.cellSize))
 
 			#plt.axis([0, self.mapSize.x, 0, self.mapSize.y])
 
 			# Rotate the tick labels and set their alignment.
-			plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-					 rotation_mode="anchor")
+			# plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+			# 		 rotation_mode="anchor")
 
-			ax.get_xaxis().set_visible(False)
-			ax.get_yaxis().set_visible(False)
+			# ax.get_xaxis().set_visible(False)
+			# ax.get_yaxis().set_visible(False)
 
 			# Loop over data dimensions and create text annotations.
 			#for i in range(int(self.mapSize.x/self.cellSize)):
 			#	for j in range(int(self.mapSize.y/self.cellSize)):
 			#		text = ax.text(j, i, heatmap[i, j],
 			#						ha="center", va="center", color="w")
-			cbar = ax.figure.colorbar(im, ax=ax)
-			cbar.ax.set_ylabel("Densidade", rotation=-90, va="bottom")
-			ax.set_title("Mapa de Densidades")
+			# cbar = ax.figure.colorbar(im, ax=ax)
+			# cbar.ax.set_ylabel("Densidade", rotation=-90, va="bottom")
+			# ax.set_title("Mapa de Densidades")
 
 			#ax.legend(title='Colors',title_fontsize=16,loc='center left', bbox_to_anchor=(1, 0.5))
 
-			fig.tight_layout()
+			# fig.tight_layout()
 
 			# Plotly configs
 
@@ -387,7 +387,7 @@ class BioCrowds():
 			#end heatmap
 
 			#trajectories
-			plt.close()
+			# plt.close()
 			dataFig = []
 			# values on x-axis
 			x = []
@@ -401,8 +401,8 @@ class BioCrowds():
 				x.append(float(csv_row[1]))
 				y.append(float(csv_row[2]))
 
-			fig = plt.figure()
-			ax = fig.add_subplot(1, 1, 1)
+			# fig = plt.figure()
+			# ax = fig.add_subplot(1, 1, 1)
 
 			# Creating trajetories figure
 
@@ -418,8 +418,8 @@ class BioCrowds():
 			# figTrajectories = px.scatter(x = x, y = y)
 
 			major_ticks = np.arange(0, self.mapSize.x + 1, self.cellSize)
-			ax.set_xticks(major_ticks)
-			ax.set_yticks(major_ticks)
+			# ax.set_xticks(major_ticks)
+			# ax.set_yticks(major_ticks)
 
 			figTrajectories.update_xaxes(range = [0, 30], showgrid=True, gridwidth=1, gridcolor='Gray')
 			figTrajectories.update_yaxes(range = [0, 30], showgrid=True, gridwidth=1, gridcolor='Gray')
@@ -430,11 +430,11 @@ class BioCrowds():
 			figTrajectories.update_xaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
 			figTrajectories.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
 
-			plt.axis([0, self.mapSize.x, 0, self.mapSize.y])
+			# plt.axis([0, self.mapSize.x, 0, self.mapSize.y])
 
 			# naming the x and y axis
-			plt.xlabel('x')
-			plt.ylabel('y')
+			# plt.xlabel('x')
+			# plt.ylabel('y')
 
 			#draw obstacles
 			for obs in range(0, len(self.obstacles)):
@@ -443,13 +443,13 @@ class BioCrowds():
 					coord.append([self.obstacles[obs].points[pnt].x, self.obstacles[obs].points[pnt].y])
 				coord.append(coord[0]) #repeat the first point to create a 'closed loop'
 				xs, ys = zip(*coord) #create lists of x and y values
-				plt.plot(xs,ys)
+				# plt.plot(xs,ys)
 				figTrajectories.add_trace(go.Scatter(x = xs, y = ys, mode="lines", showlegend=False))
 
-			plt.title("Trajetorias dos Agentes")
+			# plt.title("Trajetorias dos Agentes")
 
 			# plotting a line plot with it's default size
-			plt.plot(x, y, 'ro', markersize=1, label = "Trajetória")
+			# plt.plot(x, y, 'ro', markersize=1, label = "Trajetória")
 
 			x = []
 			y = []
@@ -459,14 +459,14 @@ class BioCrowds():
 				x.append(_goal.position.x)
 				y.append(_goal.position.y)
 
-			plt.plot(x, y, 'bo', markersize=10, label = "Objetivo")
+			# plt.plot(x, y, 'bo', markersize=10, label = "Objetivo")
 			figTrajectories.add_scatter(x = x, y = y, mode = 'markers', name = 'Objetivo', marker = dict( size = 12), marker_color="rgb(255,0,0)")
-			red_patch = mpatches.Patch(color='red', label='Trajetória')
-			blue_dot = mlines.Line2D([0], [0], marker='o', color='w', label='Objetivo',
-                          markerfacecolor='b', markersize=10)
-			ax.legend(handles=[red_patch, blue_dot])
+			# red_patch = mpatches.Patch(color='red', label='Trajetória')
+			# blue_dot = mlines.Line2D([0], [0], marker='o', color='w', label='Objetivo',
+            #               markerfacecolor='b', markersize=10)
+			# ax.legend(handles=[red_patch, blue_dot])
 
-			plt.grid()
+			# plt.grid()
 
 			figTrajectories.update_layout(
 				template="simple_white",
@@ -502,7 +502,7 @@ class BioCrowds():
 
 			#self.conn.close()
 
-			plt.close()
+			# plt.close()
 
 			# resultFile.csv
 			if os.path.isfile(self.outputDir + "/resultFile_" + self.ip.replace(":", "_") + ".csv"):
