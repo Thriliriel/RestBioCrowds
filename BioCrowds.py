@@ -118,10 +118,14 @@ class BioCrowds():
 		#json or database?
 		if data['terrains'] == 'db':
 			self.ip = data['time_stamp']
+			#take the : out
+			self.ip = self.ip.replace(':', '')
 			self.LoadDatabase()
 		else:
 			self.simulationTime = 0
 			self.mapSize, self.goals, self.agents, self.obstacles, self.ip = ParserJSON.ParseJsonContent(data)
+			#take the : out
+			self.ip = self.ip.replace(':', '')
 			CreateMap()
 
 		#print(self.cells[0].id)
@@ -296,18 +300,19 @@ class BioCrowds():
 					resultCellsFile.write("\n")
 					firstColumn = True
 
-				if firstColumn:
-					resultCellsFile.write(str(len(cell.passedAgents)))
-					firstColumn = False
-				else:
-					resultCellsFile.write("," + str(len(cell.passedAgents)))
+			#	if firstColumn:
+			#		resultCellsFile.write(str(len(cell.passedAgents)))
+			#		firstColumn = False
+			#	else:
+			#		resultCellsFile.write("," + str(len(cell.passedAgents)))
 
 
-			resultCellsFile.close()
+			#resultCellsFile.close()
 
 			#generate heatmap
 			dataFig = []
-
+			dataTemp = []
+      
 			#open file to read
 			# for line in open("resultCellFile.txt"):
 			for line in open(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt"):
@@ -315,10 +320,10 @@ class BioCrowds():
 				strip = stripLine.split(',')
 				dataTemp = []
 
-				for af in strip:
-					dataTemp.insert(0, float(af))
+			#	for af in strip:
+			#		dataTemp.insert(0, float(af))
 
-				dataFig.append(dataTemp)
+			#	dataFig.append(dataTemp)
 
 			heatmap = np.array(dataFig)
 			heatmap = heatmap.transpose()
@@ -384,6 +389,7 @@ class BioCrowds():
 				hm = ["heatmap", base64.b64encode(img_file.read())]
 
 			writeResult.append(hm)
+			os.remove("heatmap"+self.ip+".png")
 			#end heatmap
 
 			#trajectories
@@ -491,6 +497,7 @@ class BioCrowds():
 				hm = ["trajectories", base64.b64encode(img_file.read())]
 
 			writeResult.append(hm)
+			os.remove("trajectories"+self.ip+".png")
 			#end trajectories
 
 			#sim time
@@ -579,6 +586,7 @@ class BioCrowds():
 		cursor = self.conn.cursor()
 
 		#config
+		#print("SELECT * FROM config where id = '" + self.ip + "'")
 		cursor.execute("SELECT * FROM config where id = '" + self.ip + "'")
 		myresult = cursor.fetchall()
 		cursor.close()
