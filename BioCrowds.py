@@ -30,7 +30,7 @@ class BioCrowds():
 		writeResult = []
 		startTime = time.time()
 
-		#self.ConnectDB()
+		self.ConnectDB()
 
 		#from Json
 		#terrainSizeJson = data['terrains'][0]['terrain_size']
@@ -268,9 +268,9 @@ class BioCrowds():
 			simulationFrame += 1
 
 			#check the total time. If higher than 20 seconds, save in Database and leaves
-			#if time.time() - startTime > 2000:
-			#	timeout = True
-			#	break
+			if time.time() - startTime > 20:
+				timeout = True
+				break
 
 		#close file
 		resultFile.close()
@@ -279,7 +279,7 @@ class BioCrowds():
 
 		#if timeout, need to keep going later
 		if timeout:
-		#	self.SaveDatabase()
+			self.SaveDatabase()
 			return pd.DataFrame(["nope"])
 		#otherwise, it is done
 		else:
@@ -498,9 +498,9 @@ class BioCrowds():
 			writeResult.append(hm)
 
 			#clear Database, just to be sure
-			#self.ClearDatabase()
+			self.ClearDatabase()
 
-			#self.conn.close()
+			self.conn.close()
 
 			# plt.close()
 
@@ -536,8 +536,8 @@ class BioCrowds():
 								password="postgres")
 
 		#heroku
-		#DATABASE_URL = os.environ.get('DATABASE_URL')
-		#self.conn = psycopg2.connect(DATABASE_URL)
+		DATABASE_URL = os.environ.get('DATABASE_URL')
+		self.conn = psycopg2.connect(DATABASE_URL)
 
 	def ClearDatabase(self):
 		cursor = self.conn.cursor()
