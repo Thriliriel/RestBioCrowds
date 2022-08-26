@@ -9,8 +9,6 @@ import BioCrowds
 
 #cherrypy.config.update({'server.socket_port': 5000})
 
-biocrowds = BioCrowds.BioCrowds()
-
 class RestBioCrowds(object):
 	@cherrypy.expose
 	@cherrypy.tools.json_out()
@@ -28,6 +26,8 @@ class RestBioCrowds(object):
 		#print(data)
 		#df = pd.DataFrame(data)
 		#output = biocrowds.run(df)
+		biocrowds = BioCrowds.BioCrowds()
+
 		output = biocrowds.run(data)
 		#output.show()
 		

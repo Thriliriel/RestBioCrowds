@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from AgentClass import AgentClass
 from Vector3Class import Vector3
 from CellClass import CellClass
@@ -7,9 +8,12 @@ from GoalClass import GoalClass
 from ObstacleClass import ObstacleClass
 from Parsing.ParserJSON import ParserJSON
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-import matplotlib.lines as mlines
+# import matplotlib.pyplot as plt
+# import matplotlib.patches as mpatches
+# import matplotlib.lines as mlines
+import plotly.express as px
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 import numpy as np
 import base64
 #import argparse
@@ -22,6 +26,7 @@ import psycopg2
 class BioCrowds():
 	def run(self, data):
 		self.ip = ''
+		self.outputDir = os.path.abspath(os.path.dirname(__file__)) + "/OutputData/"
 		writeResult = []
 		startTime = time.time()
 
@@ -102,7 +107,8 @@ class BioCrowds():
 
 		#save markers in file
 		def SaveMarkers():
-			markerFile = open("markers.csv", "w")
+			# markerFile = open("markers.csv", "w")
+			markerFile = open(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv", "w")
 			for i in range(0, len(self.cells)):
 				for j in range(0, len(self.cells[i].markers)):
 					markerFile.write(self.cells[i].id + ";" + str(self.cells[i].markers[j].position.x) + ";" + str(self.cells[i].markers[j].position.y) + ";" + str(self.cells[i].markers[j].position.z) + "\n")
@@ -159,10 +165,14 @@ class BioCrowds():
 				self.agents[i].FindPathJson(self.cells)
 
 		#open file to write or keep writing
+		cSVPath = self.outputDir + "/resultFile_" + (self.ip.replace(":", "_")) + ".csv"
 		if data['terrains'] == 'db':
-			resultFile = open("resultFile"+self.ip+".csv", "a")
+
+			resultFile = open(cSVPath, "a")
+			# resultFile = open("resultFile.csv", "a")
 		else:
-			resultFile = open("resultFile"+self.ip+".csv", "w")
+			resultFile = open(cSVPath, "w")
+			# resultFile = open("resultFile.csv", "w")
 
 		simulationFrame = 0
 
@@ -181,13 +191,13 @@ class BioCrowds():
 			for i in range(0, len(self.cells)):
 				for j in range(0, len(self.cells[i].markers)):
 					self.cells[i].markers[j].ResetMarker()
-	
+
 			#find nearest markers for each agent
 			for i in range(0, len(self.agents)):
 				self.agents[i].FindNearMarkers()
 			#	print(sum([len(c.markers) for c in cells]), len(agents[i].markers))
 
-			#/*to find where the agent must move, we need to get the vectors from the agent to each auxin he has, and compare with 
+			#/*to find where the agent must move, we need to get the vectors from the agent to each auxin he has, and compare with
 			#   the vector from agent to goal, generating a angle which must lie between 0 (best case) and 180 (worst case)
 			#   The calculation formula was taken from the Bicho´s mastery tesis and from Paravisi algorithm, all included
 			#   in AgentController.
@@ -195,7 +205,7 @@ class BioCrowds():
 
 			#   /*for each agent, we:
 			#   1 - verify existence
-			#   2 - find him 
+			#   2 - find him
 			#   3 - for each marker near him, find the distance vector between it and the agent
 			#   4 - calculate the movement vector (CalculateMotionVector())
 			#   5 - calculate speed vector (CalculateSpeed())
@@ -280,14 +290,15 @@ class BioCrowds():
 			print(f'Total Simulation Time: {self.simulationTime} "seconds. ({simulationFrame+1} frames)')
 
 			#save the cells, for heatmap
-			#resultCellsFile = open("resultCellFile"+self.ip+".txt", "w")
-			#thisX = 0
-			#firstColumn = True
-			#for cell in self.cells:
-			#	if thisX != cell.position.x:
-			#		thisX = cell.position.x
-			#		resultCellsFile.write("\n")
-			#		firstColumn = True
+			#resultCellsFile = open("resultCellFile.txt", "w")
+			resultCellsFile = open(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt", "w")
+			thisX = 0
+			firstColumn = True
+			for cell in self.cells:
+				if thisX != cell.position.x:
+					thisX = cell.position.x
+					resultCellsFile.write("\n")
+					firstColumn = True
 
 			#	if firstColumn:
 			#		resultCellsFile.write(str(len(cell.passedAgents)))
@@ -301,24 +312,13 @@ class BioCrowds():
 			#generate heatmap
 			dataFig = []
 			dataTemp = []
-
-			thisX = 0
-			for cell in self.cells:
-				if thisX != cell.position.x:
-					thisX = cell.position.x
-					dataFig.append(dataTemp)
-					dataTemp = []
-
-				dataTemp.insert(0, float(len(cell.passedAgents)))
-
-			#last line
-			dataFig.append(dataTemp)
-
-			##open file to read
-			#for line in open("resultCellFile"+self.ip+".txt"):
-			#	stripLine = line.replace('\n', '')
-			#	strip = stripLine.split(',')
-			#	dataTemp = []
+      
+			#open file to read
+			# for line in open("resultCellFile.txt"):
+			for line in open(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt"):
+				stripLine = line.replace('\n', '')
+				strip = stripLine.split(',')
+				dataTemp = []
 
 			#	for af in strip:
 			#		dataTemp.insert(0, float(af))
@@ -328,42 +328,64 @@ class BioCrowds():
 			heatmap = np.array(dataFig)
 			heatmap = heatmap.transpose()
 
-			fig, ax = plt.subplots()
-			im = ax.imshow(heatmap)
+			# fig, ax = plt.subplots()
+			# im = ax.imshow(heatmap)
+
+			figHeatmap = px.imshow(heatmap, color_continuous_scale="Viridis", labels=dict(color="Densidade"))
+
+
 
 			# Show all ticks and label them with the respective list entries
-			ax.set_xticks(np.arange(self.mapSize.x/self.cellSize))
-			ax.set_yticks(np.arange(self.mapSize.y/self.cellSize))
+			# ax.set_xticks(np.arange(self.mapSize.x/self.cellSize))
+			# ax.set_yticks(np.arange(self.mapSize.y/self.cellSize))
 
 			#plt.axis([0, self.mapSize.x, 0, self.mapSize.y])
 
 			# Rotate the tick labels and set their alignment.
-			plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-					 rotation_mode="anchor")
+			# plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+			# 		 rotation_mode="anchor")
 
-			ax.get_xaxis().set_visible(False)
-			ax.get_yaxis().set_visible(False)
+			# ax.get_xaxis().set_visible(False)
+			# ax.get_yaxis().set_visible(False)
 
 			# Loop over data dimensions and create text annotations.
 			#for i in range(int(self.mapSize.x/self.cellSize)):
 			#	for j in range(int(self.mapSize.y/self.cellSize)):
 			#		text = ax.text(j, i, heatmap[i, j],
 			#						ha="center", va="center", color="w")
-
-			cbar = ax.figure.colorbar(im, ax=ax)
-			cbar.ax.set_ylabel("Density", rotation=-90, va="bottom")
-			ax.set_title("Density Map")
+			# cbar = ax.figure.colorbar(im, ax=ax)
+			# cbar.ax.set_ylabel("Densidade", rotation=-90, va="bottom")
+			# ax.set_title("Mapa de Densidades")
 
 			#ax.legend(title='Colors',title_fontsize=16,loc='center left', bbox_to_anchor=(1, 0.5))
 
-			fig.tight_layout()	
+			# fig.tight_layout()
+
+			# Plotly configs
+
+			figHeatmap.update_layout(
+				template = "simple_white",
+				title = "Mapa de Densidades",
+				title_x=0.5,
+				legend_title = "Densidade"
+			)
+
+			figHeatmap.update_xaxes(range=[-0.5, 14.5], visible = False)
+			figHeatmap.update_yaxes(range=[-0.5, 14.5], visible = False)
+
+			figHeatmap.update_layout(xaxis=dict(tickmode='linear', tick0=0, dtick=1))
+			figHeatmap.update_layout(yaxis=dict(tickmode='linear', tick0=0, dtick=1))
 
 			#plt.show()
+			#figHeatmap.show()
 
-			plt.savefig("heatmap"+self.ip+".png", dpi=75)
-			
+			# plt.savefig("heatmap.png", dpi=75)
+			# plt.savefig(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png", dpi=75)
+			figHeatmap.write_image(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png")
+
 			hm = []
-			with open("heatmap"+self.ip+".png", "rb") as img_file:
+			# with open("heatmap.png", "rb") as img_file:
+			with open(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png", "rb") as img_file:
 				hm = ["heatmap", base64.b64encode(img_file.read())]
 
 			writeResult.append(hm)
@@ -371,7 +393,7 @@ class BioCrowds():
 			#end heatmap
 
 			#trajectories
-			plt.close()
+			# plt.close()
 			dataFig = []
 			# values on x-axis
 			x = []
@@ -379,26 +401,46 @@ class BioCrowds():
 			y = []
 
 			#open file to read
-			for line in open("resultFile"+self.ip+".csv"):
+			#for line in open("resultFile.csv"):
+			for line in open(self.outputDir + "/resultFile_" + self.ip.replace(":", "_") + ".csv"):
 				csv_row = line.split(';')
 				x.append(float(csv_row[1]))
 				y.append(float(csv_row[2]))
 
-			#once it is read and done, we can delete it
-			os.remove("resultFile"+self.ip+".csv")
-			#os.remove("resultCellFile"+self.ip+".txt")
+			# fig = plt.figure()
+			# ax = fig.add_subplot(1, 1, 1)
 
-			fig = plt.figure()
-			ax = fig.add_subplot(1, 1, 1)
+			# Creating trajetories figure
+
+			figTrajectories = make_subplots(rows=1, cols=1)
+
+			# figTrajectories.add_trace(
+			# 	go.Scatter(x = x, y = y),
+			# 	row=1, col=1
+			# )
+
+			figTrajectories.add_scatter(x=x, y=y, mode='markers', name='Trajetória', marker=dict(size=4), marker_color="rgb(0,0,255)")
+
+			# figTrajectories = px.scatter(x = x, y = y)
+
 			major_ticks = np.arange(0, self.mapSize.x + 1, self.cellSize)
-			ax.set_xticks(major_ticks)
-			ax.set_yticks(major_ticks)
+			# ax.set_xticks(major_ticks)
+			# ax.set_yticks(major_ticks)
 
-			plt.axis([0, self.mapSize.x, 0, self.mapSize.y])
+			figTrajectories.update_xaxes(range = [0, 30], showgrid=True, gridwidth=1, gridcolor='Gray')
+			figTrajectories.update_yaxes(range = [0, 30], showgrid=True, gridwidth=1, gridcolor='Gray')
+
+			figTrajectories.update_layout(xaxis = dict(tickmode = 'linear', tick0 = 0, dtick = 2))
+			figTrajectories.update_layout(yaxis = dict(tickmode = 'linear', tick0 = 0, dtick = 2))
+
+			figTrajectories.update_xaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
+			figTrajectories.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
+
+			# plt.axis([0, self.mapSize.x, 0, self.mapSize.y])
 
 			# naming the x and y axis
-			plt.xlabel('x')
-			plt.ylabel('y')
+			# plt.xlabel('x')
+			# plt.ylabel('y')
 
 			#draw obstacles
 			for obs in range(0, len(self.obstacles)):
@@ -407,12 +449,13 @@ class BioCrowds():
 					coord.append([self.obstacles[obs].points[pnt].x, self.obstacles[obs].points[pnt].y])
 				coord.append(coord[0]) #repeat the first point to create a 'closed loop'
 				xs, ys = zip(*coord) #create lists of x and y values
-				plt.plot(xs,ys)
-				
-			plt.title("Agents Trajectory")
+				# plt.plot(xs,ys)
+				figTrajectories.add_trace(go.Scatter(x = xs, y = ys, mode="lines", showlegend=False))
+
+			# plt.title("Trajetorias dos Agentes")
 
 			# plotting a line plot with it's default size
-			plt.plot(x, y, 'ro', markersize=1)
+			# plt.plot(x, y, 'ro', markersize=1, label = "Trajetória")
 
 			x = []
 			y = []
@@ -422,19 +465,35 @@ class BioCrowds():
 				x.append(_goal.position.x)
 				y.append(_goal.position.y)
 
-			plt.plot(x, y, 'bo', markersize=10)
-			
-			red_patch = mpatches.Patch(color='red', label='Trajectory')
-			blue_dot = mlines.Line2D([0], [0], marker='o', color='w', label='Goal',
-				 markerfacecolor='b', markersize=10)
-			ax.legend(handles=[red_patch, blue_dot], loc='lower center', bbox_to_anchor=(0.85, 1))
-			
-			plt.grid()
+			# plt.plot(x, y, 'bo', markersize=10, label = "Objetivo")
+			figTrajectories.add_scatter(x = x, y = y, mode = 'markers', name = 'Objetivo', marker = dict( size = 12), marker_color="rgb(255,0,0)")
+			# red_patch = mpatches.Patch(color='red', label='Trajetória')
+			# blue_dot = mlines.Line2D([0], [0], marker='o', color='w', label='Objetivo',
+            #               markerfacecolor='b', markersize=10)
+			# ax.legend(handles=[red_patch, blue_dot])
 
-			plt.savefig("trajectories"+self.ip+".png", dpi=75)
-			
+			# plt.grid()
+
+			figTrajectories.update_layout(
+				template="simple_white",
+				title="Trajetórias dos Agentes",
+				title_x=0.5,
+				legend = dict(
+					orientation="h",
+					yanchor="bottom",
+					y=1.02,
+					xanchor="right",
+					x=1
+				)
+			)
+
+			# plt.savefig("trajectories.png", dpi=75)
+			# plt.savefig(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png", dpi=75)
+			figTrajectories.write_image(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png")
+
 			hm = []
-			with open("trajectories"+self.ip+".png", "rb") as img_file:
+			# with open("trajectories.png", "rb") as img_file:
+			with open(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png", "rb") as img_file:
 				hm = ["trajectories", base64.b64encode(img_file.read())]
 
 			writeResult.append(hm)
@@ -450,7 +509,27 @@ class BioCrowds():
 
 			self.conn.close()
 
-			plt.close()
+			# plt.close()
+
+			# resultFile.csv
+			if os.path.isfile(self.outputDir + "/resultFile_" + self.ip.replace(":", "_") + ".csv"):
+				os.remove(self.outputDir + "/resultFile_" + self.ip.replace(":", "_") + ".csv")
+
+			# heatmap.png
+			if os.path.isfile(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png"):
+				os.remove(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png")
+
+			# markers.csv
+			if os.path.isfile(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv"):
+				os.remove(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv")
+
+			# resultCellFile.txt
+			if os.path.isfile(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt"):
+				os.remove(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt")
+
+			# trajectories.png
+			if os.path.isfile(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png"):
+				os.remove(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png")
 
 			#gc.collect()
 
@@ -458,11 +537,11 @@ class BioCrowds():
 			return pd.DataFrame(writeResult)
 
 	def ConnectDB(self):
-		#self.conn = psycopg2.connect(host="localhost",
-		#						database="biocrowds",
-		#						user="postgres",
-		#						password="postgres")
-		
+		self.conn = psycopg2.connect(host="localhost",
+								database="biocrowds",
+								user="postgres",
+								password="postgres")
+
 		#heroku
 		DATABASE_URL = os.environ.get('DATABASE_URL')
 		self.conn = psycopg2.connect(DATABASE_URL)
@@ -592,7 +671,7 @@ class BioCrowds():
 				passed = pas.split(',')
 				for pa in passed:
 					self.cells[len(self.cells)-1].AddPassedAgent(int(pa))
-					
+
 		#it is loaded, we can clear now
 		self.ClearDatabase()
 
@@ -605,9 +684,9 @@ class BioCrowds():
 		cursor.execute(sqlString, records)
 		self.conn.commit()
 
-		cursor.close() 
-		cursor = self.conn.cursor() 
-		
+		cursor.close()
+		cursor = self.conn.cursor()
+
 		#goals
 		sqlString = 'insert into goals (ip, id, x, y, z) values (%s, %s, %s, %s, %s);'
 		records = []
@@ -619,7 +698,7 @@ class BioCrowds():
 		cursor.executemany(sqlString, records)
 		self.conn.commit()
 
-		cursor.close() 
+		cursor.close()
 		cursor = self.conn.cursor()
 
 		#obstacles
@@ -628,7 +707,7 @@ class BioCrowds():
 			records = (self.ip, ob.id)
 			cursor.execute(sqlString, records)
 			self.conn.commit()
-			cursor.close() 
+			cursor.close()
 			cursor = self.conn.cursor()
 
 			#points
@@ -641,7 +720,7 @@ class BioCrowds():
 			cursor.executemany(sqlString, records)
 			self.conn.commit()
 
-			cursor.close() 
+			cursor.close()
 			cursor = self.conn.cursor()
 
 		#agents
@@ -650,7 +729,7 @@ class BioCrowds():
 			records = [self.ip, ag.id, ag.position.x, ag.position.y, ag.position.z, ag.goal.id, ag.radius, ag.maxSpeed]
 			cursor.execute(sqlString, records)
 			self.conn.commit()
-			cursor.close() 
+			cursor.close()
 			cursor = self.conn.cursor()
 
 			#paths
@@ -663,9 +742,9 @@ class BioCrowds():
 			cursor.executemany(sqlString, records)
 			self.conn.commit()
 
-			cursor.close() 
+			cursor.close()
 			cursor = self.conn.cursor()
-			
+
 		#cells
 		sqlString = 'insert into cells (ip, id, name, x, y, z, radius, density, passedAgents) values (%s, %s, %s, %s, %s, %s, %s, %s, %s);'
 		records = []
