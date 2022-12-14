@@ -42,5 +42,4 @@ if __name__ == '__main__':
 	cherrypy.quickstart(RestBioCrowds())
 
 #running: 
-#curl -d "{\"text\" : [\"i am not feeling good\"]}" -H "Content-Type: application/json" -X POST http://localhost:5000/runSim
-#curl -d "{\"text\" : [\"i am not feeling good\"]}" -H "Content-Type: application/json" -X POST https://serene-beach-46283.herokuapp.com/runSim
+#curl -d "{\"terrains\" : [\"\"]}" -H "Content-Type: application/json" -X POST http://localhost:5000/runSim

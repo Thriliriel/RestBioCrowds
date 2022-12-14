@@ -272,7 +272,7 @@ class BioCrowds():
 			simulationFrame += 1
 
 			#check the total time. If higher than 20 seconds, save in Database and leaves
-			if time.time() - startTime > 20:
+			if time.time() - startTime > 30:
 				timeout = True
 				break
 
@@ -300,14 +300,14 @@ class BioCrowds():
 					resultCellsFile.write("\n")
 					firstColumn = True
 
-			#	if firstColumn:
-			#		resultCellsFile.write(str(len(cell.passedAgents)))
-			#		firstColumn = False
-			#	else:
-			#		resultCellsFile.write("," + str(len(cell.passedAgents)))
+				if firstColumn:
+					resultCellsFile.write(str(len(cell.passedAgents)))
+					firstColumn = False
+				else:
+					resultCellsFile.write("," + str(len(cell.passedAgents)))
 
 
-			#resultCellsFile.close()
+			resultCellsFile.close()
 
 			#generate heatmap
 			dataFig = []
@@ -320,10 +320,10 @@ class BioCrowds():
 				strip = stripLine.split(',')
 				dataTemp = []
 
-			#	for af in strip:
-			#		dataTemp.insert(0, float(af))
+				for af in strip:
+					dataTemp.insert(0, float(af))
 
-			#	dataFig.append(dataTemp)
+				dataFig.append(dataTemp)
 
 			heatmap = np.array(dataFig)
 			heatmap = heatmap.transpose()
@@ -332,8 +332,6 @@ class BioCrowds():
 			# im = ax.imshow(heatmap)
 
 			figHeatmap = px.imshow(heatmap, color_continuous_scale="Viridis", labels=dict(color="Densidade"))
-
-
 
 			# Show all ticks and label them with the respective list entries
 			# ax.set_xticks(np.arange(self.mapSize.x/self.cellSize))
@@ -389,7 +387,7 @@ class BioCrowds():
 				hm = ["heatmap", base64.b64encode(img_file.read())]
 
 			writeResult.append(hm)
-			os.remove("heatmap"+self.ip+".png")
+			os.remove(self.outputDir + "heatmap_"+self.ip.replace(":", "_")+".png")
 			#end heatmap
 
 			#trajectories
@@ -497,7 +495,7 @@ class BioCrowds():
 				hm = ["trajectories", base64.b64encode(img_file.read())]
 
 			writeResult.append(hm)
-			os.remove("trajectories"+self.ip+".png")
+			os.remove(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png")
 			#end trajectories
 
 			#sim time
@@ -541,10 +539,6 @@ class BioCrowds():
 								database="biocrowds",
 								user="postgres",
 								password="postgres")
-
-		#heroku
-		DATABASE_URL = os.environ.get('DATABASE_URL')
-		self.conn = psycopg2.connect(DATABASE_URL)
 
 	def ClearDatabase(self):
 		cursor = self.conn.cursor()

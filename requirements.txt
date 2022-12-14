@@ -3,3 +3,5 @@ cherrypy
 cherrypy_cors
 matplotlib
 psycopg2
+plotly
+kaleido
