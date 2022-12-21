@@ -28,8 +28,10 @@
     <Compile Include="CellClass.py" />
     <Compile Include="GoalClass.py" />
     <Compile Include="ObstacleClass.py" />
+    <Compile Include="ParserJSON.py" />
     <Compile Include="PathPlanningClass.py" />
     <Compile Include="RestBioCrowds.py" />
+    <Compile Include="Vector3Class.py" />
     <Compile Include="VisualizeJSON.py" />
     <Compile Include="VisualizeMarkers.py" />
     <Compile Include="VisualizeMarkersJSON.py" />

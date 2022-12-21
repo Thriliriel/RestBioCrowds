@@ -46,7 +46,7 @@ class BioCrowds():
 		#FPS (default: 50FPS)
 		self.timeStep = 0.02
 		#size of each square cell (Ex: 2 -> cell 2x2)
-		self.cellSize = 2
+		self.cellSize = 1
 		#using path planning?
 		self.pathPlanning = True
 
@@ -235,7 +235,7 @@ class BioCrowds():
 				#walk
 				self.agents[i].Walk(self.timeStep)
 
-				#write in file
+				#write in file (agent id, X, Y, Z)
 				resultFile.write(str(self.agents[i].id) + ";" + str(self.agents[i].position.x) + ";" + str(self.agents[i].position.y) + ";" + str(self.agents[i].position.z) + "\n")
 
 				#verify agent position, in relation to the goal. If arrived, bye
@@ -325,6 +325,7 @@ class BioCrowds():
 
 				dataFig.append(dataTemp)
 
+			#datafig has all qnt of agents passed for each cell.
 			heatmap = np.array(dataFig)
 			heatmap = heatmap.transpose()
 
@@ -363,13 +364,15 @@ class BioCrowds():
 
 			figHeatmap.update_layout(
 				template = "simple_white",
-				title = "Mapa de Densidades",
+				#title = "Mapa de Densidades",
+				title = "Density Map",
 				title_x=0.5,
-				legend_title = "Densidade"
+				#legend_title = "Densidade"
+				legend_title = "Density"
 			)
 
-			figHeatmap.update_xaxes(range=[-0.5, 14.5], visible = False)
-			figHeatmap.update_yaxes(range=[-0.5, 14.5], visible = False)
+			figHeatmap.update_xaxes(range=[-0.5, self.mapSize.x - 0.5], visible = False)
+			figHeatmap.update_yaxes(range=[-0.5, self.mapSize.y - 0.5], visible = False)
 
 			figHeatmap.update_layout(xaxis=dict(tickmode='linear', tick0=0, dtick=1))
 			figHeatmap.update_layout(yaxis=dict(tickmode='linear', tick0=0, dtick=1))
@@ -398,12 +401,31 @@ class BioCrowds():
 			# values on y-axis
 			y = []
 
+			#dictionary to calculate speeds, distances and densities later
+			agentPositionsByFrame = {}
+
 			#open file to read
+			#id, x, y, z
 			#for line in open("resultFile.csv"):
 			for line in open(self.outputDir + "/resultFile_" + self.ip.replace(":", "_") + ".csv"):
 				csv_row = line.split(';')
-				x.append(float(csv_row[1]))
-				y.append(float(csv_row[2]))
+
+				#parse
+				agentId = int(csv_row[0])
+				agentX = float(csv_row[1])
+				agentY = float(csv_row[2])
+				agentZ = float(csv_row[3])
+
+				#points for the trajectories
+				x.append(agentX)
+				y.append(agentY)
+
+				#agents positions by frame, for density, distance and velocities
+				#if not exists yet, create the list
+				if agentId not in agentPositionsByFrame:
+					agentPositionsByFrame[agentId] = []
+
+				agentPositionsByFrame[agentId].append(Vector3(agentX, agentY, agentZ))
 
 			# fig = plt.figure()
 			# ax = fig.add_subplot(1, 1, 1)
@@ -417,7 +439,13 @@ class BioCrowds():
 			# 	row=1, col=1
 			# )
 
-			figTrajectories.add_scatter(x=x, y=y, mode='markers', name='Trajetória', marker=dict(size=4), marker_color="rgb(0,0,255)")
+			figTrajectories.add_scatter(x=x, 
+										y=y, 
+										mode='markers', 
+										#name='Trajetória', 
+										name='Trajectory', 
+										marker=dict(size=4), 
+										marker_color="rgb(0,0,255)")
 
 			# figTrajectories = px.scatter(x = x, y = y)
 
@@ -425,8 +453,8 @@ class BioCrowds():
 			# ax.set_xticks(major_ticks)
 			# ax.set_yticks(major_ticks)
 
-			figTrajectories.update_xaxes(range = [0, 30], showgrid=True, gridwidth=1, gridcolor='Gray')
-			figTrajectories.update_yaxes(range = [0, 30], showgrid=True, gridwidth=1, gridcolor='Gray')
+			figTrajectories.update_xaxes(range = [0, self.mapSize.x], showgrid=True, gridwidth=1, gridcolor='Gray')
+			figTrajectories.update_yaxes(range = [0, self.mapSize.y], showgrid=True, gridwidth=1, gridcolor='Gray')
 
 			figTrajectories.update_layout(xaxis = dict(tickmode = 'linear', tick0 = 0, dtick = 2))
 			figTrajectories.update_layout(yaxis = dict(tickmode = 'linear', tick0 = 0, dtick = 2))
@@ -501,6 +529,149 @@ class BioCrowds():
 			#sim time
 			hm = ["simTime", self.simulationTime]
 			writeResult.append(hm)
+
+			#densities, distances and velocities
+			#distances
+			distanceWalked = {}
+			qntFrames = {}
+			totalWalked = 0
+
+			#for each agent
+			for ag in agentPositionsByFrame:
+				agentWalked = 0
+				lastPos = -1
+
+				#for each position of this agent
+				for pos in agentPositionsByFrame[ag]:
+					#qnt frames
+					if ag not in qntFrames:
+						qntFrames[ag] = 1
+					else:
+						qntFrames[ag] += 1
+
+					#if no position yet, just continue (need two to calculate)
+					if lastPos == -1:
+						#update lastPos, so we can use later
+						lastPos = pos
+
+						continue
+					#else, calculate
+					else:
+						#distance
+						agentWalked += abs(Vector3.Distance(pos, lastPos))
+						lastPos = pos
+
+				#update the dict. 
+				totalWalked += agentWalked
+				distanceWalked[ag] = agentWalked
+
+			#average walked
+			averageWalked = totalWalked / (len(qntFrames) - 1)
+
+			#print(distanceWalked)
+			hm = ["distanceWalked", distanceWalked]
+			writeResult.append(hm)
+			hm = ["totalWalked", averageWalked]
+			writeResult.append(hm)
+
+			#with the distance walked, as well as the qnt of frames of each agent (size of each), we can calculate mean speed
+			velocities = {}
+			sumVelocity = 0
+			for ag in distanceWalked:
+				vel = distanceWalked[ag] / (qntFrames[ag] * self.timeStep)
+				sumVelocity += vel
+				velocities[ag] = vel
+
+			#average velocity
+			averageVelocity = sumVelocity / (len(qntFrames) - 1)
+
+			#print(velocities)
+			hm = ["velocities", velocities]
+			writeResult.append(hm)
+			hm = ["averageVelocity", averageVelocity]
+			writeResult.append(hm)
+
+			#for densities, we calculate the local densities for each agent, each frame
+			localDensities = {}
+
+			#get the maximum amount of frames
+			maxframes = 0
+			for fram in qntFrames:
+				if qntFrames[fram] > maxframes:
+					maxframes = qntFrames[fram]
+
+			#for each frame	
+			for i in range(maxframes):
+				localDensities[i] = {}
+				#for each agent, we check local density
+				for ag in agentPositionsByFrame:
+					#maybe this agent is not present in the simulation on this frame, so check it
+					if i >= len(agentPositionsByFrame[ag]):
+						continue
+
+					localDensity = 1
+					for ag2 in agentPositionsByFrame:
+						#maybe this agent is not present in the simulation on this frame, so check it
+						if i >= len(agentPositionsByFrame[ag2]):
+							continue
+
+						#if ag is equal ag2, it is the same agent
+						if ag != ag2:
+							#check distance
+							distDen = Vector3.Distance(agentPositionsByFrame[ag][i], agentPositionsByFrame[ag2][i])
+							#if dist is lower or equal 1 (KIND OF 1m²), update density
+							if distDen <= 1:
+								localDensity += 1
+
+					#update local densities
+					localDensities[i][ag] = localDensity
+			
+			#print(localDensities)
+			#calculate mean values
+			meanLocalDensities = {}
+			for ld in localDensities:
+				for ag in localDensities[ld]:
+					if ag not in meanLocalDensities:
+						meanLocalDensities[ag] = localDensities[ld][ag]
+					else:
+						meanLocalDensities[ag] += localDensities[ld][ag]
+						
+			mld = {}
+			sumDensity = 0
+			for ld in meanLocalDensities:
+				sumDensity += meanLocalDensities[ld] / qntFrames[ld]
+				mld[ld] = sumDensity
+				
+			#print(mld)
+
+			#average density
+			averageDensity = sumDensity / len(qntFrames)
+
+			hm = ["localDensities", mld]
+			writeResult.append(hm)
+			hm = ["averageDensity", averageDensity]
+			writeResult.append(hm)
+			#end densities, distances and velocities
+
+			#average time
+			avt = 0
+			for ag in qntFrames:
+				avt += qntFrames[ag]
+
+			avt /= len(qntFrames)
+			avt *= self.timeStep
+
+			print(avt)
+			hm = ["averageTime", avt]
+			writeResult.append(hm)
+			#end average time
+
+			#Cassol metric (harmonic mean)
+			cassol = 4 / ((1 / self.simulationTime) + (1 / avt) + (1 / averageDensity) + (1 / averageVelocity))
+			print (cassol)
+			hm = ["cassol", cassol]
+			writeResult.append(hm)
+			#end Cassol metric (harmonic mean)
 
 			#clear Database, just to be sure
 			self.ClearDatabase()
