@@ -19,6 +19,11 @@ class ParserJSON:
 
 		ip = content['time_stamp']
 
+		if "reference_simulation" in content:
+			refSim = bool(content['reference_simulation'])
+		else:
+			refSim = False
+
 		#content = json.loads(str_content)
 
 		#terrain size
@@ -58,7 +63,7 @@ class ParserJSON:
 			for _point in _obstacles['point_list']:
 				obstacles[len(obstacles)-1].AddPoint(Vector3(float(_point[0]), float(_point[1]), float(_point[2])))
         
-		return (mapSize, goals, agents, obstacles, ip)
+		return (refSim, mapSize, goals, agents, obstacles, ip)
 
 	def ParseFile(file_path:str):
 		print("use a file: " + file_path)

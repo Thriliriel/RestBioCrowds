@@ -21,6 +21,9 @@ import base64
 #from mysql.connector import Error
 import time
 import psycopg2
+import requests
+import json
+import math
 #import gc
 
 class BioCrowds():
@@ -49,6 +52,8 @@ class BioCrowds():
 		self.cellSize = 1
 		#using path planning?
 		self.pathPlanning = True
+		#it is a reference simulation (for cassol metrics)?
+		self.refSimulation = False
 
 		#read the config file
 		lineCount = 1
@@ -114,6 +119,12 @@ class BioCrowds():
 					markerFile.write(self.cells[i].id + ";" + str(self.cells[i].markers[j].position.x) + ";" + str(self.cells[i].markers[j].position.y) + ";" + str(self.cells[i].markers[j].position.z) + "\n")
 			markerFile.close()
 
+		#add the reference simulation, if none
+		if "reference_simulation" not in data:
+			data["reference_simulation"] = "False"
+
+		self.refSimulation = eval(data["reference_simulation"])
+
 		#from json
 		#json or database?
 		if data['terrains'] == 'db':
@@ -127,6 +138,55 @@ class BioCrowds():
 			#take the : out
 			self.ip = self.ip.replace(':', '')
 			CreateMap()
+
+		#if this one is not a reference simulation, we need to simulate it with only one agent, 
+		#to be able to normalize the metrics later
+		referenceAgent = []
+		if not self.refSimulation:
+			data["reference_simulation"] = "True"
+			headers = {'Content-Type': 'application/json'}
+			response = requests.post('http://localhost:5000/runSim', json.dumps(data), headers=headers) 
+			#print("Code status: " + str(response.status_code)) 
+			#ffs = json.loads(response.text)
+			#print(type(ffs))
+			#print("Return: " + response.text)
+			ffs = response.text.replace('"', '')
+			ffs = ffs.replace('\\', '')
+			ffs = ffs.replace('{0:', '@')
+			resp = ffs.split('@')
+			#what we need is the last index
+			resp = resp[len(resp)-1]
+			resp = resp.split(',')
+			#print("Response: " + str(resp))
+
+			#we need: total time, average speed - indexes 2 and 6
+			spl1 = resp[2].split(':')
+			spl2 = resp[6].split(':')
+			#print(spl1)
+			refTT = float(spl1[1])
+			refAS = float(spl2[1])
+			referenceAgent.append(refTT)
+			referenceAgent.append(refAS)
+
+			#print("Ref TT: ", str(refTT))
+			#print("Ref AS: ", str(refAS))
+
+			#print("Return 2: " + ffs['1'])
+		else:
+			#if it is a reference simulation, one agent only
+			#find the agent farther away from the goals
+			thisLittleFucker = None
+			maxDist = 0
+
+			for ag in self.agents:
+				for gl in self.goals:
+					dst = Vector3.Distance(ag.position, gl.position)
+					if dst > maxDist:
+						maxDist = dst
+						thisLittleFucker = ag
+
+			self.agents.clear()
+			self.agents.append(thisLittleFucker)
 
 		#print(self.cells[0].id)
 		CreateMarkers()
@@ -566,7 +626,7 @@ class BioCrowds():
 				distanceWalked[ag] = agentWalked
 
 			#average walked
-			averageWalked = totalWalked / (len(qntFrames) - 1)
+			averageWalked = totalWalked / (len(qntFrames))
 
 			#print(distanceWalked)
 			hm = ["distanceWalked", distanceWalked]
@@ -583,7 +643,7 @@ class BioCrowds():
 				velocities[ag] = vel
 
 			#average velocity
-			averageVelocity = sumVelocity / (len(qntFrames) - 1)
+			averageVelocity = sumVelocity / (len(qntFrames))
 
 			#print(velocities)
 			hm = ["velocities", velocities]
@@ -666,9 +726,20 @@ class BioCrowds():
 			writeResult.append(hm)
 			#end average time
 
+			#normalizations. ReferenceAgent had time on index 0 and speed on index 1
+			if not self.refSimulation:
+				simTimeNN = self.simulationTime / referenceAgent[0]
+				avgTimeNN = avt / referenceAgent[0]
+				avgVelNN = math.exp(referenceAgent[1] / averageVelocity)
+			else:
+				simTimeNN = self.simulationTime
+				avgTimeNN = avt
+				avgVelNN = averageVelocity
+			#end normalizations
+
 			#Cassol metric (harmonic mean)
-			cassol = 4 / ((1 / self.simulationTime) + (1 / avt) + (1 / averageDensity) + (1 / averageVelocity))
-			print (cassol)
+			cassol = 4 / ((1 / simTimeNN) + (1 / avgTimeNN) + (1 / averageDensity) + (1 / avgVelNN))
+			print ("Cassol: " + str(cassol))
 			hm = ["cassol", cassol]
 			writeResult.append(hm)
 			#end Cassol metric (harmonic mean)
