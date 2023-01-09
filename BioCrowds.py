@@ -679,9 +679,12 @@ class BioCrowds():
 						if ag != ag2:
 							#check distance
 							distDen = Vector3.Distance(agentPositionsByFrame[ag][i], agentPositionsByFrame[ag2][i])
-							#if dist is lower or equal 1 (KIND OF 1m²), update density
-							if distDen <= 1:
+							#if dist is lower or equal 1/pi (area of the circle, 1m²ish), update density
+							maxDistance = 1 / math.pi
+							#print(maxDistance)
+							if distDen <= maxDistance:
 								localDensity += 1
+								#print(localDensity)
 
 					#update local densities
 					localDensities[i][ag] = localDensity
