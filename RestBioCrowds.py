@@ -29,6 +29,7 @@ class RestBioCrowds(object):
 		biocrowds = BioCrowds.BioCrowds()
 
 		output = biocrowds.run(data)
+		print(output)
 		#output.show()
 		
 		gc.collect()

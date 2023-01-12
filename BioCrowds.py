@@ -160,13 +160,17 @@ class BioCrowds():
 			#print("Response: " + str(resp))
 
 			#we need: total time, average speed - indexes 2 and 6
+			#extra new one: distance walked - index 4 
 			spl1 = resp[2].split(':')
 			spl2 = resp[6].split(':')
+			spl3 = resp[4].split(':')
 			#print(spl1)
 			refTT = float(spl1[1])
 			refAS = float(spl2[1])
+			refDW = float(spl3[1])
 			referenceAgent.append(refTT)
 			referenceAgent.append(refAS)
+			referenceAgent.append(refDW)
 
 			#print("Ref TT: ", str(refTT))
 			#print("Ref AS: ", str(refAS))
@@ -734,14 +738,17 @@ class BioCrowds():
 				simTimeNN = self.simulationTime / referenceAgent[0]
 				avgTimeNN = avt / referenceAgent[0]
 				avgVelNN = math.exp(referenceAgent[1] / averageVelocity)
+				avgWalNN = averageWalked / referenceAgent[2]
 			else:
 				simTimeNN = self.simulationTime
 				avgTimeNN = avt
 				avgVelNN = averageVelocity
+				avgWalNN = averageWalked
 			#end normalizations
 
 			#Cassol metric (harmonic mean)
-			cassol = 4 / ((1 / simTimeNN) + (1 / avgTimeNN) + (1 / averageDensity) + (1 / avgVelNN))
+			#extra: average distance walked
+			cassol = 5 / ((1 / simTimeNN) + (1 / avgTimeNN) + (1 / averageDensity) + (1 / avgVelNN) + + (1 / avgWalNN))
 			print ("Cassol: " + str(cassol))
 			hm = ["cassol", cassol]
 			writeResult.append(hm)
