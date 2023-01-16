@@ -150,6 +150,14 @@ class BioCrowds():
 			#ffs = json.loads(response.text)
 			#print(type(ffs))
 			#print("Return: " + response.text)
+
+			#if the response contains "nope", it means it reached the 30 seconds without finishing
+			#need to run again until done
+			while "nope" in response.text:
+				data["terrains"] = "db"
+				headers = {'Content-Type': 'application/json'}
+				response = requests.post('http://localhost:5000/runSim', json.dumps(data), headers=headers)
+
 			ffs = response.text.replace('"', '')
 			ffs = ffs.replace('\\', '')
 			ffs = ffs.replace('{0:', '@')
@@ -335,8 +343,10 @@ class BioCrowds():
 			print("Simulation Frame:", simulationFrame, end='\r')
 			simulationFrame += 1
 
-			#check the total time. If higher than 20 seconds, save in Database and leaves
-			if time.time() - startTime > 30:
+			#check the total time. If higher than 30 seconds, save in Database and leaves
+			#timeout has problems with the extra simulation for the reference agent. 
+			#easiest way to solve: remove it, since LAD does not have this problem.
+			if time.time() - startTime > 30000:
 				timeout = True
 				break
 
