@@ -139,10 +139,10 @@ class BioCrowds():
 			self.ip = self.ip.replace(':', '')
 			CreateMap()
 
-		#if this one is not a reference simulation, we need to simulate it with only one agent, 
+		#if this one is not a reference simulation, we need to simulate it with only one agent (unless it is only one), 
 		#to be able to normalize the metrics later
 		referenceAgent = []
-		if not self.refSimulation:
+		if not self.refSimulation and len(self.agents) > 1:
 			data["reference_simulation"] = "True"
 			headers = {'Content-Type': 'application/json'}
 			response = requests.post('http://localhost:5000/runSim', json.dumps(data), headers=headers) 
@@ -157,6 +157,8 @@ class BioCrowds():
 				data["terrains"] = "db"
 				headers = {'Content-Type': 'application/json'}
 				response = requests.post('http://localhost:5000/runSim', json.dumps(data), headers=headers)
+
+			print(response.text)
 
 			ffs = response.text.replace('"', '')
 			ffs = ffs.replace('\\', '')
@@ -745,10 +747,16 @@ class BioCrowds():
 
 			#normalizations. ReferenceAgent had time on index 0 and speed on index 1
 			if not self.refSimulation:
-				simTimeNN = self.simulationTime / referenceAgent[0]
-				avgTimeNN = avt / referenceAgent[0]
-				avgVelNN = math.exp(referenceAgent[1] / averageVelocity)
-				avgWalNN = averageWalked / referenceAgent[2]
+				if len(referenceAgent) > 0:
+					simTimeNN = self.simulationTime / referenceAgent[0]
+					avgTimeNN = avt / referenceAgent[0]
+					avgVelNN = math.exp(referenceAgent[1] / averageVelocity)
+					avgWalNN = averageWalked / referenceAgent[2]
+				else:
+					simTimeNN = self.simulationTime
+					avgTimeNN = avt
+					avgVelNN = averageVelocity
+					avgWalNN = averageWalked
 			else:
 				simTimeNN = self.simulationTime
 				avgTimeNN = avt
