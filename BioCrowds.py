@@ -241,7 +241,6 @@ class BioCrowds():
 		#open file to write or keep writing
 		cSVPath = self.outputDir + "/resultFile_" + (self.ip.replace(":", "_")) + ".csv"
 		if data['terrains'] == 'db':
-
 			resultFile = open(cSVPath, "a")
 			# resultFile = open("resultFile.csv", "a")
 		else:
@@ -385,6 +384,7 @@ class BioCrowds():
 
 			resultCellsFile.close()
 
+			
 			#generate heatmap
 			dataFig = []
 			dataTemp = []
@@ -405,36 +405,7 @@ class BioCrowds():
 			heatmap = np.array(dataFig)
 			heatmap = heatmap.transpose()
 
-			# fig, ax = plt.subplots()
-			# im = ax.imshow(heatmap)
-
 			figHeatmap = px.imshow(heatmap, color_continuous_scale="Viridis", labels=dict(color="Densidade"))
-
-			# Show all ticks and label them with the respective list entries
-			# ax.set_xticks(np.arange(self.mapSize.x/self.cellSize))
-			# ax.set_yticks(np.arange(self.mapSize.y/self.cellSize))
-
-			#plt.axis([0, self.mapSize.x, 0, self.mapSize.y])
-
-			# Rotate the tick labels and set their alignment.
-			# plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-			# 		 rotation_mode="anchor")
-
-			# ax.get_xaxis().set_visible(False)
-			# ax.get_yaxis().set_visible(False)
-
-			# Loop over data dimensions and create text annotations.
-			#for i in range(int(self.mapSize.x/self.cellSize)):
-			#	for j in range(int(self.mapSize.y/self.cellSize)):
-			#		text = ax.text(j, i, heatmap[i, j],
-			#						ha="center", va="center", color="w")
-			# cbar = ax.figure.colorbar(im, ax=ax)
-			# cbar.ax.set_ylabel("Densidade", rotation=-90, va="bottom")
-			# ax.set_title("Mapa de Densidades")
-
-			#ax.legend(title='Colors',title_fontsize=16,loc='center left', bbox_to_anchor=(1, 0.5))
-
-			# fig.tight_layout()
 
 			# Plotly configs
 
@@ -453,11 +424,6 @@ class BioCrowds():
 			figHeatmap.update_layout(xaxis=dict(tickmode='linear', tick0=0, dtick=1))
 			figHeatmap.update_layout(yaxis=dict(tickmode='linear', tick0=0, dtick=1))
 
-			#plt.show()
-			#figHeatmap.show()
-
-			# plt.savefig("heatmap.png", dpi=75)
-			# plt.savefig(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png", dpi=75)
 			figHeatmap.write_image(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png")
 
 			hm = []
@@ -465,7 +431,11 @@ class BioCrowds():
 			with open(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png", "rb") as img_file:
 				hm = ["heatmap", base64.b64encode(img_file.read())]
 
-			writeResult.append(hm)
+			#just need to generate the maps when it is not reference agent
+			if not self.refSimulation:
+				writeResult.append(hm)
+			else:
+				writeResult.append(["noNeed"])
 			os.remove(self.outputDir + "heatmap_"+self.ip.replace(":", "_")+".png")
 			#end heatmap
 
@@ -502,19 +472,11 @@ class BioCrowds():
 					agentPositionsByFrame[agentId] = []
 
 				agentPositionsByFrame[agentId].append(Vector3(agentX, agentY, agentZ))
-
-			# fig = plt.figure()
-			# ax = fig.add_subplot(1, 1, 1)
-
+					
 			# Creating trajetories figure
 
 			figTrajectories = make_subplots(rows=1, cols=1)
-
-			# figTrajectories.add_trace(
-			# 	go.Scatter(x = x, y = y),
-			# 	row=1, col=1
-			# )
-
+				
 			figTrajectories.add_scatter(x=x, 
 										y=y, 
 										mode='markers', 
@@ -537,12 +499,7 @@ class BioCrowds():
 
 			figTrajectories.update_xaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
 			figTrajectories.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
-
-			# plt.axis([0, self.mapSize.x, 0, self.mapSize.y])
-
-			# naming the x and y axis
-			# plt.xlabel('x')
-			# plt.ylabel('y')
+				
 
 			#draw obstacles
 			for obs in range(0, len(self.obstacles)):
@@ -553,11 +510,7 @@ class BioCrowds():
 				xs, ys = zip(*coord) #create lists of x and y values
 				# plt.plot(xs,ys)
 				figTrajectories.add_trace(go.Scatter(x = xs, y = ys, mode="lines", showlegend=False))
-
-			# plt.title("Trajetorias dos Agentes")
-
-			# plotting a line plot with it's default size
-			# plt.plot(x, y, 'ro', markersize=1, label = "Trajetória")
+					
 
 			x = []
 			y = []
@@ -569,13 +522,7 @@ class BioCrowds():
 
 			# plt.plot(x, y, 'bo', markersize=10, label = "Objetivo")
 			figTrajectories.add_scatter(x = x, y = y, mode = 'markers', name = 'Objetivo', marker = dict( size = 12), marker_color="rgb(255,0,0)")
-			# red_patch = mpatches.Patch(color='red', label='Trajetória')
-			# blue_dot = mlines.Line2D([0], [0], marker='o', color='w', label='Objetivo',
-            #               markerfacecolor='b', markersize=10)
-			# ax.legend(handles=[red_patch, blue_dot])
-
-			# plt.grid()
-
+				
 			figTrajectories.update_layout(
 				template="simple_white",
 				title="Trajetórias dos Agentes",
@@ -598,7 +545,11 @@ class BioCrowds():
 			with open(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png", "rb") as img_file:
 				hm = ["trajectories", base64.b64encode(img_file.read())]
 
-			writeResult.append(hm)
+			#just need to generate the maps when it is not reference agent
+			if not self.refSimulation:
+				writeResult.append(hm)
+			else:
+				writeResult.append(["noNeed"])
 			os.remove(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png")
 			#end trajectories
 
@@ -677,6 +628,8 @@ class BioCrowds():
 					maxframes = qntFrames[fram]
 
 			#for each frame	
+			#if dist is lower or equal sqrt(1/pi) (area of the circle, 1m²ish), update density
+			maxDistance = math.sqrt(1 / math.pi)
 			for i in range(maxframes):
 				localDensities[i] = {}
 				#for each agent, we check local density
@@ -696,8 +649,6 @@ class BioCrowds():
 							#check distance
 							distDen = Vector3.Distance(agentPositionsByFrame[ag][i], agentPositionsByFrame[ag2][i])
 							#if dist is lower or equal 1/pi (area of the circle, 1m²ish), update density
-							maxDistance = 1 / math.pi
-							#print(maxDistance)
 							if distDen <= maxDistance:
 								localDensity += 1
 								#print(localDensity)
@@ -705,6 +656,12 @@ class BioCrowds():
 					#update local densities
 					localDensities[i][ag] = localDensity
 			
+			#if not self.refSimulation:
+			#	m = open(self.outputDir + "/localdensities_" + self.ip.replace(":", "_") + ".txt", "w")
+			#	for ld in localDensities:
+			#		m.write(str(localDensities[ld]) + "\n")
+			#	m.close()
+
 			#print(localDensities)
 			#calculate mean values
 			meanLocalDensities = {}
@@ -714,14 +671,30 @@ class BioCrowds():
 						meanLocalDensities[ag] = localDensities[ld][ag]
 					else:
 						meanLocalDensities[ag] += localDensities[ld][ag]
-						
+			
+			#if not self.refSimulation:
+			#	m = open(self.outputDir + "/localdensities_" + self.ip.replace(":", "_") + ".txt", "w")
+			#	m.write(str(meanLocalDensities))
+			#	m.close()
+
+			#if not self.refSimulation:
+			#	m = open(self.outputDir + "/qntframes_" + self.ip.replace(":", "_") + ".txt", "w")
+			#	m.write(str(qntFrames))
+			#	m.close()
+
 			mld = {}
 			sumDensity = 0
 			for ld in meanLocalDensities:
-				sumDensity += meanLocalDensities[ld] / qntFrames[ld]
-				mld[ld] = sumDensity
+				dnt = meanLocalDensities[ld] / qntFrames[ld]
+				sumDensity += dnt
+				mld[ld] = dnt
 				
 			#print(mld)
+
+			#if not self.refSimulation:
+			#	m = open(self.outputDir + "/meanlocaldensities_" + self.ip.replace(":", "_") + ".txt", "w")
+			#	m.write(str(mld))
+			#	m.close()
 
 			#average density
 			averageDensity = sumDensity / len(qntFrames)
@@ -771,6 +744,14 @@ class BioCrowds():
 			hm = ["cassol", cassol]
 			writeResult.append(hm)
 			#end Cassol metric (harmonic mean)
+
+			#just to test stuff
+			#if self.refSimulation:
+			#	m = open(self.outputDir + "/metricsRef_" + self.ip.replace(":", "_") + ".txt", "w")
+			#else:
+			#	m = open(self.outputDir + "/metrics_" + self.ip.replace(":", "_") + ".txt", "w")
+			#m.write(str(writeResult))
+			#m.close()
 
 			#clear Database, just to be sure
 			self.ClearDatabase()
