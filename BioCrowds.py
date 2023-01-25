@@ -160,24 +160,20 @@ class BioCrowds():
 
 			print(response.text)
 
-			ffs = response.text.replace('"', '')
-			ffs = ffs.replace('\\', '')
-			ffs = ffs.replace('{0:', '@')
-			resp = ffs.split('@')
-			#what we need is the last index
-			resp = resp[len(resp)-1]
-			resp = resp.split(',')
-			#print("Response: " + str(resp))
+			jason = json.loads(json.loads(response.text))
+			jason = jason["1"]
 
 			#we need: total time, average speed - indexes 2 and 6
 			#extra new one: distance walked - index 4 
-			spl1 = resp[2].split(':')
-			spl2 = resp[6].split(':')
-			spl3 = resp[4].split(':')
 			#print(spl1)
-			refTT = float(spl1[1])
-			refAS = float(spl2[1])
-			refDW = float(spl3[1])
+			refTT = float(jason["2"])
+			refAS = float(jason["6"])
+			refDW = float(jason["4"])
+
+			#print("Ref TT: " + str(refTT))
+			#print("Ref AS: " + str(refAS))
+			#print("Ref DW: " + str(refDW))
+
 			referenceAgent.append(refTT)
 			referenceAgent.append(refAS)
 			referenceAgent.append(refDW)
@@ -341,7 +337,7 @@ class BioCrowds():
 				for i in range(0, len(agentsToKill)):
 					self.agents.pop(agentsToKill[i])
 
-			print("Simulation Frame:", simulationFrame, end='\r')
+			#print("Simulation Frame:", simulationFrame, end='\r')
 			simulationFrame += 1
 
 			#check the total time. If higher than 30 seconds, save in Database and leaves
