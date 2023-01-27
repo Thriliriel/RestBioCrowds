@@ -26,7 +26,7 @@ class RestBioCrowds(object):
 		#print(data)
 		#df = pd.DataFrame(data)
 		#output = biocrowds.run(df)
-		biocrowds = BioCrowds.BioCrowds()
+		biocrowds = BioCrowds.BioCrowdsClass()
 
 		output = biocrowds.run(data)
 		print(output)

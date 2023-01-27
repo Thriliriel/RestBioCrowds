@@ -7,6 +7,7 @@ from MarkerClass import MarkerClass
 from GoalClass import GoalClass
 from ObstacleClass import ObstacleClass
 from Parsing.ParserJSON import ParserJSON
+import Util.BioCrowdsUtil as BC_Util
 import pandas as pd
 # import matplotlib.pyplot as plt
 # import matplotlib.patches as mpatches
@@ -26,14 +27,17 @@ import json
 import math
 #import gc
 
-class BioCrowds():
+class BioCrowdsClass():
 	def run(self, data):
 		self.ip = ''
 		self.outputDir = os.path.abspath(os.path.dirname(__file__)) + "/OutputData/"
 		writeResult = []
 		startTime = time.time()
+		self.reference_agent = {}
+		self.run_on_server = True
 
-		self.ConnectDB()
+		if self.run_on_server:
+			self.ConnectDB()
 
 		#from Json
 		#terrainSizeJson = data['terrains'][0]['terrain_size']
@@ -56,32 +60,8 @@ class BioCrowds():
 		self.refSimulation = False
 
 		#read the config file
-		lineCount = 1
-		for line in open("Input/config.txt", "r"):
-			if '#' in line:
-				continue
-			if lineCount == 1:
-				#markers density
-				self.PORC_QTD_Marcacoes = float(line)
-			elif lineCount == 2:
-				#FPS
-				self.timeStep = float(line)
-			elif lineCount == 3:
-				#size of each square cell
-				self.cellSize = int(line)
-			elif lineCount == 4:
-				#size of the scenario (comes from json, so no needed)
-				sp = line.split(',')
-				self.mapSize = Vector3(int(sp[0]), int(sp[1]), int(sp[2]))
-			elif lineCount == 5:
-				#using path planning?
-				if line.lower() == 'false':
-					self.pathPlanning = False
-				else:
-					self.pathPlanning = True
-
-			lineCount += 1
-
+		BC_Util.ParseConfigFile(self, "Input/config.txt")
+		
 		#goals
 		self.goals = []
 
@@ -92,7 +72,7 @@ class BioCrowds():
 		self.obstacles = []
 
 		#cells
-		self.cells = []
+		self.cells:list[CellClass] = []
 
 		#create the cells and markers
 		def CreateMap():
@@ -121,9 +101,9 @@ class BioCrowds():
 
 		#add the reference simulation, if none
 		if "reference_simulation" not in data:
-			data["reference_simulation"] = "False"
+			data["reference_simulation"] = False
 
-		self.refSimulation = eval(data["reference_simulation"])
+		self.refSimulation = bool(data["reference_simulation"])
 
 		#from json
 		#json or database?
@@ -141,9 +121,9 @@ class BioCrowds():
 
 		#if this one is not a reference simulation, we need to simulate it with only one agent (unless it is only one), 
 		#to be able to normalize the metrics later
-		referenceAgent = []
+		self.reference_agent = {}
 		if not self.refSimulation and len(self.agents) > 1:
-			data["reference_simulation"] = "True"
+			data["reference_simulation"] = True
 			headers = {'Content-Type': 'application/json'}
 			response = requests.post('http://localhost:5000/runSim', json.dumps(data), headers=headers) 
 			#print("Code status: " + str(response.status_code)) 
@@ -158,30 +138,13 @@ class BioCrowds():
 				headers = {'Content-Type': 'application/json'}
 				response = requests.post('http://localhost:5000/runSim', json.dumps(data), headers=headers)
 
-			print(response.text)
-
+			# print(response.text)
 			jason = json.loads(json.loads(response.text))
 			jason = jason["1"]
-
-			#we need: total time, average speed - indexes 2 and 6
-			#extra new one: distance walked - index 4 
-			#print(spl1)
-			refTT = float(jason["2"])
-			refAS = float(jason["6"])
-			refDW = float(jason["4"])
-
-			#print("Ref TT: " + str(refTT))
-			#print("Ref AS: " + str(refAS))
-			#print("Ref DW: " + str(refDW))
-
-			referenceAgent.append(refTT)
-			referenceAgent.append(refAS)
-			referenceAgent.append(refDW)
-
-			#print("Ref TT: ", str(refTT))
-			#print("Ref AS: ", str(refAS))
-
-			#print("Return 2: " + ffs['1'])
+			self.reference_agent = BC_Util.ParseReferenceSimulation(jason)
+			#print("dist walked type:", type(self.reference_agent["total_average_distance_walked"]))
+			#print(self.reference_agent["agents_distance_walked"])
+			#print(self.reference_agent)
 		else:
 			#if it is a reference simulation, one agent only
 			#find the agent farther away from the goals
@@ -203,36 +166,36 @@ class BioCrowds():
 		SaveMarkers()
 
 		#for each goal, vinculate the cell
-		for i in range(0, len(self.goals)):
+		for _goal in self.goals:
 			totalDistance = self.cellSize * 2
-			for j in range(0, len(self.cells)):
-				distance = Vector3.Distance(self.goals[i].position, self.cells[j].position)
+			for _cell in self.cells:
+				distance = Vector3.Distance(_goal.position, _cell.position)
 
 				#if distance is lower than total, change
 				if distance < totalDistance:
 					totalDistance = distance
-					self.goals[i].cell = self.cells[j]
+					_goal.cell = _cell
 
 		#for each cell, find its neighbors
-		for i in range(0, len(self.cells)):
-			self.cells[i].FindNeighbor(self.cells)
+		for _cell in self.cells: 
+			_cell.FindNeighbor(self.cells)
 
 		#for each agent, find its initial cell
-		for i in range(0, len(self.agents)):
+		for _agent in self.agents:
 			minDis = 5
-			for c in range(0, len(self.cells)):
-				dist = Vector3.Distance(self.agents[i].position, self.cells[c].position)
+			for _cell in self.cells:
+				dist = Vector3.Distance(_agent.position,_cell.position)
 				if dist < minDis:
 					minDis = dist
-					self.agents[i].cell = self.cells[c]
+					_agent.cell = _cell
 
 		#for each agent, calculate the path, if true (comes from Json, dont need to calculate)
 		#if self.pathPlanning:
 		#	for i in range(0, len(self.agents)):
 		#		self.agents[i].FindPath()
 		if self.pathPlanning:
-			for i in range(0, len(self.agents)):
-				self.agents[i].FindPathJson(self.cells)
+			for a in self.agents:
+				a.FindPathJson(self.cells)
 
 		#open file to write or keep writing
 		cSVPath = self.outputDir + "/resultFile_" + (self.ip.replace(":", "_")) + ".csv"
@@ -253,17 +216,17 @@ class BioCrowds():
 				break
 
 			#for each agent, we reset their info
-			for i in range(0, len(self.agents)):
-				self.agents[i].ClearAgent()
+			for ag in self.agents:
+				ag.ClearAgent()
 			#print("markers", len(agents[0].markers))
 			#reset the markers
-			for i in range(0, len(self.cells)):
-				for j in range(0, len(self.cells[i].markers)):
-					self.cells[i].markers[j].ResetMarker()
+			for _cell in self.cells:
+				for marker in _cell.markers:
+					marker.ResetMarker()
 
 			#find nearest markers for each agent
-			for i in range(0, len(self.agents)):
-				self.agents[i].FindNearMarkers()
+			for ag in self.agents:
+				ag.FindNearMarkers()
 			#	print(sum([len(c.markers) for c in cells]), len(agents[i].markers))
 
 			#/*to find where the agent must move, we need to get the vectors from the agent to each auxin he has, and compare with
@@ -283,59 +246,59 @@ class BioCrowds():
 			#   */
 
 			agentsToKill = []
-			i = 0
-			while i < len(self.agents):
-				agentMarkers = self.agents[i].markers
+			frame = 0
+			while frame < len(self.agents):
+				agentMarkers = self.agents[frame].markers
 
 				#vector for each marker
 				for j in range(0, len(agentMarkers)):
 					#add the distance vector between it and the agent
 					#print (agents[i].position, agentMarkers[j].position)
-					self.agents[i].vetorDistRelacaoMarcacao.append(Vector3.Sub_vec(agentMarkers[j].position, self.agents[i].position))
+					self.agents[frame].vetorDistRelacaoMarcacao.append(Vector3.Sub_vec(agentMarkers[j].position, self.agents[frame].position))
 
 				#print("total", len(agents[i].vetorDistRelacaoMarcacao))
 				#calculate the movement vector
-				self.agents[i].CalculateMotionVector()
+				self.agents[frame].CalculateMotionVector()
 
 				#print(agents[i].m)
 				#calculate speed vector
-				self.agents[i].CalculateSpeed()
+				self.agents[frame].CalculateSpeed()
 
 				#walk
-				self.agents[i].Walk(self.timeStep)
+				self.agents[frame].Walk(self.timeStep)
 
 				#write in file (agent id, X, Y, Z)
-				resultFile.write(str(self.agents[i].id) + ";" + str(self.agents[i].position.x) + ";" + str(self.agents[i].position.y) + ";" + str(self.agents[i].position.z) + "\n")
+				resultFile.write(str(self.agents[frame].id) + ";" + str(self.agents[frame].position.x) + ";" + str(self.agents[frame].position.y) + ";" + str(self.agents[frame].position.z) + "\n")
 
 				#verify agent position, in relation to the goal. If arrived, bye
-				dist = Vector3.Distance(self.agents[i].goal.position, self.agents[i].position)
+				dist = Vector3.Distance(self.agents[frame].goal.position, self.agents[frame].position)
 				#print(agents[i].id, " -- Dist: ", dist, " -- Radius: ", agents[i].radius, " -- Agent: ", agents[i].position.x, agents[i].position.y)
 				#print(agents[i].speed.x, agents[i].speed.y)
-				if dist < self.agents[i].radius / 4:
-					agentsToKill.append(i)
+				if dist < self.agents[frame].radius / 4:
+					agentsToKill.append(frame)
 
 				#update lastdist (max = 5)
-				if len(self.agents[i].lastDist) == 5:
-					self.agents[i].lastDist.pop(0)
+				if len(self.agents[frame].lastDist) == 5:
+					self.agents[frame].lastDist.pop(0)
 
-				self.agents[i].lastDist.append(dist)
+				self.agents[frame].lastDist.append(dist)
 
 				#check them all
 				qntFound = 0
-				for ck in self.agents[i].lastDist:
+				for ck in self.agents[frame].lastDist:
 					if ck == dist:
 						qntFound += 1
 
 				#if distances does not change, assume agent is stuck
 				if qntFound == 5:
-					agentsToKill.append(i)
+					agentsToKill.append(frame)
 
-				i += 1
+				frame += 1
 
 			#die!
 			if len(agentsToKill) > 0:
-				for i in range(0, len(agentsToKill)):
-					self.agents.pop(agentsToKill[i])
+				for frame in range(0, len(agentsToKill)):
+					self.agents.pop(agentsToKill[frame])
 
 			#print("Simulation Frame:", simulationFrame, end='\r')
 			simulationFrame += 1
@@ -356,430 +319,425 @@ class BioCrowds():
 		if timeout:
 			self.SaveDatabase()
 			return pd.DataFrame(["nope"])
+			
 		#otherwise, it is done
-		else:
-			print(f'Total Simulation Time: {self.simulationTime} "seconds. ({simulationFrame+1} frames)')
+		# Simulation Finished
+		print(f'Total Simulation Time: {self.simulationTime} "seconds. ({simulationFrame+1} frames)')
 
-			#save the cells, for heatmap
-			#resultCellsFile = open("resultCellFile.txt", "w")
-			resultCellsFile = open(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt", "w")
-			thisX = 0
-			firstColumn = True
-			for cell in self.cells:
-				if thisX != cell.position.x:
-					thisX = cell.position.x
-					resultCellsFile.write("\n")
-					firstColumn = True
+		#save the cells, for heatmap
+		#resultCellsFile = open("resultCellFile.txt", "w")
+		resultCellsFile = open(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt", "w")
+		thisX = 0
+		firstColumn = True
+		for _cell in self.cells:
+			if thisX != _cell.position.x:
+				thisX = _cell.position.x
+				resultCellsFile.write("\n")
+				firstColumn = True
 
-				if firstColumn:
-					resultCellsFile.write(str(len(cell.passedAgents)))
-					firstColumn = False
-				else:
-					resultCellsFile.write("," + str(len(cell.passedAgents)))
+			if firstColumn:
+				resultCellsFile.write(str(len(_cell.passedAgents)))
+				firstColumn = False
+			else:
+				resultCellsFile.write("," + str(len(_cell.passedAgents)))
 
 
-			resultCellsFile.close()
+		resultCellsFile.close()
 
-			
-			#generate heatmap
-			dataFig = []
+		
+		#generate heatmap
+		dataFig = []
+		dataTemp = []
+	
+		#open file to read
+		# for line in open("resultCellFile.txt"):
+		for line in open(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt"):
+			stripLine = line.replace('\n', '')
+			strip = stripLine.split(',')
 			dataTemp = []
-      
-			#open file to read
-			# for line in open("resultCellFile.txt"):
-			for line in open(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt"):
-				stripLine = line.replace('\n', '')
-				strip = stripLine.split(',')
-				dataTemp = []
 
-				for af in strip:
-					dataTemp.insert(0, float(af))
+			for af in strip:
+				dataTemp.insert(0, float(af))
 
-				dataFig.append(dataTemp)
+			dataFig.append(dataTemp)
 
-			#datafig has all qnt of agents passed for each cell.
-			heatmap = np.array(dataFig)
-			heatmap = heatmap.transpose()
+		#datafig has all qnt of agents passed for each cell.
+		heatmap = np.array(dataFig)
+		heatmap = heatmap.transpose()
 
-			figHeatmap = px.imshow(heatmap, color_continuous_scale="Viridis", labels=dict(color="Densidade"))
+		figHeatmap = px.imshow(heatmap, color_continuous_scale="Viridis", labels=dict(color="Densidade"))
 
-			# Plotly configs
+		# Plotly configs
 
-			figHeatmap.update_layout(
-				template = "simple_white",
-				#title = "Mapa de Densidades",
-				title = "Density Map",
-				title_x=0.5,
-				#legend_title = "Densidade"
-				legend_title = "Density"
-			)
+		figHeatmap.update_layout(
+			template = "simple_white",
+			#title = "Mapa de Densidades",
+			title = "Density Map",
+			title_x=0.5,
+			#legend_title = "Densidade"
+			legend_title = "Density"
+		)
 
-			figHeatmap.update_xaxes(range=[-0.5, self.mapSize.x - 0.5], visible = False)
-			figHeatmap.update_yaxes(range=[-0.5, self.mapSize.y - 0.5], visible = False)
+		figHeatmap.update_xaxes(range=[-0.5, self.mapSize.x - 0.5], visible = False)
+		figHeatmap.update_yaxes(range=[-0.5, self.mapSize.y - 0.5], visible = False)
 
-			figHeatmap.update_layout(xaxis=dict(tickmode='linear', tick0=0, dtick=1))
-			figHeatmap.update_layout(yaxis=dict(tickmode='linear', tick0=0, dtick=1))
+		figHeatmap.update_layout(xaxis=dict(tickmode='linear', tick0=0, dtick=1))
+		figHeatmap.update_layout(yaxis=dict(tickmode='linear', tick0=0, dtick=1))
 
-			figHeatmap.write_image(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png")
+		figHeatmap.write_image(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png")
 
-			hm = []
-			# with open("heatmap.png", "rb") as img_file:
-			with open(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png", "rb") as img_file:
-				hm = ["heatmap", base64.b64encode(img_file.read())]
+		hm = []
+		# with open("heatmap.png", "rb") as img_file:
+		with open(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png", "rb") as img_file:
+			hm = ["heatmap", base64.b64encode(img_file.read())]
 
-			#just need to generate the maps when it is not reference agent
-			if not self.refSimulation:
-				writeResult.append(hm)
-			else:
-				writeResult.append(["noNeed"])
-			os.remove(self.outputDir + "heatmap_"+self.ip.replace(":", "_")+".png")
-			#end heatmap
+		#just need to generate the maps when it is not reference agent
+		if not self.refSimulation:
+			writeResult.append(hm)
+		else:
+			writeResult.append(["noNeed"])
+		os.remove(self.outputDir + "heatmap_"+self.ip.replace(":", "_")+".png")
+		#end heatmap
 
-			#trajectories
-			# plt.close()
-			dataFig = []
-			# values on x-axis
-			x = []
-			# values on y-axis
-			y = []
+		#trajectories
+		# plt.close()
+		dataFig = []
+		# values on x-axis
+		x = []
+		# values on y-axis
+		y = []
 
-			#dictionary to calculate speeds, distances and densities later
-			agentPositionsByFrame = {}
+		#dictionary to calculate speeds, distances and densities later
+		agentPositionsByFrame = {}
 
-			#open file to read
-			#id, x, y, z
-			#for line in open("resultFile.csv"):
-			for line in open(self.outputDir + "/resultFile_" + self.ip.replace(":", "_") + ".csv"):
-				csv_row = line.split(';')
+		#open file to read
+		#id, x, y, z
+		#for line in open("resultFile.csv"):
+		for line in open(self.outputDir + "/resultFile_" + self.ip.replace(":", "_") + ".csv"):
+			csv_row = line.split(';')
 
-				#parse
-				agentId = int(csv_row[0])
-				agentX = float(csv_row[1])
-				agentY = float(csv_row[2])
-				agentZ = float(csv_row[3])
+			#parse
+			agentId = int(csv_row[0])
+			agentX = float(csv_row[1])
+			agentY = float(csv_row[2])
+			agentZ = float(csv_row[3])
 
-				#points for the trajectories
-				x.append(agentX)
-				y.append(agentY)
+			#points for the trajectories
+			x.append(agentX)
+			y.append(agentY)
 
-				#agents positions by frame, for density, distance and velocities
-				#if not exists yet, create the list
-				if agentId not in agentPositionsByFrame:
-					agentPositionsByFrame[agentId] = []
+			#agents positions by frame, for density, distance and velocities
+			#if not exists yet, create the list
+			if agentId not in agentPositionsByFrame:
+				agentPositionsByFrame[agentId] = []
 
-				agentPositionsByFrame[agentId].append(Vector3(agentX, agentY, agentZ))
-					
-			# Creating trajetories figure
-
-			figTrajectories = make_subplots(rows=1, cols=1)
+			agentPositionsByFrame[agentId].append(Vector3(agentX, agentY, agentZ))
 				
-			figTrajectories.add_scatter(x=x, 
-										y=y, 
-										mode='markers', 
-										#name='Trajetória', 
-										name='Trajectory', 
-										marker=dict(size=4), 
-										marker_color="rgb(0,0,255)")
+		# Creating trajetories figure
 
-			# figTrajectories = px.scatter(x = x, y = y)
-
-			major_ticks = np.arange(0, self.mapSize.x + 1, self.cellSize)
-			# ax.set_xticks(major_ticks)
-			# ax.set_yticks(major_ticks)
-
-			figTrajectories.update_xaxes(range = [0, self.mapSize.x], showgrid=True, gridwidth=1, gridcolor='Gray')
-			figTrajectories.update_yaxes(range = [0, self.mapSize.y], showgrid=True, gridwidth=1, gridcolor='Gray')
-
-			figTrajectories.update_layout(xaxis = dict(tickmode = 'linear', tick0 = 0, dtick = 2))
-			figTrajectories.update_layout(yaxis = dict(tickmode = 'linear', tick0 = 0, dtick = 2))
-
-			figTrajectories.update_xaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
-			figTrajectories.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
-				
-
-			#draw obstacles
-			for obs in range(0, len(self.obstacles)):
-				coord = []
-				for pnt in range(0, len(self.obstacles[obs].points)):
-					coord.append([self.obstacles[obs].points[pnt].x, self.obstacles[obs].points[pnt].y])
-				coord.append(coord[0]) #repeat the first point to create a 'closed loop'
-				xs, ys = zip(*coord) #create lists of x and y values
-				# plt.plot(xs,ys)
-				figTrajectories.add_trace(go.Scatter(x = xs, y = ys, mode="lines", showlegend=False))
-					
-
-			x = []
-			y = []
-
-			#goals
-			for _goal in self.goals:
-				x.append(_goal.position.x)
-				y.append(_goal.position.y)
-
-			# plt.plot(x, y, 'bo', markersize=10, label = "Objetivo")
-			figTrajectories.add_scatter(x = x, y = y, mode = 'markers', name = 'Objetivo', marker = dict( size = 12), marker_color="rgb(255,0,0)")
-				
-			figTrajectories.update_layout(
-				template="simple_white",
-				title="Trajetórias dos Agentes",
-				title_x=0.5,
-				legend = dict(
-					orientation="h",
-					yanchor="bottom",
-					y=1.02,
-					xanchor="right",
-					x=1
-				)
-			)
-
-			# plt.savefig("trajectories.png", dpi=75)
-			# plt.savefig(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png", dpi=75)
-			figTrajectories.write_image(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png")
-
-			hm = []
-			# with open("trajectories.png", "rb") as img_file:
-			with open(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png", "rb") as img_file:
-				hm = ["trajectories", base64.b64encode(img_file.read())]
-
-			#just need to generate the maps when it is not reference agent
-			if not self.refSimulation:
-				writeResult.append(hm)
-			else:
-				writeResult.append(["noNeed"])
-			os.remove(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png")
-			#end trajectories
-
-			#sim time
-			hm = ["simTime", self.simulationTime]
-			writeResult.append(hm)
-
-			#densities, distances and velocities
-			#distances
-			distanceWalked = {}
-			qntFrames = {}
-			totalWalked = 0
-
-			#for each agent
-			for ag in agentPositionsByFrame:
-				agentWalked = 0
-				lastPos = -1
-
-				#for each position of this agent
-				for pos in agentPositionsByFrame[ag]:
-					#qnt frames
-					if ag not in qntFrames:
-						qntFrames[ag] = 1
-					else:
-						qntFrames[ag] += 1
-
-					#if no position yet, just continue (need two to calculate)
-					if lastPos == -1:
-						#update lastPos, so we can use later
-						lastPos = pos
-
-						continue
-					#else, calculate
-					else:
-						#distance
-						agentWalked += abs(Vector3.Distance(pos, lastPos))
-						lastPos = pos
-
-				#update the dict. 
-				totalWalked += agentWalked
-				distanceWalked[ag] = agentWalked
-
-			#average walked
-			averageWalked = totalWalked / (len(qntFrames))
-
-			#print(distanceWalked)
-			hm = ["distanceWalked", distanceWalked]
-			writeResult.append(hm)
-			hm = ["totalWalked", averageWalked]
-			writeResult.append(hm)
-
-			#with the distance walked, as well as the qnt of frames of each agent (size of each), we can calculate mean speed
-			velocities = {}
-			sumVelocity = 0
-			for ag in distanceWalked:
-				vel = distanceWalked[ag] / (qntFrames[ag] * self.timeStep)
-				sumVelocity += vel
-				velocities[ag] = vel
-
-			#average velocity
-			averageVelocity = sumVelocity / (len(qntFrames))
-
-			#print(velocities)
-			hm = ["velocities", velocities]
-			writeResult.append(hm)
-			hm = ["averageVelocity", averageVelocity]
-			writeResult.append(hm)
-
-			#for densities, we calculate the local densities for each agent, each frame
-			localDensities = {}
-
-			#get the maximum amount of frames
-			maxframes = 0
-			for fram in qntFrames:
-				if qntFrames[fram] > maxframes:
-					maxframes = qntFrames[fram]
-
-			#for each frame	
-			#if dist is lower or equal sqrt(1/pi) (area of the circle, 1m²ish), update density
-			maxDistance = math.sqrt(1 / math.pi)
-			for i in range(maxframes):
-				localDensities[i] = {}
-				#for each agent, we check local density
-				for ag in agentPositionsByFrame:
-					#maybe this agent is not present in the simulation on this frame, so check it
-					if i >= len(agentPositionsByFrame[ag]):
-						continue
-
-					localDensity = 1
-					for ag2 in agentPositionsByFrame:
-						#maybe this agent is not present in the simulation on this frame, so check it
-						if i >= len(agentPositionsByFrame[ag2]):
-							continue
-
-						#if ag is equal ag2, it is the same agent
-						if ag != ag2:
-							#check distance
-							distDen = Vector3.Distance(agentPositionsByFrame[ag][i], agentPositionsByFrame[ag2][i])
-							#if dist is lower or equal 1/pi (area of the circle, 1m²ish), update density
-							if distDen <= maxDistance:
-								localDensity += 1
-								#print(localDensity)
-
-					#update local densities
-					localDensities[i][ag] = localDensity
+		figTrajectories = make_subplots(rows=1, cols=1)
 			
-			#if not self.refSimulation:
-			#	m = open(self.outputDir + "/localdensities_" + self.ip.replace(":", "_") + ".txt", "w")
-			#	for ld in localDensities:
-			#		m.write(str(localDensities[ld]) + "\n")
-			#	m.close()
+		figTrajectories.add_scatter(x=x, 
+									y=y, 
+									mode='markers', 
+									#name='Trajetória', 
+									name='Trajectory', 
+									marker=dict(size=4), 
+									marker_color="rgb(0,0,255)")
 
-			#print(localDensities)
-			#calculate mean values
-			meanLocalDensities = {}
-			for ld in localDensities:
-				for ag in localDensities[ld]:
-					if ag not in meanLocalDensities:
-						meanLocalDensities[ag] = localDensities[ld][ag]
-					else:
-						meanLocalDensities[ag] += localDensities[ld][ag]
+		# figTrajectories = px.scatter(x = x, y = y)
+
+		major_ticks = np.arange(0, self.mapSize.x + 1, self.cellSize)
+		# ax.set_xticks(major_ticks)
+		# ax.set_yticks(major_ticks)
+
+		figTrajectories.update_xaxes(range = [0, self.mapSize.x], showgrid=True, gridwidth=1, gridcolor='Gray')
+		figTrajectories.update_yaxes(range = [0, self.mapSize.y], showgrid=True, gridwidth=1, gridcolor='Gray')
+
+		figTrajectories.update_layout(xaxis = dict(tickmode = 'linear', tick0 = 0, dtick = 2))
+		figTrajectories.update_layout(yaxis = dict(tickmode = 'linear', tick0 = 0, dtick = 2))
+
+		figTrajectories.update_xaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
+		figTrajectories.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
 			
-			#if not self.refSimulation:
-			#	m = open(self.outputDir + "/localdensities_" + self.ip.replace(":", "_") + ".txt", "w")
-			#	m.write(str(meanLocalDensities))
-			#	m.close()
 
-			#if not self.refSimulation:
-			#	m = open(self.outputDir + "/qntframes_" + self.ip.replace(":", "_") + ".txt", "w")
-			#	m.write(str(qntFrames))
-			#	m.close()
-
-			mld = {}
-			sumDensity = 0
-			for ld in meanLocalDensities:
-				dnt = meanLocalDensities[ld] / qntFrames[ld]
-				sumDensity += dnt
-				mld[ld] = dnt
+		#draw obstacles
+		for obs in range(0, len(self.obstacles)):
+			coord = []
+			for pnt in range(0, len(self.obstacles[obs].points)):
+				coord.append([self.obstacles[obs].points[pnt].x, self.obstacles[obs].points[pnt].y])
+			coord.append(coord[0]) #repeat the first point to create a 'closed loop'
+			xs, ys = zip(*coord) #create lists of x and y values
+			# plt.plot(xs,ys)
+			figTrajectories.add_trace(go.Scatter(x = xs, y = ys, mode="lines", showlegend=False))
 				
-			#print(mld)
 
-			#if not self.refSimulation:
-			#	m = open(self.outputDir + "/meanlocaldensities_" + self.ip.replace(":", "_") + ".txt", "w")
-			#	m.write(str(mld))
-			#	m.close()
+		x = []
+		y = []
 
-			#average density
-			averageDensity = sumDensity / len(qntFrames)
+		#goals
+		for _goal in self.goals:
+			x.append(_goal.position.x)
+			y.append(_goal.position.y)
 
-			hm = ["localDensities", mld]
+		# plt.plot(x, y, 'bo', markersize=10, label = "Objetivo")
+		figTrajectories.add_scatter(x = x, y = y, mode = 'markers', name = 'Objetivo', marker = dict( size = 12), marker_color="rgb(255,0,0)")
+			
+		figTrajectories.update_layout(
+			template="simple_white",
+			title="Trajetórias dos Agentes",
+			title_x=0.5,
+			legend = dict(
+				orientation="h",
+				yanchor="bottom",
+				y=1.02,
+				xanchor="right",
+				x=1
+			)
+		)
+
+		# plt.savefig("trajectories.png", dpi=75)
+		# plt.savefig(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png", dpi=75)
+		figTrajectories.write_image(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png")
+
+		hm = []
+		# with open("trajectories.png", "rb") as img_file:
+		with open(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png", "rb") as img_file:
+			hm = ["trajectories", base64.b64encode(img_file.read())]
+
+		#just need to generate the maps when it is not reference agent
+		if not self.refSimulation:
 			writeResult.append(hm)
-			hm = ["averageDensity", averageDensity]
-			writeResult.append(hm)
-			#end densities, distances and velocities
+		else:
+			writeResult.append(["noNeed"])
+		os.remove(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png")
+		#end trajectories
 
-			#average time
-			avt = 0
-			for ag in qntFrames:
-				avt += qntFrames[ag]
+		#sim time
+		hm = ["simTime", self.simulationTime]
+		writeResult.append(hm)
 
-			avt /= len(qntFrames)
-			avt *= self.timeStep
+		#densities, distances and velocities
+		#distances
+		distanceWalked = {}
+		qntFrames = {}
+		totalWalked = 0
 
-			print(avt)
-			hm = ["averageTime", avt]
-			writeResult.append(hm)
-			#end average time
+		#for each agent
+		for ag in agentPositionsByFrame:
+			agentWalked = 0
+			lastPos = -1
 
-			#normalizations. ReferenceAgent had time on index 0 and speed on index 1
-			if not self.refSimulation:
-				if len(referenceAgent) > 0:
-					simTimeNN = self.simulationTime / referenceAgent[0]
-					avgTimeNN = avt / referenceAgent[0]
-					avgVelNN = math.exp(referenceAgent[1] / averageVelocity)
-					avgWalNN = averageWalked / referenceAgent[2]
+			#for each position of this agent
+			for pos in agentPositionsByFrame[ag]:
+				#qnt frames
+				if ag not in qntFrames:
+					qntFrames[ag] = 1
 				else:
-					simTimeNN = self.simulationTime
-					avgTimeNN = avt
-					avgVelNN = averageVelocity
-					avgWalNN = averageWalked
+					qntFrames[ag] += 1
+
+				#if no position yet, just continue (need two to calculate)
+				if lastPos == -1:
+					#update lastPos, so we can use later
+					lastPos = pos
+
+					continue
+				#else, calculate
+				else:
+					#distance
+					agentWalked += abs(Vector3.Distance(pos, lastPos))
+					lastPos = pos
+
+			#update the dict. 
+			totalWalked += agentWalked
+			distanceWalked[ag] = agentWalked
+
+		#average walked
+		averageWalked = totalWalked / (len(qntFrames))
+		hm = ["distanceWalked", distanceWalked]
+		writeResult.append(hm)
+		hm = ["totalWalked", averageWalked]
+		writeResult.append(hm)
+
+		#with the distance walked, as well as the qnt of frames of each agent (size of each), we can calculate mean speed
+		velocities = {}
+		sumVelocity = 0
+		for ag in distanceWalked:
+			vel = distanceWalked[ag] / (qntFrames[ag] * self.timeStep)
+			sumVelocity += vel
+			velocities[ag] = vel
+
+		#average velocity
+		averageVelocity = sumVelocity / (len(qntFrames))
+
+		#print(velocities)
+		hm = ["velocities", velocities]
+		writeResult.append(hm)
+		hm = ["averageVelocity", averageVelocity]
+		writeResult.append(hm)
+
+		#for densities, we calculate the local densities for each agent, each frame
+		localDensities = {}
+
+		#get the maximum amount of frames
+		maxframes = 0
+		for fram in qntFrames:
+			if qntFrames[fram] > maxframes:
+				maxframes = qntFrames[fram]
+		print("max comparison", maxframes, max(qntFrames.values()))
+
+		#for each frame	
+		#if dist is lower or equal sqrt(1/pi) (area of the circle, 1m²ish), update density
+		maxDistance = math.sqrt(1 / math.pi)
+		for frame in range(maxframes):
+			localDensities[frame] = {}
+			#for each agent, we check local density
+			for ag in agentPositionsByFrame:
+				#maybe this agent is not present in the simulation on this frame, so check it
+				if frame >= len(agentPositionsByFrame[ag]):
+					continue
+
+				localDensity = 1
+				for ag2 in agentPositionsByFrame:
+					#maybe this agent is not present in the simulation on this frame, so check it
+					if frame >= len(agentPositionsByFrame[ag2]):
+						continue
+
+					#if ag is equal ag2, it is the same agent
+					if ag != ag2:
+						#check distance
+						distDen = Vector3.Distance(agentPositionsByFrame[ag][frame], agentPositionsByFrame[ag2][frame])
+						#if dist is lower or equal 1/pi (area of the circle, 1m²ish), update density
+						if distDen <= maxDistance:
+							localDensity += 1
+
+				#update local densities
+				localDensities[frame][ag] = localDensity
+		#if not self.refSimulation:
+		#	m = open(self.outputDir + "/localdensities_" + self.ip.replace(":", "_") + ".txt", "w")
+		#	for ld in localDensities:
+		#		m.write(str(localDensities[ld]) + "\n")
+		#	m.close()
+
+		#print(localDensities)
+		#calculate mean values
+		meanLocalDensities = {}
+		for ld in localDensities:
+			for ag in localDensities[ld]:
+				if ag not in meanLocalDensities:
+					meanLocalDensities[ag] = localDensities[ld][ag]
+				else:
+					meanLocalDensities[ag] += localDensities[ld][ag]
+		
+		#if not self.refSimulation:
+		#	m = open(self.outputDir + "/localdensities_" + self.ip.replace(":", "_") + ".txt", "w")
+		#	m.write(str(meanLocalDensities))
+		#	m.close()
+
+		#if not self.refSimulation:
+		#	m = open(self.outputDir + "/qntframes_" + self.ip.replace(":", "_") + ".txt", "w")
+		#	m.write(str(qntFrames))
+		#	m.close()
+
+		mld = {}
+		sumDensity = 0
+		for ld in meanLocalDensities:
+			dnt = meanLocalDensities[ld] / qntFrames[ld]
+			sumDensity += dnt
+			mld[ld] = dnt
+			
+		#print(mld)
+
+		#if not self.refSimulation:
+		#	m = open(self.outputDir + "/meanlocaldensities_" + self.ip.replace(":", "_") + ".txt", "w")
+		#	m.write(str(mld))
+		#	m.close()
+
+		#average density
+		averageDensity = sumDensity / len(qntFrames)
+
+		hm = ["localDensities", mld]
+		writeResult.append(hm)
+		hm = ["averageDensity", averageDensity]
+		writeResult.append(hm)
+		#end densities, distances and velocities
+
+		#average time
+		avt = sum(qntFrames.values())
+		avt /= len(qntFrames)
+		avt *= self.timeStep
+
+		hm = ["averageTime", avt]
+		writeResult.append(hm)
+		#end average time
+
+		#normalizations. ReferenceAgent had time on index 0 and speed on index 1
+		if not self.refSimulation:
+			if self.reference_agent:
+				simTimeNN = self.simulationTime / self.reference_agent["total_simulation_time"]
+				avgTimeNN = avt / self.reference_agent["total_simulation_time"]
+				avgVelNN = math.exp(self.reference_agent["total_average_speed"] / averageVelocity)
+				avgWalNN = averageWalked / self.reference_agent["total_average_distance_walked"]
 			else:
 				simTimeNN = self.simulationTime
 				avgTimeNN = avt
 				avgVelNN = averageVelocity
 				avgWalNN = averageWalked
-			#end normalizations
+		else:
+			simTimeNN = self.simulationTime
+			avgTimeNN = avt
+			avgVelNN = averageVelocity
+			avgWalNN = averageWalked
+		#end normalizations
 
-			#Cassol metric (harmonic mean)
-			#extra: average distance walked
-			cassol = 5 / ((1 / simTimeNN) + (1 / avgTimeNN) + (1 / averageDensity) + (1 / avgVelNN) + + (1 / avgWalNN))
-			print ("Cassol: " + str(cassol))
-			hm = ["cassol", cassol]
-			writeResult.append(hm)
-			#end Cassol metric (harmonic mean)
+		#Cassol metric (harmonic mean)
+		#extra: average distance walked
+		cassol = 5 / ((1 / simTimeNN) + (1 / avgTimeNN) + (1 / averageDensity) + (1 / avgVelNN) + + (1 / avgWalNN))
+		print ("Cassol: " + str(cassol))
+		hm = ["cassol", cassol]
+		writeResult.append(hm)
+		#end Cassol metric (harmonic mean)
 
-			#just to test stuff
-			#if self.refSimulation:
-			#	m = open(self.outputDir + "/metricsRef_" + self.ip.replace(":", "_") + ".txt", "w")
-			#else:
-			#	m = open(self.outputDir + "/metrics_" + self.ip.replace(":", "_") + ".txt", "w")
-			#m.write(str(writeResult))
-			#m.close()
+		#just to test stuff
+		#if self.refSimulation:
+		#	m = open(self.outputDir + "/metricsRef_" + self.ip.replace(":", "_") + ".txt", "w")
+		#else:
+		#	m = open(self.outputDir + "/metrics_" + self.ip.replace(":", "_") + ".txt", "w")
+		#m.write(str(writeResult))
+		#m.close()
 
-			#clear Database, just to be sure
+		#clear Database, just to be sure
+		if self.run_on_server:
 			self.ClearDatabase()
-
 			self.conn.close()
 
-			# plt.close()
+		# plt.close()
 
-			# resultFile.csv
-			if os.path.isfile(self.outputDir + "/resultFile_" + self.ip.replace(":", "_") + ".csv"):
-				os.remove(self.outputDir + "/resultFile_" + self.ip.replace(":", "_") + ".csv")
+		# resultFile.csv
+		if os.path.isfile(self.outputDir + "/resultFile_" + self.ip.replace(":", "_") + ".csv"):
+			os.remove(self.outputDir + "/resultFile_" + self.ip.replace(":", "_") + ".csv")
 
-			# heatmap.png
-			if os.path.isfile(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png"):
-				os.remove(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png")
+		# heatmap.png
+		if os.path.isfile(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png"):
+			os.remove(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png")
 
-			# markers.csv
-			if os.path.isfile(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv"):
-				os.remove(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv")
+		# markers.csv
+		if os.path.isfile(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv"):
+			os.remove(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv")
 
-			# resultCellFile.txt
-			if os.path.isfile(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt"):
-				os.remove(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt")
+		# resultCellFile.txt
+		if os.path.isfile(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt"):
+			os.remove(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt")
 
-			# trajectories.png
-			if os.path.isfile(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png"):
-				os.remove(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png")
+		# trajectories.png
+		if os.path.isfile(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png"):
+			os.remove(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png")
 
-			#gc.collect()
+		#gc.collect()
 
-			#return plt
-			return pd.DataFrame(writeResult)
+		#return plt
+		return pd.DataFrame(writeResult)
+
 
 	def ConnectDB(self):
 		self.conn = psycopg2.connect(host="localhost",

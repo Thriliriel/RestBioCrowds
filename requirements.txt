@@ -5,4 +5,4 @@ matplotlib
 psycopg2
 plotly
 kaleido
-math
+requests
