@@ -1,0 +1,148 @@
+{
+  "time_stamp": "10:41:15 PM:460",
+  "terrains": [
+    {
+      "transform": {
+        "position": [ 200, -0.05, 0 ],
+        "rotation": [ 0, 0, 0 ],
+        "localScale": [ 1, 1, 1 ]
+      },
+      "terrain_size": [ 30, 600, 30 ]
+    },
+    {
+      "transform": {
+        "position": [ 100, -0.05, 0 ],
+        "rotation": [ 0, 0, 0 ],
+        "localScale": [ 1, 1, 1 ]
+      },
+      "terrain_size": [ 30, 600, 30 ]
+    },
+    {
+      "transform": {
+        "position": [ 0, -0.05, 0 ],
+        "rotation": [ 0, 0, 0 ],
+        "localScale": [ 1, 1, 1 ]
+      },
+      "terrain_size": [ 30, 600, 30 ]
+    }
+  ],
+  "goals": [
+    { "position": [ -183.048782, 0.5, 17 ] },
+    { "position": [ -83.04878, 0.5, 17 ] },
+    { "position": [ 16.9512177, 0.5, 17 ] }
+  ],
+  "obstacles": [],
+  "spawnAreas": [
+    {
+      "transform": {
+        "position": [ 211.097565, 0.5, 17.0487823 ],
+        "rotation": [ 0, 0, 0 ],
+        "localScale": [ 2, 1, 2 ]
+      },
+      "agent_count": 10,
+      "remove_at_goal": "True",
+      "goal_list": [ 2 ],
+      "wait_list": [],
+      "cycle_lenght": 0,
+      "cycle_agent_count": 2,
+      "cycle_remove_at_goal": "True",
+      "cycle_goal_list": [ 2 ],
+      "cycle_wait_list": []
+    }
+  ],
+  "loaded_models": [],
+  "agents": [
+    {
+      "position": [ 10.2542267, 0, 17.6642 ],
+      "goal_list": [ 2 ],
+      "remove_goal_reach": "True",
+      "path_planning_goals": [
+        [ 10.2542267, -0.00843333453, 17.6642 ],
+        [ 16.9512177, -0.00843333453, 17 ]
+      ]
+    },
+    {
+      "position": [ 10.5632172, 0, 16.6957912 ],
+      "goal_list": [ 2 ],
+      "remove_goal_reach": "True",
+      "path_planning_goals": [
+        [ 10.5632172, -0.00843333453, 16.6957912 ],
+        [ 16.9512177, -0.00843333453, 17 ]
+      ]
+    },
+    {
+      "position": [ 10.7998047, 0, 17.11047 ],
+      "goal_list": [ 2 ],
+      "remove_goal_reach": "True",
+      "path_planning_goals": [
+        [ 10.7998047, -0.00843333453, 17.11047 ],
+        [ 16.9512177, -0.00843333453, 17 ]
+      ]
+    },
+    {
+      "position": [ 11.6595154, 0, 16.0910683 ],
+      "goal_list": [ 2 ],
+      "remove_goal_reach": "True",
+      "path_planning_goals": [
+        [ 11.6595154, -0.00843333453, 16.0910683 ],
+        [ 16.9512177, -0.00843333453, 17 ]
+      ]
+    },
+    {
+      "position": [ 11.0851288, 0, 16.4787788 ],
+      "goal_list": [ 2 ],
+      "remove_goal_reach": "True",
+      "path_planning_goals": [
+        [ 11.0851288, -0.00843333453, 16.4787788 ],
+        [ 16.9512177, -0.00843333453, 17 ]
+      ]
+    },
+    {
+      "position": [ 11.7268066, 0, 17.7393417 ],
+      "goal_list": [ 2 ],
+      "remove_goal_reach": "True",
+      "path_planning_goals": [
+        [ 11.7268066, -0.00843333453, 17.7393417 ],
+        [ 16.9512177, -0.00843333453, 17 ]
+      ]
+    },
+    {
+      "position": [ 10.6641541, 0, 16.39916 ],
+      "goal_list": [ 2 ],
+      "remove_goal_reach": "True",
+      "path_planning_goals": [
+        [ 10.6641541, -0.00843333453, 16.39916 ],
+        [ 16.9512177, -0.00843333453, 17 ]
+      ]
+    },
+    {
+      "position": [ 11.7852631, 0, 16.7149963 ],
+      "goal_list": [ 2 ],
+      "remove_goal_reach": "True",
+      "path_planning_goals": [
+        [ 11.7852631, -0.00843333453, 16.7149963 ],
+        [ 16.9512177, -0.00843333453, 17 ]
+      ]
+    },
+    {
+      "position": [ 10.9850616, 0, 17.89198 ],
+      "goal_list": [ 2 ],
+      "remove_goal_reach": "True",
+      "path_planning_goals": [
+        [ 10.9850616, -0.00843333453, 17.89198 ],
+        [ 16.9512177, -0.00843333453, 17 ]
+      ]
+    },
+    {
+      "position": [ 11.4530334, 0, 17.0356712 ],
+      "goal_list": [ 2 ],
+      "remove_goal_reach": "True",
+      "path_planning_goals": [
+        [ 11.4530334, -0.00843333453, 17.0356712 ],
+        [ 16.9512177, -0.00843333453, 17 ]
+      ]
+    }
+  ],
+  "auxins": [],
+  "reference_simulation": "True"
+}

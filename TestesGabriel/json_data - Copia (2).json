@@ -1,0 +1,103 @@
+{
+  "time_stamp": "10:41:15 PM:459",
+  "terrains": [
+    {
+      "transform": {
+        "position": [ 200, -0.05, 0 ],
+        "rotation": [ 0, 0, 0 ],
+        "localScale": [ 1, 1, 1 ]
+      },
+      "terrain_size": [ 30, 600, 30 ]
+    },
+    {
+      "transform": {
+        "position": [ 100, -0.05, 0 ],
+        "rotation": [ 0, 0, 0 ],
+        "localScale": [ 1, 1, 1 ]
+      },
+      "terrain_size": [ 30, 600, 30 ]
+    },
+    {
+      "transform": {
+        "position": [ 0, -0.05, 0 ],
+        "rotation": [ 0, 0, 0 ],
+        "localScale": [ 1, 1, 1 ]
+      },
+      "terrain_size": [ 30, 600, 30 ]
+    }
+  ],
+  "goals": [
+    { "position": [ -83.04878, 0.5, 17 ] },
+    { "position": [ 16.9512177, 0.5, 17 ] },
+    { "position": [ 116.951218, 0.5, 17 ] }
+  ],
+  "obstacles": [],
+  "spawnAreas": [
+    {
+      "transform": {
+        "position": [ 111.097565, 0.5, 17.0487823 ],
+        "rotation": [ 0, 0, 0 ],
+        "localScale": [ 2, 1, 2 ]
+      },
+      "agent_count": 5,
+      "remove_at_goal": "True",
+      "goal_list": [ 1 ],
+      "wait_list": [],
+      "cycle_lenght": 0,
+      "cycle_agent_count": 2,
+      "cycle_remove_at_goal": "True",
+      "cycle_goal_list": [ 1 ],
+      "cycle_wait_list": []
+    }
+  ],
+  "loaded_models": [],
+  "agents": [
+    {
+      "position": [ 11.7023392, 0, 16.1868229 ],
+      "goal_list": [ 1 ],
+      "remove_goal_reach": "True",
+      "path_planning_goals": [
+        [ 11.7023392, -0.00843333453, 16.1868229 ],
+        [ 16.9512177, -0.00843333453, 17 ]
+      ]
+    },
+    {
+      "position": [ 11.8837891, 0, 17.0367355 ],
+      "goal_list": [ 1 ],
+      "remove_goal_reach": "True",
+      "path_planning_goals": [
+        [ 11.8837891, -0.00843333453, 17.0367355 ],
+        [ 16.9512177, -0.00843333453, 17 ]
+      ]
+    },
+    {
+      "position": [ 10.3379211, 0, 16.8511772 ],
+      "goal_list": [ 1 ],
+      "remove_goal_reach": "True",
+      "path_planning_goals": [
+        [ 10.3379211, -0.00843333453, 16.8511772 ],
+        [ 16.9512177, -0.00843333453, 17 ]
+      ]
+    },
+    {
+      "position": [ 11.85701, 0, 16.2550964 ],
+      "goal_list": [ 1 ],
+      "remove_goal_reach": "True",
+      "path_planning_goals": [
+        [ 11.85701, -0.00843333453, 16.2550964 ],
+        [ 16.9512177, -0.00843333453, 17 ]
+      ]
+    },
+    {
+      "position": [ 11.7831116, 0, 16.38738 ],
+      "goal_list": [ 1 ],
+      "remove_goal_reach": "True",
+      "path_planning_goals": [
+        [ 11.7831116, -0.00843333453, 16.38738 ],
+        [ 16.9512177, -0.00843333453, 17 ]
+      ]
+    }
+  ],
+  "auxins": [],
+  "reference_simulation": "False"
+}

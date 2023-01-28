@@ -1,0 +1,67 @@
+{
+  "time_stamp": "10:41:15 PM:458",
+  "terrains": [
+    {
+      "transform": {
+        "position": [ 200, -0.05, 0 ],
+        "rotation": [ 0, 0, 0 ],
+        "localScale": [ 1, 1, 1 ]
+      },
+      "terrain_size": [ 30, 600, 30 ]
+    },
+    {
+      "transform": {
+        "position": [ 100, -0.05, 0 ],
+        "rotation": [ 0, 0, 0 ],
+        "localScale": [ 1, 1, 1 ]
+      },
+      "terrain_size": [ 30, 600, 30 ]
+    },
+    {
+      "transform": {
+        "position": [ 0, -0.05, 0 ],
+        "rotation": [ 0, 0, 0 ],
+        "localScale": [ 1, 1, 1 ]
+      },
+      "terrain_size": [ 30, 600, 30 ]
+    }
+  ],
+  "goals": [
+    { "position": [ 16.9512215, 0.5, 17 ] },
+    { "position": [ 116.951218, 0.5, 17 ] },
+    { "position": [ 216.951218, 0.5, 17 ] }
+  ],
+  "obstacles": [],
+  "spawnAreas": [
+    {
+      "transform": {
+        "position": [ 11.0975609, 0.5, 17.0487823 ],
+        "rotation": [ 0, 0, 0 ],
+        "localScale": [ 2, 1, 2 ]
+      },
+      "agent_count": 1,
+      "remove_at_goal": "True",
+      "goal_list": [ 0 ],
+      "wait_list": [],
+      "cycle_lenght": 0,
+      "cycle_agent_count": 2,
+      "cycle_remove_at_goal": "True",
+      "cycle_goal_list": [ 0 ],
+      "cycle_wait_list": []
+    }
+  ],
+  "loaded_models": [],
+  "agents": [
+    {
+      "position": [ 11.4780979, 0, 16.7179737 ],
+      "goal_list": [ 0 ],
+      "remove_goal_reach": "True",
+      "path_planning_goals": [
+        [ 11.4780979, -0.008333333, 16.7179737 ],
+        [ 16.9512215, -0.008333333, 17 ]
+      ]
+    }
+  ],
+  "auxins": [],
+  "reference_simulation": "False"
+}

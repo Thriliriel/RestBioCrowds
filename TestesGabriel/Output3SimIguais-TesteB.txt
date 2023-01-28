@@ -1,0 +1,114 @@
+Parsing Config File
+------------Data---------------
+{'time_stamp': '11:00:56 PM:388', 'terrains': [{'transform': {'position': [200, -0.05, 0], 'rotation': [0, 0, 0], 'localScale': [1, 1, 1]}, 'terrain_size': [30, 600, 30]}, {'transform': {'position': [100, -0.05, 0], 'rotation': [0, 0, 0], 'localScale': [1, 1, 1]}, 'terrain_size': [30, 600, 30]}, {'transform': {'position': [0, -0.05, 0], 'rotation': [0, 0, 0], 'localScale': [1, 1, 1]}, 'terrain_size': [30, 600, 30]}], 'goals': [{'position': [16.9512215, 0.5, 17]}, {'position': [116.951218, 0.5, 17]}, {'position': [216.951218, 0.5, 17]}], 'obstacles': [], 'spawnAreas': [{'transform': {'position': [11.0975609, 0.5, 17.0487823], 'rotation': [0, 0, 0], 'localScale': [2, 1, 2]}, 'agent_count': 1, 'remove_at_goal': True, 'goal_list': [0], 'wait_list': [], 'cycle_lenght': 0, 'cycle_agent_count': 2, 'cycle_remove_at_goal': True, 'cycle_goal_list': [0], 'cycle_wait_list': []}], 'loaded_models': [], 'agents': [{'position': [11.743763, 0, 16.9369278], 'goal_list': [0], 'remove_goal_reach': True, 'path_planning_goals': [[11.743763, -0.008333333, 16.9369278], [16.9512215, -0.008333333, 17]]}], 'auxins': [], 'reference_simulation': False}
+Total Simulation Time: 4.48 "seconds. (224 frames)
+max comparison 223 223
+Cassol: 1.964981620441117
+Write Result
+[['simTime', 4.48], ['distanceWalked', {0: 4.976650167538134}], ['totalWalked', 4.976650167538134], ['velocities', {0: 1.1158408447394919}], ['averageVelocity', 1.1158408447394919], ['localDensities', {0: 1.0}], ['averageDensity', 1.0], ['averageTime', 4.46], ['cassol', 1.964981620441117]]
+                  0                                                  1
+0           heatmap  b'iVBORw0KGgoAAAANSUhEUgAAArwAAAH0CAYAAADfWf7f...
+1      trajectories  b'iVBORw0KGgoAAAANSUhEUgAAArwAAAH0CAYAAADfWf7f...
+2           simTime                                               4.48
+3    distanceWalked                             {0: 4.976650167538134}
+4       totalWalked                                            4.97665
+5        velocities                            {0: 1.1158408447394919}
+6   averageVelocity                                           1.115841
+7    localDensities                                           {0: 1.0}
+8    averageDensity                                                1.0
+9       averageTime                                               4.46
+10           cassol                                           1.964982
+127.0.0.1 - - [27/Jan/2023:20:01:22] "POST /runSim HTTP/1.1" 200 62732 "http://localhost:3000/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+127.0.0.1 - - [27/Jan/2023:20:01:22] "OPTIONS /runSim HTTP/1.1" 200 4 "http://localhost:3000/" "Mozilla/5.0 (Windows NT 10.0; Win64; 
+x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+Parsing Config File
+------------Data---------------
+{'time_stamp': '11:00:56 PM:389', 'terrains': [{'transform': {'position': [200, -0.05, 0], 'rotation': [0, 0, 0], 'localScale': [1, 1, 1]}, 'terrain_size': [30, 600, 30]}, {'transform': {'position': [100, -0.05, 0], 'rotation': [0, 0, 0], 'localScale': [1, 1, 1]}, 'terrain_size': [30, 600, 30]}, {'transform': {'position': [0, -0.05, 0], 'rotation': [0, 0, 0], 'localScale': [1, 1, 1]}, 'terrain_size': [30, 600, 30]}], 'goals': [{'position': [-83.04878, 0.5, 17]}, {'position': [16.9512177, 0.5, 17]}, {'position': [116.951218, 0.5, 17]}], 'obstacles': [], 'spawnAreas': [{'transform': {'position': [111.097565, 0.5, 17.0487823], 'rotation': [0, 0, 0], 'localScale': [2, 1, 2]}, 'agent_count': 5, 'remove_at_goal': True, 'goal_list': [1], 'wait_list': [], 'cycle_lenght': 0, 'cycle_agent_count': 
+2, 'cycle_remove_at_goal': True, 'cycle_goal_list': [1], 'cycle_wait_list': []}], 'loaded_models': [], 'agents': [{'position': [11.5421143, 0, 16.5312424], 'goal_list': [1], 'remove_goal_reach': True, 'path_planning_goals': [[11.5421143, -0.00843333453, 16.5312424], [16.9512177, -0.00843333453, 17]]}, {'position': [11.018692, 0, 17.7840233], 'goal_list': [1], 'remove_goal_reach': True, 'path_planning_goals': [[11.018692, -0.00843333453, 17.7840233], [16.9512177, -0.00843333453, 17]]}, {'position': [10.521759, 0, 17.6859913], 'goal_list': [1], 'remove_goal_reach': True, 'path_planning_goals': [[10.521759, -0.00843333453, 17.6859913], [16.9512177, -0.00843333453, 17]]}, {'position': [10.3561172, 0, 16.6756783], 'goal_list': [1], 'remove_goal_reach': True, 'path_planning_goals': [[10.3561172, -0.00843333453, 16.6756783], [16.9512177, -0.00843333453, 17]]}, {'position': [10.8567047, 0, 17.4982548], 'goal_list': [1], 'remove_goal_reach': True, 'path_planning_goals': [[10.8567047, -0.00843333453, 17.4982548], [16.9512177, -0.00843333453, 17]]}], 'auxins': [], 'reference_simulation': False}
+Parsing Config File
+------------Data---------------
+{'time_stamp': '11:00:56 PM:389', 'terrains': [{'transform': {'position': [200, -0.05, 0], 'rotation': [0, 0, 0], 'localScale': [1, 1, 1]}, 'terrain_size': [30, 600, 30]}, {'transform': {'position': [100, -0.05, 0], 'rotation': [0, 0, 0], 'localScale': [1, 1, 1]}, 'terrain_size': [30, 600, 30]}, {'transform': {'position': [0, -0.05, 0], 'rotation': [0, 0, 0], 'localScale': [1, 1, 1]}, 'terrain_size': [30, 600, 30]}], 'goals': [{'position': [-83.04878, 0.5, 17]}, {'position': [16.9512177, 0.5, 17]}, {'position': [116.951218, 0.5, 17]}], 'obstacles': [], 'spawnAreas': [{'transform': {'position': [111.097565, 0.5, 17.0487823], 'rotation': [0, 0, 0], 'localScale': [2, 1, 2]}, 'agent_count': 5, 'remove_at_goal': True, 'goal_list': [1], 'wait_list': [], 'cycle_lenght': 0, 'cycle_agent_count': 
+2, 'cycle_remove_at_goal': True, 'cycle_goal_list': [1], 'cycle_wait_list': []}], 'loaded_models': [], 'agents': [{'position': [11.5421143, 0, 16.5312424], 'goal_list': [1], 'remove_goal_reach': True, 'path_planning_goals': [[11.5421143, -0.00843333453, 16.5312424], [16.9512177, -0.00843333453, 17]]}, {'position': [11.018692, 0, 17.7840233], 'goal_list': [1], 'remove_goal_reach': True, 'path_planning_goals': [[11.018692, -0.00843333453, 17.7840233], [16.9512177, -0.00843333453, 17]]}, {'position': [10.521759, 0, 17.6859913], 'goal_list': [1], 'remove_goal_reach': True, 'path_planning_goals': [[10.521759, -0.00843333453, 17.6859913], [16.9512177, -0.00843333453, 17]]}, {'position': [10.3561172, 0, 16.6756783], 'goal_list': [1], 'remove_goal_reach': True, 'path_planning_goals': [[10.3561172, -0.00843333453, 16.6756783], [16.9512177, -0.00843333453, 17]]}, {'position': [10.8567047, 0, 17.4982548], 'goal_list': [1], 'remove_goal_reach': True, 'path_planning_goals': [[10.8567047, -0.00843333453, 17.4982548], [16.9512177, -0.00843333453, 17]]}], 'auxins': [], 'reference_simulation': True}
+Total Simulation Time: 5.66 "seconds. (283 frames)
+max comparison 282 282
+Cassol: 2.093269868017267
+Write Result
+[['simTime', 5.66], ['distanceWalked', {3: 6.417790179552641}], ['totalWalked', 6.417790179552641], ['velocities', {3: 1.1379060602043691}], ['averageVelocity', 1.1379060602043691], ['localDensities', {3: 1.0}], ['averageDensity', 1.0], ['averageTime', 5.64], ['cassol', 2.093269868017267]]
+                  0                        1
+0            noNeed                     None
+1            noNeed                     None
+2           simTime                     5.66
+3    distanceWalked   {3: 6.417790179552641}
+4       totalWalked                  6.41779
+5        velocities  {3: 1.1379060602043691}
+6   averageVelocity                 1.137906
+7    localDensities                 {3: 1.0}
+8    averageDensity                      1.0
+9       averageTime                     5.64
+10           cassol                  2.09327
+127.0.0.1 - - [27/Jan/2023:20:01:30] "POST /runSim HTTP/1.1" 200 438 "" "python-requests/2.28.2"
+Parsing Reference Agent
+Total Simulation Time: 7.76 "seconds. (388 frames)
+max comparison 387 387
+Cassol: 1.2613790559759317
+Write Result
+[['simTime', 7.76], ['distanceWalked', {0: 5.229533634133309, 1: 6.311490213520983, 2: 7.709195019873631, 3: 6.896953601880363, 4: 6.057950895740802}], ['totalWalked', 6.441024673029818], ['velocities', {0: 1.177822890570565, 1: 1.1151042780072409, 2: 0.9960200284074459, 3: 1.123282345583121, 4: 0.8805161185669771}], ['averageVelocity', 1.05854913222707], ['localDensities', {0: 1.0, 1: 1.03886925795053, 2: 1.020671834625323, 3: 1.0, 4: 1.0436046511627908}], ['averageDensity', 1.0206291487477288], ['averageTime', 6.172000000000001], ['cassol', 1.2613790559759317]]
+                  0                                                  1
+0           heatmap  b'iVBORw0KGgoAAAANSUhEUgAAArwAAAH0CAYAAADfWf7f...
+1      trajectories  b'iVBORw0KGgoAAAANSUhEUgAAArwAAAH0CAYAAADfWf7f...
+2           simTime                                               7.76
+3    distanceWalked  {0: 5.229533634133309, 1: 6.311490213520983, 2...
+4       totalWalked                                           6.441025
+5        velocities  {0: 1.177822890570565, 1: 1.1151042780072409, ...
+6   averageVelocity                                           1.058549
+7    localDensities  {0: 1.0, 1: 1.03886925795053, 2: 1.02067183462...
+8    averageDensity                                           1.020629
+9       averageTime                                              6.172
+10           cassol                                           1.261379
+127.0.0.1 - - [27/Jan/2023:20:01:40] "POST /runSim HTTP/1.1" 200 65565 "http://localhost:3000/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+127.0.0.1 - - [27/Jan/2023:20:01:40] "OPTIONS /runSim HTTP/1.1" 200 4 "http://localhost:3000/" "Mozilla/5.0 (Windows NT 10.0; Win64; 
+x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
+Parsing Config File
+------------Data---------------
+{'time_stamp': '11:00:56 PM:390', 'terrains': [{'transform': {'position': [200, -0.05, 0], 'rotation': [0, 0, 0], 'localScale': [1, 1, 1]}, 'terrain_size': [30, 600, 30]}, {'transform': {'position': [100, -0.05, 0], 'rotation': [0, 0, 0], 'localScale': [1, 1, 1]}, 'terrain_size': [30, 600, 30]}, {'transform': {'position': [0, -0.05, 0], 'rotation': [0, 0, 0], 'localScale': [1, 1, 1]}, 'terrain_size': [30, 600, 30]}], 'goals': [{'position': [-183.048782, 0.5, 17]}, {'position': [-83.04878, 0.5, 17]}, {'position': [16.9512177, 0.5, 17]}], 'obstacles': [], 'spawnAreas': [{'transform': {'position': [211.097565, 0.5, 17.0487823], 'rotation': [0, 0, 0], 'localScale': [2, 1, 2]}, 'agent_count': 10, 'remove_at_goal': True, 'goal_list': [2], 'wait_list': [], 'cycle_lenght': 0, 'cycle_agent_count': 2, 'cycle_remove_at_goal': True, 'cycle_goal_list': [2], 'cycle_wait_list': []}], 'loaded_models': [], 'agents': [{'position': [11.9257507, 0, 16.5197754], 'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[11.9257507, -0.00843333453, 16.5197754], [16.9512177, -0.00843333453, 17]]}, {'position': [11.2998352, 0, 17.4769783], 'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[11.2998352, -0.00843333453, 17.4769783], [16.9512177, -0.00843333453, 17]]}, {'position': [11.52005, 0, 17.98728], 
+'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[11.52005, -0.00843333453, 17.98728], [16.9512177, -0.00843333453, 17]]}, {'position': [11.6783752, 0, 16.3196926], 'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[11.6783752, -0.00843333453, 16.3196926], [16.9512177, -0.00843333453, 17]]}, {'position': [11.9618378, 0, 17.0993786], 'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[11.9618378, -0.00843333453, 17.0993786], [16.9512177, -0.00843333453, 17]]}, {'position': [11.0847626, 0, 17.7381725], 'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[11.0847626, -0.00843333453, 17.7381725], [16.9512177, -0.00843333453, 17]]}, {'position': [10.85614, 0, 17.3947353], 'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[10.85614, -0.00843333453, 17.3947353], [16.9512177, -0.00843333453, 17]]}, {'position': [12.0867767, 0, 17.7982121], 'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[12.0867767, -0.00843333453, 17.7982121], [16.9512177, -0.00843333453, 17]]}, {'position': [11.978714, 0, 17.00454], 'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[11.978714, -0.00843333453, 17.00454], [16.9512177, -0.00843333453, 17]]}, {'position': [10.7207031, 0, 17.7912922], 'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[10.7207031, -0.00843333453, 17.7912922], [16.9512177, -0.00843333453, 17]]}], 'auxins': [], 'reference_simulation': False}
+Parsing Config File
+------------Data---------------
+{'time_stamp': '11:00:56 PM:390', 'terrains': [{'transform': {'position': [200, -0.05, 0], 'rotation': [0, 0, 0], 'localScale': [1, 1, 1]}, 'terrain_size': [30, 600, 30]}, {'transform': {'position': [100, -0.05, 0], 'rotation': [0, 0, 0], 'localScale': [1, 1, 1]}, 'terrain_size': [30, 600, 30]}, {'transform': {'position': [0, -0.05, 0], 'rotation': [0, 0, 0], 'localScale': [1, 1, 1]}, 'terrain_size': [30, 600, 30]}], 'goals': [{'position': [-183.048782, 0.5, 17]}, {'position': [-83.04878, 0.5, 17]}, {'position': [16.9512177, 0.5, 17]}], 'obstacles': [], 'spawnAreas': [{'transform': {'position': [211.097565, 0.5, 17.0487823], 'rotation': [0, 0, 0], 'localScale': [2, 1, 2]}, 'agent_count': 10, 'remove_at_goal': True, 'goal_list': [2], 'wait_list': [], 'cycle_lenght': 0, 'cycle_agent_count': 2, 'cycle_remove_at_goal': True, 'cycle_goal_list': [2], 'cycle_wait_list': []}], 'loaded_models': [], 'agents': [{'position': [11.9257507, 0, 16.5197754], 'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[11.9257507, -0.00843333453, 16.5197754], [16.9512177, -0.00843333453, 17]]}, {'position': [11.2998352, 0, 17.4769783], 'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[11.2998352, -0.00843333453, 17.4769783], [16.9512177, -0.00843333453, 17]]}, {'position': [11.52005, 0, 17.98728], 
+'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[11.52005, -0.00843333453, 17.98728], [16.9512177, -0.00843333453, 17]]}, {'position': [11.6783752, 0, 16.3196926], 'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[11.6783752, -0.00843333453, 16.3196926], [16.9512177, -0.00843333453, 17]]}, {'position': [11.9618378, 0, 17.0993786], 'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[11.9618378, -0.00843333453, 17.0993786], [16.9512177, -0.00843333453, 17]]}, {'position': [11.0847626, 0, 17.7381725], 'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[11.0847626, -0.00843333453, 17.7381725], [16.9512177, -0.00843333453, 17]]}, {'position': [10.85614, 0, 17.3947353], 'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[10.85614, -0.00843333453, 17.3947353], [16.9512177, -0.00843333453, 17]]}, {'position': [12.0867767, 0, 17.7982121], 'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[12.0867767, -0.00843333453, 17.7982121], [16.9512177, -0.00843333453, 17]]}, {'position': [11.978714, 0, 17.00454], 'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[11.978714, -0.00843333453, 17.00454], [16.9512177, -0.00843333453, 17]]}, {'position': [10.7207031, 0, 17.7912922], 'goal_list': [2], 'remove_goal_reach': True, 'path_planning_goals': [[10.7207031, -0.00843333453, 17.7912922], [16.9512177, -0.00843333453, 17]]}], 'auxins': [], 'reference_simulation': True}
+Total Simulation Time: 4.46 "seconds. (223 frames)
+max comparison 222 222
+Cassol: 1.9634717311865757
+Write Result
+[['simTime', 4.46], ['distanceWalked', {7: 4.958665668920603}], ['totalWalked', 4.958665668920603], ['velocities', {7: 1.1168165920992348}], ['averageVelocity', 1.1168165920992348], ['localDensities', {7: 1.0}], ['averageDensity', 1.0], ['averageTime', 4.44], ['cassol', 1.9634717311865757]]
+                  0                        1
+0            noNeed                     None
+1            noNeed                     None
+2           simTime                     4.46
+3    distanceWalked   {7: 4.958665668920603}
+4       totalWalked                 4.958666
+5        velocities  {7: 1.1168165920992348}
+6   averageVelocity                 1.116817
+7    localDensities                 {7: 1.0}
+8    averageDensity                      1.0
+9       averageTime                     4.44
+10           cassol                 1.963472
+127.0.0.1 - - [27/Jan/2023:20:01:47] "POST /runSim HTTP/1.1" 200 439 "" "python-requests/2.28.2"
+Parsing Reference Agent
+Total Simulation Time: 11.18 "seconds. (559 frames)
+max comparison 558 558
+Cassol: 1.7157619879996941
+Write Result
+[['simTime', 11.18], ['distanceWalked', {0: 6.289158740146065, 1: 5.738959025648006, 2: 7.330339033092868, 3: 7.350555482804604, 4: 5.206702836649786, 5: 6.115605221388328, 6: 6.720451334056392, 7: 5.5960617854214085, 8: 4.746158010336594, 9: 7.866855922018723}], ['totalWalked', 6.296084739156278], ['velocities', {0: 0.9471624608653711, 1: 0.8015305901743025, 2: 0.7967759818579204, 3: 0.7067841810389043, 4: 0.8186639680266958, 5: 0.5479932994075563, 6: 0.7089083685713493, 7: 0.9234425388484172, 8: 1.1865395025841485, 9: 0.7257247160533877}], ['averageVelocity', 0.8163525607428053], ['localDensities', {0: 1.0813253012048192, 1: 1.164804469273743, 2: 1.0043478260869565, 3: 1.0269230769230768, 4: 1.1635220125786163, 5: 1.1057347670250897, 6: 1.0337552742616034, 7: 1.0, 8: 1.185, 9: 1.051660516605166}], ['averageDensity', 1.0817073243959072], ['averageTime', 8.13], ['cassol', 1.7157619879996941]]
+                  0                                                  1
+0           heatmap  b'iVBORw0KGgoAAAANSUhEUgAAArwAAAH0CAYAAADfWf7f...
+1      trajectories  b'iVBORw0KGgoAAAANSUhEUgAAArwAAAH0CAYAAADfWf7f...
+2           simTime                                              11.18
+3    distanceWalked  {0: 6.289158740146065, 1: 5.738959025648006, 2...
+4       totalWalked                                           6.296085
+5        velocities  {0: 0.9471624608653711, 1: 0.8015305901743025,...
+6   averageVelocity                                           0.816353
+7    localDensities  {0: 1.0813253012048192, 1: 1.164804469273743, ...
+8    averageDensity                                           1.081707
+9       averageTime                                               8.13
+10           cassol                                           1.715762
