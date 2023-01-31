@@ -21,6 +21,9 @@ class Vector3:
     def __repr__(self) -> str:
         return str([self.x, self.y, self.z])
 
+    def get_formatted_str(self, sep = ";"):
+        return str(self.x) + sep + str(self.y) + sep + str(self.z)
+
     @staticmethod
     def Zero():
         return Vector3(0.0,0.0,0.0)    
@@ -78,3 +81,5 @@ class Vector3:
         result.y = obj.y / nrm
         result.z = obj.z / nrm
         return (result)
+
+    

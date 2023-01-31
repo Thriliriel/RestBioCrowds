@@ -31,10 +31,11 @@ class BioCrowdsClass():
 	def run(self, data):
 		self.ip = ''
 		self.outputDir = os.path.abspath(os.path.dirname(__file__)) + "/OutputData/"
+		Path(self.outputDir).mkdir(parents=True, exist_ok=True)
 		writeResult = []
 		startTime = time.time()
 		self.reference_agent = {}
-		self.run_on_server = True
+		self.run_on_server = False
 
 		if self.run_on_server:
 			self.ConnectDB()
@@ -74,31 +75,6 @@ class BioCrowdsClass():
 		#cells
 		self.cells:list[CellClass] = []
 
-		#create the cells and markers
-		def CreateMap():
-			i = j = 0
-			while i < self.mapSize.x:
-				while j < self.mapSize.y:
-					self.cells.append(CellClass(str(i)+"-"+str(j), Vector3(i, j, 0), self.cellSize, self.PORC_QTD_Marcacoes, []))
-					j += self.cellSize
-				i += self.cellSize
-				j = 0
-
-		#create markers
-		def CreateMarkers():
-			for i in range(0, len(self.cells)):
-				self.cells[i].CreateMarkers(self.obstacles)
-				#print("Qnt created: ", len(self.cells[i].markers))
-
-		#save markers in file
-		def SaveMarkers():
-			# markerFile = open("markers.csv", "w")
-			markerFile = open(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv", "w")
-			for i in range(0, len(self.cells)):
-				for j in range(0, len(self.cells[i].markers)):
-					markerFile.write(self.cells[i].id + ";" + str(self.cells[i].markers[j].position.x) + ";" + str(self.cells[i].markers[j].position.y) + ";" + str(self.cells[i].markers[j].position.z) + "\n")
-			markerFile.close()
-
 		#add the reference simulation, if none
 		if "reference_simulation" not in data:
 			data["reference_simulation"] = False
@@ -117,7 +93,7 @@ class BioCrowdsClass():
 			self.mapSize, self.goals, self.agents, self.obstacles, self.ip = ParserJSON.ParseJsonContent(data)
 			#take the : out
 			self.ip = self.ip.replace(':', '')
-			CreateMap()
+			self.CreateMap()
 
 		#if this one is not a reference simulation, we need to simulate it with only one agent (unless it is only one), 
 		#to be able to normalize the metrics later
@@ -138,7 +114,7 @@ class BioCrowdsClass():
 				headers = {'Content-Type': 'application/json'}
 				response = requests.post('http://localhost:5000/runSim', json.dumps(data), headers=headers)
 
-			# print(response.text)
+			print(response.text)
 			jason = json.loads(json.loads(response.text))
 			jason = jason["1"]
 			self.reference_agent = BC_Util.ParseReferenceSimulation(jason)
@@ -162,8 +138,8 @@ class BioCrowdsClass():
 			self.agents.append(thisLittleFucker)
 
 		#print(self.cells[0].id)
-		CreateMarkers()
-		SaveMarkers()
+		self.CreateMarkers()
+		self.SaveMarkersToFile()
 
 		#for each goal, vinculate the cell
 		for _goal in self.goals:
@@ -722,6 +698,7 @@ class BioCrowdsClass():
 			os.remove(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png")
 
 		# markers.csv
+		print(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv")
 		if os.path.isfile(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv"):
 			os.remove(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv")
 
@@ -738,6 +715,27 @@ class BioCrowdsClass():
 		#return plt
 		return pd.DataFrame(writeResult)
 
+
+	def CreateMap(self):
+		i = j = 0
+		while i < self.mapSize.x:
+			while j < self.mapSize.y:
+				self.cells.append(CellClass(str(i)+"-"+str(j), Vector3(i, j, 0), self.cellSize, self.PORC_QTD_Marcacoes, []))
+				j += self.cellSize
+			i += self.cellSize
+			j = 0
+
+	def CreateMarkers(self):
+		for _cell in self.cells:
+			_cell.CreateMarkers(self.obstacles)
+
+	def SaveMarkersToFile(self):
+			_markerFile = open(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv", "w")
+			for _cell in self.cells:
+				for _marker in _cell.markers:
+					_line = _cell.id + ";" + _marker.position.get_formatted_str() + "\n"
+					_markerFile.write(_line)
+			_markerFile.close()
 
 	def ConnectDB(self):
 		self.conn = psycopg2.connect(host="localhost",
