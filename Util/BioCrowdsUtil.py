@@ -1,11 +1,13 @@
 from typing import TYPE_CHECKING
+from AgentClass import AgentClass
+from GoalClass import GoalClass
 from Vector3Class import Vector3
 
 
 if TYPE_CHECKING:
     from BioCrowds import BioCrowdsClass
 
-def ParseConfigFile(bio_crowds:'BioCrowdsClass', file_path:str):
+def parse_config_file(bio_crowds:'BioCrowdsClass', file_path:str):
     print("Parsing Config File")
     _lineCount = 1
     for line in open(file_path, "r"):
@@ -33,7 +35,7 @@ def ParseConfigFile(bio_crowds:'BioCrowdsClass', file_path:str):
 
         _lineCount += 1
 
-def ParseReferenceSimulation(reference_data)->dict:
+def parse_reference_simulation(reference_data)->dict:
     print("Parsing Reference Agent")
     ref_agent = {
         "response": reference_data,
@@ -49,4 +51,13 @@ def ParseReferenceSimulation(reference_data)->dict:
     }
     return ref_agent
 
-    
+def find_reference_agent(agents:list[AgentClass], goals:list[GoalClass])->AgentClass:
+    ref_agent = None
+    maxDist = 0
+    for ag in agents:
+        for gl in goals:
+            dst = Vector3.Distance(ag.position, gl.position)
+            if dst > maxDist:
+                maxDist = dst
+                ref_agent = ag
+    return ref_agent

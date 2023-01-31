@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from AgentClass import AgentClass
+from BioCrowdsDatabase import BioCrowdsDataBase
 from Vector3Class import Vector3
 from CellClass import CellClass
 from MarkerClass import MarkerClass
@@ -30,21 +31,16 @@ import math
 class BioCrowdsClass():
 	def run(self, data):
 		self.ip = ''
-		self.outputDir = os.path.abspath(os.path.dirname(__file__)) + "/OutputData/"
+		self.outputDir = os.path.abspath(os.path.dirname(__file__)) + "/OutputData"
 		Path(self.outputDir).mkdir(parents=True, exist_ok=True)
 		writeResult = []
 		startTime = time.time()
 		self.reference_agent = {}
 		self.run_on_server = False
+		self.database = BioCrowdsDataBase()
 
 		if self.run_on_server:
-			self.ConnectDB()
-
-		#from Json
-		#terrainSizeJson = data['terrains'][0]['terrain_size']
-		#goalsJson = data['goals']
-		#agentsJson = data
-		#obstaclesJson = data['obstacles']
+			self.database.ConnectDB()
 
 		#default values
 		#size of the scenario
@@ -61,7 +57,7 @@ class BioCrowdsClass():
 		self.refSimulation = False
 
 		#read the config file
-		BC_Util.ParseConfigFile(self, "Input/config.txt")
+		BC_Util.parse_config_file(self, "Input/config.txt")
 		
 		#goals
 		self.goals = []
@@ -93,7 +89,7 @@ class BioCrowdsClass():
 			self.mapSize, self.goals, self.agents, self.obstacles, self.ip = ParserJSON.ParseJsonContent(data)
 			#take the : out
 			self.ip = self.ip.replace(':', '')
-			self.CreateMap()
+			self.create_map()
 
 		#if this one is not a reference simulation, we need to simulate it with only one agent (unless it is only one), 
 		#to be able to normalize the metrics later
@@ -117,53 +113,29 @@ class BioCrowdsClass():
 			print(response.text)
 			jason = json.loads(json.loads(response.text))
 			jason = jason["1"]
-			self.reference_agent = BC_Util.ParseReferenceSimulation(jason)
+			self.reference_agent = BC_Util.parse_reference_simulation(jason)
 			#print("dist walked type:", type(self.reference_agent["total_average_distance_walked"]))
 			#print(self.reference_agent["agents_distance_walked"])
 			#print(self.reference_agent)
 		else:
 			#if it is a reference simulation, one agent only
 			#find the agent farther away from the goals
-			thisLittleFucker = None
-			maxDist = 0
-
-			for ag in self.agents:
-				for gl in self.goals:
-					dst = Vector3.Distance(ag.position, gl.position)
-					if dst > maxDist:
-						maxDist = dst
-						thisLittleFucker = ag
-
+			thisLittleFucker = BC_Util.find_reference_agent(self.agents, self.goals)
 			self.agents.clear()
 			self.agents.append(thisLittleFucker)
 
-		#print(self.cells[0].id)
-		self.CreateMarkers()
-		self.SaveMarkersToFile()
+		# Create and save Markers
+		self.create_markers()
+		self.save_markers_to_file()
 
 		#for each goal, vinculate the cell
-		for _goal in self.goals:
-			totalDistance = self.cellSize * 2
-			for _cell in self.cells:
-				distance = Vector3.Distance(_goal.position, _cell.position)
-
-				#if distance is lower than total, change
-				if distance < totalDistance:
-					totalDistance = distance
-					_goal.cell = _cell
+		self.vinculate_goals_to_cells()
 
 		#for each cell, find its neighbors
-		for _cell in self.cells: 
-			_cell.FindNeighbor(self.cells)
+		self.find_cell_neighbors()
 
 		#for each agent, find its initial cell
-		for _agent in self.agents:
-			minDis = 5
-			for _cell in self.cells:
-				dist = Vector3.Distance(_agent.position,_cell.position)
-				if dist < minDis:
-					minDis = dist
-					_agent.cell = _cell
+		self.find_agents_initial_cell()
 
 		#for each agent, calculate the path, if true (comes from Json, dont need to calculate)
 		#if self.pathPlanning:
@@ -372,7 +344,7 @@ class BioCrowdsClass():
 			writeResult.append(hm)
 		else:
 			writeResult.append(["noNeed"])
-		os.remove(self.outputDir + "heatmap_"+self.ip.replace(":", "_")+".png")
+		os.remove(self.outputDir + "/heatmap_"+self.ip.replace(":", "_")+".png")
 		#end heatmap
 
 		#trajectories
@@ -684,39 +656,20 @@ class BioCrowdsClass():
 
 		#clear Database, just to be sure
 		if self.run_on_server:
-			self.ClearDatabase()
-			self.conn.close()
+			self.database.ClearDatabase()
+			self.database.close_connection()
 
 		# plt.close()
 
 		# resultFile.csv
-		if os.path.isfile(self.outputDir + "/resultFile_" + self.ip.replace(":", "_") + ".csv"):
-			os.remove(self.outputDir + "/resultFile_" + self.ip.replace(":", "_") + ".csv")
-
-		# heatmap.png
-		if os.path.isfile(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png"):
-			os.remove(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png")
-
-		# markers.csv
-		print(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv")
-		if os.path.isfile(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv"):
-			os.remove(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv")
-
-		# resultCellFile.txt
-		if os.path.isfile(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt"):
-			os.remove(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt")
-
-		# trajectories.png
-		if os.path.isfile(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png"):
-			os.remove(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png")
-
+		self.remove_result_files()
 		#gc.collect()
 
 		#return plt
 		return pd.DataFrame(writeResult)
 
 
-	def CreateMap(self):
+	def create_map(self):
 		i = j = 0
 		while i < self.mapSize.x:
 			while j < self.mapSize.y:
@@ -725,59 +678,68 @@ class BioCrowdsClass():
 			i += self.cellSize
 			j = 0
 
-	def CreateMarkers(self):
+	def create_markers(self):
 		for _cell in self.cells:
 			_cell.CreateMarkers(self.obstacles)
 
-	def SaveMarkersToFile(self):
-			_markerFile = open(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv", "w")
+	def save_markers_to_file(self):
+		_markerFile = open(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv", "w")
+		for _cell in self.cells:
+			for _marker in _cell.markers:
+				_line = _cell.id + ";" + _marker.position.get_formatted_str() + "\n"
+				_markerFile.write(_line)
+		_markerFile.close()
+
+	#for each goal, vinculate the cell
+	def vinculate_goals_to_cells(self):
+		for _goal in self.goals:
+			totalDistance = self.cellSize * 2
 			for _cell in self.cells:
-				for _marker in _cell.markers:
-					_line = _cell.id + ";" + _marker.position.get_formatted_str() + "\n"
-					_markerFile.write(_line)
-			_markerFile.close()
+				distance = Vector3.Distance(_goal.position, _cell.position)
 
-	def ConnectDB(self):
-		self.conn = psycopg2.connect(host="localhost",
-								database="biocrowds",
-								user="postgres",
-								password="postgres")
+				#if distance is lower than total, change
+				if distance < totalDistance:
+					totalDistance = distance
+					_goal.cell = _cell
 
-	def ClearDatabase(self):
-		cursor = self.conn.cursor()
-		cursor.execute("delete from config where id = '" + self.ip + "'")
-		self.conn.commit()
-		cursor.close()
+	#for each cell, find its neighbors
+	def find_cell_neighbors(self):
+		for _cell in self.cells: 
+			_cell.FindNeighbor(self.cells)
 
-		cursor = self.conn.cursor()
-		cursor.execute("delete from agents where ip = '" + self.ip + "'")
-		self.conn.commit()
-		cursor.close()
+	#for each agent, find its initial cell
+	def find_agents_initial_cell(self):
+		for _agent in self.agents:
+			minDis = 5
+			for _cell in self.cells:
+				dist = Vector3.Distance(_agent.position,_cell.position)
+				if dist < minDis:
+					minDis = dist
+					_agent.cell = _cell	
 
-		cursor = self.conn.cursor()
-		cursor.execute("delete from goals where ip = '" + self.ip + "'")
-		self.conn.commit()
-		cursor.close()
+	def remove_result_files(self):
+		csv_str = self.ip.replace(":", "_") + ".csv"
+		png_str = self.ip.replace(":", "_") + ".png"
+		txt_str = self.ip.replace(":", "_") + ".txt"
 
-		cursor = self.conn.cursor()
-		cursor.execute("delete from obstacles where ip = '" + self.ip + "'")
-		self.conn.commit()
-		cursor.close()
+		if os.path.isfile(self.outputDir + "/resultFile_" + csv_str):
+			os.remove(self.outputDir + "/resultFile_" + csv_str)
 
-		cursor = self.conn.cursor()
-		cursor.execute("delete from obstacles_points where ip = '" + self.ip + "'")
-		self.conn.commit()
-		cursor.close()
+		# heatmap.png
+		if os.path.isfile(self.outputDir + "/heatmap_" + png_str):
+			os.remove(self.outputDir + "/heatmap_" + png_str)
 
-		cursor = self.conn.cursor()
-		cursor.execute("delete from cells where ip = '" + self.ip + "'")
-		self.conn.commit()
-		cursor.close()
+		# markers.csv
+		if os.path.isfile(self.outputDir + "/markers_" + csv_str):
+			os.remove(self.outputDir + "/markers_" + csv_str)
 
-		cursor = self.conn.cursor()
-		cursor.execute("delete from agents_paths where ip = '" + self.ip + "'")
-		self.conn.commit()
-		cursor.close()
+		# resultCellFile.txt
+		if os.path.isfile(self.outputDir + "/resultCellFile_" + txt_str):
+			os.remove(self.outputDir + "/resultCellFile_" + txt_str)
+
+		# trajectories.png
+		if os.path.isfile(self.outputDir + "/trajectories_" + png_str):
+			os.remove(self.outputDir + "/trajectories_" + png_str)
 
 	def LoadDatabase(self):
 		cursor = self.conn.cursor()
@@ -870,7 +832,7 @@ class BioCrowdsClass():
 					self.cells[len(self.cells)-1].AddPassedAgent(int(pa))
 
 		#it is loaded, we can clear now
-		self.ClearDatabase()
+		self.database.ClearDatabase()
 
 	def SaveDatabase(self):
 		cursor = self.conn.cursor()
