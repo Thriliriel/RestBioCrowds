@@ -7,9 +7,12 @@
 #cell = position
 #parent = parent node
 #changePath = should agent change path when enter in sight?
+from CellClass import CellClass
+
+
 class NodeClass:
 	def __init__(self):
 		self.f = self.g = self.h = 0
-		self.changePath = False
+		self.changePath = False 
 		self.cell = None
 		self.parent = None

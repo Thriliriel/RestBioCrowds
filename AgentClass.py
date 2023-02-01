@@ -1,36 +1,38 @@
 from os import path
+from CellClass import CellClass
+from GoalClass import GoalClass
 from Vector3Class import Vector3
 from MarkerClass import MarkerClass
 from PathPlanningClass import PathPlanningClass
 
 class AgentClass:
 	def __init__(self, id, goal, radius, maxSpeed, usePathPlanning, position = Vector3.Zero()):
-		self.goal = goal
+		self.goal:GoalClass = goal
 		self.goalPosition = self.goal.position
 		self.id = id
 		self.radius = radius
 		self.maxSpeed = maxSpeed
-		self.markers = []
+		self.markers:list[MarkerClass] = []
 		self.position = position
-		self.vetorDistRelacaoMarcacao = []
+		self.dist_to_markers:list[Vector3] = []
 		self.denominadorW = False
 		self.valorDenominadorW = 0
 		self.m = Vector3.Zero()
 		self.speedModule = 0
 		self.speed = Vector3.Zero()
-		self.cell = None
+		self.cell:CellClass = None # type: ignore		
 		self.usePathPlanning = usePathPlanning
-		self.lastDist = [] # to check if agent is stuck
+		self.last_dist = [] # to check if agent is stuck
 		self.tempPath = []
 		if self.usePathPlanning:
 			self.pathPlanning = PathPlanningClass(10000) #10000 = max iterations allowed to find a path
-			self.path = []
+			self.path:list[CellClass] = []
 
 	#clear agent´s informations
 	def ClearAgent(self):
 		#re-set inicial values
 		self.valorDenominadorW = 0
-		self.vetorDistRelacaoMarcacao = []
+		self.dist_to_markers = []
 		self.denominadorW = False
 		self.m = Vector3.Zero()
 		self.speed = Vector3.Zero()
@@ -74,7 +76,7 @@ class AgentClass:
 			self.valorDenominadorW = 0
 
 			#for each agent´s marker
-			for i in range(0, len(self.vetorDistRelacaoMarcacao)):
+			for i in range(0, len(self.dist_to_markers)):
 				#calculate F for this k index, and sum up
 				self.valorDenominadorW += self.CalculateF(i)
 			self.denominadorW = True
@@ -86,18 +88,18 @@ class AgentClass:
 	#calculate F (F is part of weight formula)
 	def CalculateF(self, indiceRelacao):
 		#distance between auxin´s distance and origin (dont know why origin...)
-		moduloY = Vector3.Distance(self.vetorDistRelacaoMarcacao[indiceRelacao], Vector3.Zero())
+		moduloY = Vector3.Distance(self.dist_to_markers[indiceRelacao], Vector3.Zero())
 		#distance between goal vector and origin (dont know why origin...)
 		#print(Vector3.Sub_vec(self.goal.position, self.position))
 		#print(Vector3.Zero())
 		#print(Vector3.Distance(Vector3.Sub_vec(self.goal.position, self.position), Vector3.Zero()))
 		#moduloX = Vector3.Distance(Vector3.Sub_vec(self.goal.position, self.position), Vector3.Zero())
 		moduloX = 1.0
-        
+		
 		if moduloY < 0.00001:
 			return 0
-		produtoEscalar = Vector3.Dot_vec(self.vetorDistRelacaoMarcacao[indiceRelacao],  Vector3.Nrm_vec(Vector3.Sub_vec(self.goalPosition, self.position)))
-        
+		produtoEscalar = Vector3.Dot_vec(self.dist_to_markers[indiceRelacao],  Vector3.Nrm_vec(Vector3.Sub_vec(self.goalPosition, self.position)))
+		
 		retorno = (1.0 / (1.0 + moduloY)) * (1.0 + ((produtoEscalar) / (moduloX * moduloY)))
 		return retorno
 
@@ -109,14 +111,14 @@ class AgentClass:
 	def CalculateMotionVector(self):
 		#for each agent´s marker
 		s = 0.0
-		for i in range(0, len(self.vetorDistRelacaoMarcacao)):
+		for i in range(0, len(self.dist_to_markers)):
 			valorW = self.CalculateWeight(i)
 			if self.valorDenominadorW < 0.0001:
 				valorW = 0
 			s += valorW
 
 			#sum the resulting vector * weight (Wk*Dk)
-			self.m = Vector3.Add_vec(self.m, Vector3.Mul_vec(self.vetorDistRelacaoMarcacao[i], self.maxSpeed, valorW))
+			self.m = Vector3.Add_vec(self.m, Vector3.Mul_vec(self.dist_to_markers[i], self.maxSpeed, valorW))
 
 		#print(self.m.x, self.m.y, self.m.z)
 		#print("weights", s)
@@ -185,7 +187,7 @@ class AgentClass:
 		#distance from agent to cell, to define agent new cell
 		distanceToCell = Vector3.Distance(self.position, self.cell.position)
 		cellToChange = self.cell
-        
+		
 		#iterate through neighbors of the agent cell
 		for i in range(0, len(self.cell.neighborCells)):
 			if i >= len(self.cell.neighborCells):

@@ -8,7 +8,8 @@ from ObstacleClass import ObstacleClass
 
 class ParserJSON:
 	#def ParseJsonContent(str_content:str):
-	def ParseJsonContent(content):
+	@classmethod
+	def ParseJsonContent(cls, content):
 		#save file
 		with open('json_data.json', 'w') as outfile:
 			json.dump(content, outfile)
@@ -17,7 +18,7 @@ class ParserJSON:
 		agents:list[AgentClass] = []
 		obstacles:list[ObstacleClass] = []
 
-		ip = content['time_stamp']
+		ip = str(content['time_stamp'])
 
 		#content = json.loads(str_content)
 
@@ -59,8 +60,3 @@ class ParserJSON:
 				obstacles[len(obstacles)-1].AddPoint(Vector3(float(_point[0]), float(_point[1]), float(_point[2])))
         
 		return (mapSize, goals, agents, obstacles, ip)
-
-	def ParseFile(file_path:str):
-		print("use a file: " + file_path)
-		file = open(file_path,'r', encoding='utf8')
-		return ParserJSON.ParseJsonContent(file.read())

@@ -1,5 +1,6 @@
 import math
 import random
+from ObstacleClass import ObstacleClass
 from Vector3Class import Vector3
 from MarkerClass import MarkerClass
 
@@ -10,7 +11,7 @@ INT_MAX = 1000
 class CellClass:
 	def __init__(self, id, position, cellRadius, density = 0.65, markers = []):
 		self.id = id
-		self.position = position
+		self.position:Vector3 = position
 		self.markers:list[MarkerClass] = markers
 		self.density = density
 		self.markerRadius = 0.1
@@ -20,7 +21,7 @@ class CellClass:
 		self.isWall = False
 		self.passedAgents = []
 
-	def DartThrow(self, obstacles):
+	def DartThrow(self, obstacles:list[ObstacleClass]):
 		#flag to break the loop if it is taking too long (maybe out of space)
 		flag = 0
 		#print("Qnt create: ", self.qntMarkers)

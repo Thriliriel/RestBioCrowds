@@ -9,6 +9,8 @@ from GoalClass import GoalClass
 from ObstacleClass import ObstacleClass
 from Parsing.ParserJSON import ParserJSON
 import Util.BioCrowdsUtil as BC_Util
+import Util.HeatmapGeneration as HM_Gen
+import Util.TrajectoriesGeneration as TJ_Gen
 import pandas as pd
 # import matplotlib.pyplot as plt
 # import matplotlib.patches as mpatches
@@ -22,7 +24,6 @@ import base64
 #import mysql.connector
 #from mysql.connector import Error
 import time
-import psycopg2
 import requests
 import json
 import math
@@ -30,31 +31,33 @@ import math
 
 class BioCrowdsClass():
 	def run(self, data):
-		self.ip = ''
-		self.outputDir = os.path.abspath(os.path.dirname(__file__)) + "/OutputData"
-		Path(self.outputDir).mkdir(parents=True, exist_ok=True)
-		writeResult = []
-		startTime = time.time()
+		self.ip:str = ""
+		self.output_dir = os.path.abspath(os.path.dirname(__file__)) + "/OutputData"
+		Path(self.output_dir).mkdir(parents=True, exist_ok=True)
+		write_result = []
+		start_time = time.time()
 		self.reference_agent = {}
 		self.run_on_server = False
 		self.database = BioCrowdsDataBase()
 
 		if self.run_on_server:
-			self.database.ConnectDB()
+			self.database.connect_to_database()
 
 		#default values
 		#size of the scenario
-		self.mapSize = Vector3.Zero
+		self.map_size = Vector3.Zero
 		#markers density
 		self.PORC_QTD_Marcacoes = 0.65
 		#FPS (default: 50FPS)
-		self.timeStep = 0.02
+		self.time_step:float = 0.02
 		#size of each square cell (Ex: 2 -> cell 2x2)
-		self.cellSize = 1
+		self.cell_size:float = 1
 		#using path planning?
-		self.pathPlanning = True
+		self.path_planning = True
 		#it is a reference simulation (for cassol metrics)?
-		self.refSimulation = False
+		self.ref_simulation = False
+		
+		self.simulation_time:float = 0
 
 		#read the config file
 		BC_Util.parse_config_file(self, "Input/config.txt")
@@ -74,19 +77,19 @@ class BioCrowdsClass():
 		#add the reference simulation, if none
 		if "reference_simulation" not in data:
 			data["reference_simulation"] = False
-
-		self.refSimulation = bool(data["reference_simulation"])
+		self.ref_simulation = bool(data["reference_simulation"])
 
 		#from json
 		#json or database?
 		if data['terrains'] == 'db':
-			self.ip = data['time_stamp']
+			self.ip = str(data['time_stamp'])
 			#take the : out
 			self.ip = self.ip.replace(':', '')
-			self.LoadDatabase()
+			#self.LoadDatabase()
+			self.database.load_database(self)
 		else:
-			self.simulationTime = 0
-			self.mapSize, self.goals, self.agents, self.obstacles, self.ip = ParserJSON.ParseJsonContent(data)
+			self.simulation_time = 0
+			self.map_size, self.goals, self.agents, self.obstacles, self.ip = ParserJSON.ParseJsonContent(data)
 			#take the : out
 			self.ip = self.ip.replace(':', '')
 			self.create_map()
@@ -94,7 +97,7 @@ class BioCrowdsClass():
 		#if this one is not a reference simulation, we need to simulate it with only one agent (unless it is only one), 
 		#to be able to normalize the metrics later
 		self.reference_agent = {}
-		if not self.refSimulation and len(self.agents) > 1:
+		if not self.ref_simulation and len(self.agents) > 1:
 			data["reference_simulation"] = True
 			headers = {'Content-Type': 'application/json'}
 			response = requests.post('http://localhost:5000/runSim', json.dumps(data), headers=headers) 
@@ -138,23 +141,13 @@ class BioCrowdsClass():
 		self.find_agents_initial_cell()
 
 		#for each agent, calculate the path, if true (comes from Json, dont need to calculate)
-		#if self.pathPlanning:
-		#	for i in range(0, len(self.agents)):
-		#		self.agents[i].FindPath()
-		if self.pathPlanning:
-			for a in self.agents:
-				a.FindPathJson(self.cells)
+		if self.path_planning:
+			self.find_agents_path_json()
 
 		#open file to write or keep writing
-		cSVPath = self.outputDir + "/resultFile_" + (self.ip.replace(":", "_")) + ".csv"
-		if data['terrains'] == 'db':
-			resultFile = open(cSVPath, "a")
-			# resultFile = open("resultFile.csv", "a")
-		else:
-			resultFile = open(cSVPath, "w")
-			# resultFile = open("resultFile.csv", "w")
+		result_file = BC_Util.open_result_file(self.output_dir, self.ip, data['terrains'])
 
-		simulationFrame = 0
+		simulation_frame:int = 0
 
 		#walking loop
 		timeout = False
@@ -193,277 +186,97 @@ class BioCrowdsClass():
 			#   7 - verify if the agent has reached the goal. If so, destroy it
 			#   */
 
-			agentsToKill = []
-			frame = 0
-			while frame < len(self.agents):
-				agentMarkers = self.agents[frame].markers
+			agents_to_kill = []
 
+			for _agent in self.agents:
 				#vector for each marker
-				for j in range(0, len(agentMarkers)):
+				for _ag_marker in _agent.markers:
 					#add the distance vector between it and the agent
-					#print (agents[i].position, agentMarkers[j].position)
-					self.agents[frame].vetorDistRelacaoMarcacao.append(Vector3.Sub_vec(agentMarkers[j].position, self.agents[frame].position))
+					#print (_agent.position, _ag_marker.position)
+					_agent.dist_to_markers.append(Vector3.Sub_vec(_ag_marker.position, _agent.position))
 
-				#print("total", len(agents[i].vetorDistRelacaoMarcacao))
+				#print("total", len(_agent.vetorDistRelacaoMarcacao))
 				#calculate the movement vector
-				self.agents[frame].CalculateMotionVector()
+				_agent.CalculateMotionVector()
 
-				#print(agents[i].m)
+				#print(_agent.m)
 				#calculate speed vector
-				self.agents[frame].CalculateSpeed()
+				_agent.CalculateSpeed()
 
 				#walk
-				self.agents[frame].Walk(self.timeStep)
+				_agent.Walk(self.time_step)
 
 				#write in file (agent id, X, Y, Z)
-				resultFile.write(str(self.agents[frame].id) + ";" + str(self.agents[frame].position.x) + ";" + str(self.agents[frame].position.y) + ";" + str(self.agents[frame].position.z) + "\n")
+				result_file.write(str(_agent.id) + ";" + _agent.position.get_formatted_str(";") + "\n")
 
 				#verify agent position, in relation to the goal. If arrived, bye
-				dist = Vector3.Distance(self.agents[frame].goal.position, self.agents[frame].position)
-				#print(agents[i].id, " -- Dist: ", dist, " -- Radius: ", agents[i].radius, " -- Agent: ", agents[i].position.x, agents[i].position.y)
-				#print(agents[i].speed.x, agents[i].speed.y)
-				if dist < self.agents[frame].radius / 4:
-					agentsToKill.append(frame)
+				dist = Vector3.Distance(_agent.goal.position, _agent.position)
+				#print(_agent.id, " -- Dist: ", dist, " -- Radius: ", _agent.radius, " -- Agent: ", _agent.position.x, _agent.position.y)
+				#print(_agent.speed.x, _agent.speed.y)
+				if dist < _agent.radius / 4:
+					agents_to_kill.append(_agent)
 
 				#update lastdist (max = 5)
-				if len(self.agents[frame].lastDist) == 5:
-					self.agents[frame].lastDist.pop(0)
+				if len(_agent.last_dist) == 5:
+					_agent.last_dist.pop(0)
 
-				self.agents[frame].lastDist.append(dist)
+				_agent.last_dist.append(dist)
 
 				#check them all
 				qntFound = 0
-				for ck in self.agents[frame].lastDist:
+				for ck in _agent.last_dist:
 					if ck == dist:
 						qntFound += 1
 
 				#if distances does not change, assume agent is stuck
 				if qntFound == 5:
-					agentsToKill.append(frame)
-
-				frame += 1
+					agents_to_kill.append(_agent)
 
 			#die!
-			if len(agentsToKill) > 0:
-				for frame in range(0, len(agentsToKill)):
-					self.agents.pop(agentsToKill[frame])
+			for _to_kill in agents_to_kill:
+				self.agents.remove(_to_kill)
 
 			#print("Simulation Frame:", simulationFrame, end='\r')
-			simulationFrame += 1
+			simulation_frame += 1
 
 			#check the total time. If higher than 30 seconds, save in Database and leaves
 			#timeout has problems with the extra simulation for the reference agent. 
 			#easiest way to solve: remove it, since LAD does not have this problem.
-			if time.time() - startTime > 30000:
+			if time.time() - start_time > 30000:
 				timeout = True
 				break
 
 		#close file
-		resultFile.close()
+		result_file.close()
 
-		self.simulationTime += (simulationFrame+1) * self.timeStep
+		self.simulation_time += (simulation_frame+1) * self.time_step
 
 		#if timeout, need to keep going later
 		if timeout:
-			self.SaveDatabase()
+			self.database.save_database(self)
 			return pd.DataFrame(["nope"])
 			
 		#otherwise, it is done
 		# Simulation Finished
-		print(f'Total Simulation Time: {self.simulationTime} "seconds. ({simulationFrame+1} frames)')
+		print(f'Total Simulation Time: {self.simulation_time} "seconds. ({simulation_frame+1} frames)')
 
 		#save the cells, for heatmap
-		#resultCellsFile = open("resultCellFile.txt", "w")
-		resultCellsFile = open(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt", "w")
-		thisX = 0
-		firstColumn = True
-		for _cell in self.cells:
-			if thisX != _cell.position.x:
-				thisX = _cell.position.x
-				resultCellsFile.write("\n")
-				firstColumn = True
-
-			if firstColumn:
-				resultCellsFile.write(str(len(_cell.passedAgents)))
-				firstColumn = False
-			else:
-				resultCellsFile.write("," + str(len(_cell.passedAgents)))
-
-
-		resultCellsFile.close()
-
+		BC_Util.save_cells_file(self.output_dir, self.ip, self.cells)
 		
-		#generate heatmap
-		dataFig = []
-		dataTemp = []
-	
-		#open file to read
-		# for line in open("resultCellFile.txt"):
-		for line in open(self.outputDir + "/resultCellFile_" + self.ip.replace(":", "_") + ".txt"):
-			stripLine = line.replace('\n', '')
-			strip = stripLine.split(',')
-			dataTemp = []
+		# ---------- Generate Results ----------
+		agent_positions_per_frame, x_data, y_data = BC_Util.parse_agent_position_by_frame(self.output_dir, self.ip)
 
-			for af in strip:
-				dataTemp.insert(0, float(af))
-
-			dataFig.append(dataTemp)
-
-		#datafig has all qnt of agents passed for each cell.
-		heatmap = np.array(dataFig)
-		heatmap = heatmap.transpose()
-
-		figHeatmap = px.imshow(heatmap, color_continuous_scale="Viridis", labels=dict(color="Densidade"))
-
-		# Plotly configs
-
-		figHeatmap.update_layout(
-			template = "simple_white",
-			#title = "Mapa de Densidades",
-			title = "Density Map",
-			title_x=0.5,
-			#legend_title = "Densidade"
-			legend_title = "Density"
-		)
-
-		figHeatmap.update_xaxes(range=[-0.5, self.mapSize.x - 0.5], visible = False)
-		figHeatmap.update_yaxes(range=[-0.5, self.mapSize.y - 0.5], visible = False)
-
-		figHeatmap.update_layout(xaxis=dict(tickmode='linear', tick0=0, dtick=1))
-		figHeatmap.update_layout(yaxis=dict(tickmode='linear', tick0=0, dtick=1))
-
-		figHeatmap.write_image(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png")
-
-		hm = []
-		# with open("heatmap.png", "rb") as img_file:
-		with open(self.outputDir + "/heatmap_" + self.ip.replace(":", "_") + ".png", "rb") as img_file:
-			hm = ["heatmap", base64.b64encode(img_file.read())]
-
-		#just need to generate the maps when it is not reference agent
-		if not self.refSimulation:
-			writeResult.append(hm)
+		#generate heatmap and trajectories
+		if self.ref_simulation:
+			write_result.append(["noNeed"])
+			write_result.append(["noNeed"])
 		else:
-			writeResult.append(["noNeed"])
-		os.remove(self.outputDir + "/heatmap_"+self.ip.replace(":", "_")+".png")
-		#end heatmap
-
-		#trajectories
-		# plt.close()
-		dataFig = []
-		# values on x-axis
-		x = []
-		# values on y-axis
-		y = []
-
-		#dictionary to calculate speeds, distances and densities later
-		agentPositionsByFrame = {}
-
-		#open file to read
-		#id, x, y, z
-		#for line in open("resultFile.csv"):
-		for line in open(self.outputDir + "/resultFile_" + self.ip.replace(":", "_") + ".csv"):
-			csv_row = line.split(';')
-
-			#parse
-			agentId = int(csv_row[0])
-			agentX = float(csv_row[1])
-			agentY = float(csv_row[2])
-			agentZ = float(csv_row[3])
-
-			#points for the trajectories
-			x.append(agentX)
-			y.append(agentY)
-
-			#agents positions by frame, for density, distance and velocities
-			#if not exists yet, create the list
-			if agentId not in agentPositionsByFrame:
-				agentPositionsByFrame[agentId] = []
-
-			agentPositionsByFrame[agentId].append(Vector3(agentX, agentY, agentZ))
-				
-		# Creating trajetories figure
-
-		figTrajectories = make_subplots(rows=1, cols=1)
-			
-		figTrajectories.add_scatter(x=x, 
-									y=y, 
-									mode='markers', 
-									#name='Trajetória', 
-									name='Trajectory', 
-									marker=dict(size=4), 
-									marker_color="rgb(0,0,255)")
-
-		# figTrajectories = px.scatter(x = x, y = y)
-
-		major_ticks = np.arange(0, self.mapSize.x + 1, self.cellSize)
-		# ax.set_xticks(major_ticks)
-		# ax.set_yticks(major_ticks)
-
-		figTrajectories.update_xaxes(range = [0, self.mapSize.x], showgrid=True, gridwidth=1, gridcolor='Gray')
-		figTrajectories.update_yaxes(range = [0, self.mapSize.y], showgrid=True, gridwidth=1, gridcolor='Gray')
-
-		figTrajectories.update_layout(xaxis = dict(tickmode = 'linear', tick0 = 0, dtick = 2))
-		figTrajectories.update_layout(yaxis = dict(tickmode = 'linear', tick0 = 0, dtick = 2))
-
-		figTrajectories.update_xaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
-		figTrajectories.update_yaxes(showline=True, linewidth=1, linecolor='black', mirror=True)
-			
-
-		#draw obstacles
-		for obs in range(0, len(self.obstacles)):
-			coord = []
-			for pnt in range(0, len(self.obstacles[obs].points)):
-				coord.append([self.obstacles[obs].points[pnt].x, self.obstacles[obs].points[pnt].y])
-			coord.append(coord[0]) #repeat the first point to create a 'closed loop'
-			xs, ys = zip(*coord) #create lists of x and y values
-			# plt.plot(xs,ys)
-			figTrajectories.add_trace(go.Scatter(x = xs, y = ys, mode="lines", showlegend=False))
-				
-
-		x = []
-		y = []
-
-		#goals
-		for _goal in self.goals:
-			x.append(_goal.position.x)
-			y.append(_goal.position.y)
-
-		# plt.plot(x, y, 'bo', markersize=10, label = "Objetivo")
-		figTrajectories.add_scatter(x = x, y = y, mode = 'markers', name = 'Objetivo', marker = dict( size = 12), marker_color="rgb(255,0,0)")
-			
-		figTrajectories.update_layout(
-			template="simple_white",
-			title="Trajetórias dos Agentes",
-			title_x=0.5,
-			legend = dict(
-				orientation="h",
-				yanchor="bottom",
-				y=1.02,
-				xanchor="right",
-				x=1
-			)
-		)
-
-		# plt.savefig("trajectories.png", dpi=75)
-		# plt.savefig(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png", dpi=75)
-		figTrajectories.write_image(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png")
-
-		hm = []
-		# with open("trajectories.png", "rb") as img_file:
-		with open(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png", "rb") as img_file:
-			hm = ["trajectories", base64.b64encode(img_file.read())]
-
-		#just need to generate the maps when it is not reference agent
-		if not self.refSimulation:
-			writeResult.append(hm)
-		else:
-			writeResult.append(["noNeed"])
-		os.remove(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png")
-		#end trajectories
+			write_result.append(HM_Gen.generate_heatmap(self))
+			write_result.append(TJ_Gen.generate_trajectories(self, x_data, y_data))
 
 		#sim time
-		hm = ["simTime", self.simulationTime]
-		writeResult.append(hm)
+		hm = ["simTime", self.simulation_time]
+		write_result.append(hm)
 
 		#densities, distances and velocities
 		#distances
@@ -472,12 +285,12 @@ class BioCrowdsClass():
 		totalWalked = 0
 
 		#for each agent
-		for ag in agentPositionsByFrame:
+		for ag in agent_positions_per_frame:
 			agentWalked = 0
 			lastPos = -1
 
 			#for each position of this agent
-			for pos in agentPositionsByFrame[ag]:
+			for pos in agent_positions_per_frame[ag]:
 				#qnt frames
 				if ag not in qntFrames:
 					qntFrames[ag] = 1
@@ -503,15 +316,15 @@ class BioCrowdsClass():
 		#average walked
 		averageWalked = totalWalked / (len(qntFrames))
 		hm = ["distanceWalked", distanceWalked]
-		writeResult.append(hm)
+		write_result.append(hm)
 		hm = ["totalWalked", averageWalked]
-		writeResult.append(hm)
+		write_result.append(hm)
 
 		#with the distance walked, as well as the qnt of frames of each agent (size of each), we can calculate mean speed
 		velocities = {}
 		sumVelocity = 0
 		for ag in distanceWalked:
-			vel = distanceWalked[ag] / (qntFrames[ag] * self.timeStep)
+			vel = distanceWalked[ag] / (qntFrames[ag] * self.time_step)
 			sumVelocity += vel
 			velocities[ag] = vel
 
@@ -520,9 +333,9 @@ class BioCrowdsClass():
 
 		#print(velocities)
 		hm = ["velocities", velocities]
-		writeResult.append(hm)
+		write_result.append(hm)
 		hm = ["averageVelocity", averageVelocity]
-		writeResult.append(hm)
+		write_result.append(hm)
 
 		#for densities, we calculate the local densities for each agent, each frame
 		localDensities = {}
@@ -540,21 +353,21 @@ class BioCrowdsClass():
 		for frame in range(maxframes):
 			localDensities[frame] = {}
 			#for each agent, we check local density
-			for ag in agentPositionsByFrame:
+			for ag in agent_positions_per_frame:
 				#maybe this agent is not present in the simulation on this frame, so check it
-				if frame >= len(agentPositionsByFrame[ag]):
+				if frame >= len(agent_positions_per_frame[ag]):
 					continue
 
 				localDensity = 1
-				for ag2 in agentPositionsByFrame:
+				for ag2 in agent_positions_per_frame:
 					#maybe this agent is not present in the simulation on this frame, so check it
-					if frame >= len(agentPositionsByFrame[ag2]):
+					if frame >= len(agent_positions_per_frame[ag2]):
 						continue
 
 					#if ag is equal ag2, it is the same agent
 					if ag != ag2:
 						#check distance
-						distDen = Vector3.Distance(agentPositionsByFrame[ag][frame], agentPositionsByFrame[ag2][frame])
+						distDen = Vector3.Distance(agent_positions_per_frame[ag][frame], agent_positions_per_frame[ag2][frame])
 						#if dist is lower or equal 1/pi (area of the circle, 1m²ish), update density
 						if distDen <= maxDistance:
 							localDensity += 1
@@ -605,34 +418,34 @@ class BioCrowdsClass():
 		averageDensity = sumDensity / len(qntFrames)
 
 		hm = ["localDensities", mld]
-		writeResult.append(hm)
+		write_result.append(hm)
 		hm = ["averageDensity", averageDensity]
-		writeResult.append(hm)
+		write_result.append(hm)
 		#end densities, distances and velocities
 
 		#average time
 		avt = sum(qntFrames.values())
 		avt /= len(qntFrames)
-		avt *= self.timeStep
+		avt *= self.time_step
 
 		hm = ["averageTime", avt]
-		writeResult.append(hm)
+		write_result.append(hm)
 		#end average time
 
 		#normalizations. ReferenceAgent had time on index 0 and speed on index 1
-		if not self.refSimulation:
+		if not self.ref_simulation:
 			if self.reference_agent:
-				simTimeNN = self.simulationTime / self.reference_agent["total_simulation_time"]
+				simTimeNN = self.simulation_time / self.reference_agent["total_simulation_time"]
 				avgTimeNN = avt / self.reference_agent["total_simulation_time"]
 				avgVelNN = math.exp(self.reference_agent["total_average_speed"] / averageVelocity)
 				avgWalNN = averageWalked / self.reference_agent["total_average_distance_walked"]
 			else:
-				simTimeNN = self.simulationTime
+				simTimeNN = self.simulation_time
 				avgTimeNN = avt
 				avgVelNN = averageVelocity
 				avgWalNN = averageWalked
 		else:
-			simTimeNN = self.simulationTime
+			simTimeNN = self.simulation_time
 			avgTimeNN = avt
 			avgVelNN = averageVelocity
 			avgWalNN = averageWalked
@@ -643,7 +456,7 @@ class BioCrowdsClass():
 		cassol = 5 / ((1 / simTimeNN) + (1 / avgTimeNN) + (1 / averageDensity) + (1 / avgVelNN) + + (1 / avgWalNN))
 		print ("Cassol: " + str(cassol))
 		hm = ["cassol", cassol]
-		writeResult.append(hm)
+		write_result.append(hm)
 		#end Cassol metric (harmonic mean)
 
 		#just to test stuff
@@ -656,8 +469,7 @@ class BioCrowdsClass():
 
 		#clear Database, just to be sure
 		if self.run_on_server:
-			self.database.ClearDatabase()
-			self.database.close_connection()
+			self.database.clear_database(self.ip, close_conn=True)
 
 		# plt.close()
 
@@ -666,16 +478,16 @@ class BioCrowdsClass():
 		#gc.collect()
 
 		#return plt
-		return pd.DataFrame(writeResult)
+		return pd.DataFrame(write_result)
 
 
 	def create_map(self):
 		i = j = 0
-		while i < self.mapSize.x:
-			while j < self.mapSize.y:
-				self.cells.append(CellClass(str(i)+"-"+str(j), Vector3(i, j, 0), self.cellSize, self.PORC_QTD_Marcacoes, []))
-				j += self.cellSize
-			i += self.cellSize
+		while i < self.map_size.x:
+			while j < self.map_size.y:
+				self.cells.append(CellClass(str(i)+"-"+str(j), Vector3(i, j, 0), self.cell_size, self.PORC_QTD_Marcacoes, []))
+				j += self.cell_size
+			i += self.cell_size
 			j = 0
 
 	def create_markers(self):
@@ -683,7 +495,7 @@ class BioCrowdsClass():
 			_cell.CreateMarkers(self.obstacles)
 
 	def save_markers_to_file(self):
-		_markerFile = open(self.outputDir + "/markers_" + self.ip.replace(":", "_") + ".csv", "w")
+		_markerFile = open(self.output_dir + "/markers_" + self.ip.replace(":", "_") + ".csv", "w")
 		for _cell in self.cells:
 			for _marker in _cell.markers:
 				_line = _cell.id + ";" + _marker.position.get_formatted_str() + "\n"
@@ -693,7 +505,7 @@ class BioCrowdsClass():
 	#for each goal, vinculate the cell
 	def vinculate_goals_to_cells(self):
 		for _goal in self.goals:
-			totalDistance = self.cellSize * 2
+			totalDistance = self.cell_size * 2
 			for _cell in self.cells:
 				distance = Vector3.Distance(_goal.position, _cell.position)
 
@@ -715,215 +527,35 @@ class BioCrowdsClass():
 				dist = Vector3.Distance(_agent.position,_cell.position)
 				if dist < minDis:
 					minDis = dist
-					_agent.cell = _cell	
+					_agent.cell = _cell
 
+	#calculate the path for each agent
+	def find_agents_path_json(self):
+		for _agents in self.agents:
+			_agents.FindPathJson(self.cells)
+		
+
+	#remove result files
 	def remove_result_files(self):
 		csv_str = self.ip.replace(":", "_") + ".csv"
 		png_str = self.ip.replace(":", "_") + ".png"
 		txt_str = self.ip.replace(":", "_") + ".txt"
 
-		if os.path.isfile(self.outputDir + "/resultFile_" + csv_str):
-			os.remove(self.outputDir + "/resultFile_" + csv_str)
+		if os.path.isfile(self.output_dir + "/resultFile_" + csv_str):
+			os.remove(self.output_dir + "/resultFile_" + csv_str)
 
 		# heatmap.png
-		if os.path.isfile(self.outputDir + "/heatmap_" + png_str):
-			os.remove(self.outputDir + "/heatmap_" + png_str)
+		if os.path.isfile(self.output_dir + "/heatmap_" + png_str):
+			os.remove(self.output_dir + "/heatmap_" + png_str)
 
 		# markers.csv
-		if os.path.isfile(self.outputDir + "/markers_" + csv_str):
-			os.remove(self.outputDir + "/markers_" + csv_str)
+		if os.path.isfile(self.output_dir + "/markers_" + csv_str):
+			os.remove(self.output_dir + "/markers_" + csv_str)
 
 		# resultCellFile.txt
-		if os.path.isfile(self.outputDir + "/resultCellFile_" + txt_str):
-			os.remove(self.outputDir + "/resultCellFile_" + txt_str)
+		if os.path.isfile(self.output_dir + "/resultCellFile_" + txt_str):
+			os.remove(self.output_dir + "/resultCellFile_" + txt_str)
 
 		# trajectories.png
-		if os.path.isfile(self.outputDir + "/trajectories_" + png_str):
-			os.remove(self.outputDir + "/trajectories_" + png_str)
-
-	def LoadDatabase(self):
-		cursor = self.conn.cursor()
-
-		#config
-		#print("SELECT * FROM config where id = '" + self.ip + "'")
-		cursor.execute("SELECT * FROM config where id = '" + self.ip + "'")
-		myresult = cursor.fetchall()
-		cursor.close()
-		#print(myresult)
-		self.mapSize = Vector3(float(myresult[0][1]), float(myresult[0][2]), float(myresult[0][3]))
-		self.PORC_QTD_Marcacoes = float(myresult[0][4])
-		self.timeStep = float(myresult[0][5])
-		self.cellSize = float(myresult[0][6])
-		if int(myresult[0][7]) == 0:
-			self.pathPlanning =  False
-		else:
-			self.pathPlanning =  True
-
-		self.simulationTime = float(myresult[0][8])
-
-		cursor = self.conn.cursor()
-
-		#goals
-		cursor.execute("SELECT id, x, y, z FROM goals where ip = '" + self.ip + "'")
-		myresult = cursor.fetchall()
-		cursor.close()
-
-		for res in myresult:
-			self.goals.append(GoalClass(int(res[0]), Vector3(float(res[1]), float(res[2]), float(res[3]))))
-
-		cursor = self.conn.cursor()
-
-		#obstacles
-		cursor.execute("SELECT id FROM obstacles where ip = '" + self.ip + "'")
-		myresultObs = cursor.fetchall()
-		cursor.close()
-
-		for res in myresultObs:
-			self.obstacles.append(ObstacleClass(int(res[0])))
-
-			cursor = self.conn.cursor()
-			#points
-			cursor.execute("SELECT x, y, z FROM obstacles_points where ip = '"+self.ip+"' and id_obstacle = "+str(res[0]))
-			myresult = cursor.fetchall()
-			cursor.close()
-
-			for pnt in myresult:
-				self.obstacles[len(self.obstacles)-1].AddPoint(Vector3(float(pnt[0]), float(pnt[1]), float(pnt[2])))
-
-		#agents
-		cursor = self.conn.cursor()
-		cursor.execute("SELECT id, x, y, z, goal, radius, maxspeed FROM agents where ip = '" + self.ip + "'")
-		myresultag = cursor.fetchall()
-		cursor.close()
-
-		for res in myresultag:
-			goalId = int(res[4])
-			thisGoal = self.goals[0]
-			for gl in self.goals:
-				if goalId == gl.id:
-					thisGoal = gl
-					break
-
-			self.agents.append(AgentClass(int(res[0]), thisGoal, float(res[5]), float(res[6]), self.pathPlanning, Vector3(float(res[1]), float(res[2]), float(res[3]))))
-
-			cursor = self.conn.cursor()
-			#paths
-			cursor.execute("SELECT x, y, z FROM agents_paths where ip = '"+self.ip+"' and id_agent = "+str(res[0]))
-			myresult = cursor.fetchall()
-			cursor.close()
-
-			for pnt in myresult:
-				self.agents[len(self.agents)-1].AddTempPath(Vector3(float(pnt[0]), float(pnt[1]), float(pnt[2])))
-
-		#cells
-		cursor = self.conn.cursor()
-		cursor.execute("SELECT name, x, y, z, radius, density, passedAgents FROM cells where ip = '" + self.ip + "' order by id asc")
-		myresult = cursor.fetchall()
-		cursor.close()
-
-		for res in myresult:
-			self.cells.append(CellClass(str(res[0]), Vector3(float(res[1]), float(res[2]), float(res[3])), float(res[4]), float(res[5]), []))
-
-			#passed agents
-			pas = str(res[6])
-			if pas != "":
-				passed = pas.split(',')
-				for pa in passed:
-					self.cells[len(self.cells)-1].AddPassedAgent(int(pa))
-
-		#it is loaded, we can clear now
-		self.database.ClearDatabase()
-
-	def SaveDatabase(self):
-		cursor = self.conn.cursor()
-
-		#config
-		sqlString = 'insert into config (id, mapx, mapy, mapz, markerdensity, timestep, cellsize, usepp, simtime) values(%s,%s,%s,%s,%s,%s,%s,%s,%s);'
-		records = (self.ip, self.mapSize.x, self.mapSize.y, self.mapSize.z, self.PORC_QTD_Marcacoes, self.timeStep, self.cellSize, int(self.pathPlanning == True), self.simulationTime)
-		cursor.execute(sqlString, records)
-		self.conn.commit()
-
-		cursor.close()
-		cursor = self.conn.cursor()
-
-		#goals
-		sqlString = 'insert into goals (ip, id, x, y, z) values (%s, %s, %s, %s, %s);'
-		records = []
-		for gl in self.goals:
-			rec = [self.ip, gl.id, gl.position.x, gl.position.y, gl.position.z]
-			records.append(rec)
-
-		#print(sqlString)
-		cursor.executemany(sqlString, records)
-		self.conn.commit()
-
-		cursor.close()
-		cursor = self.conn.cursor()
-
-		#obstacles
-		for ob in self.obstacles:
-			sqlString = 'insert into obstacles (ip, id) values (%s, %s);'
-			records = (self.ip, ob.id)
-			cursor.execute(sqlString, records)
-			self.conn.commit()
-			cursor.close()
-			cursor = self.conn.cursor()
-
-			#points
-			sqlString = 'insert into obstacles_points (ip, id_obstacle, x, y, z) values (%s, %s, %s, %s, %s);'
-			records = []
-			for po in ob.points:
-				rec = [self.ip, ob.id, po.x, po.y, po.z]
-				records.append(rec)
-
-			cursor.executemany(sqlString, records)
-			self.conn.commit()
-
-			cursor.close()
-			cursor = self.conn.cursor()
-
-		#agents
-		for ag in self.agents:
-			sqlString = 'insert into agents (ip, id, x, y, z, goal, radius, maxspeed) values (%s, %s, %s, %s, %s, %s, %s, %s);'
-			records = [self.ip, ag.id, ag.position.x, ag.position.y, ag.position.z, ag.goal.id, ag.radius, ag.maxSpeed]
-			cursor.execute(sqlString, records)
-			self.conn.commit()
-			cursor.close()
-			cursor = self.conn.cursor()
-
-			#paths
-			sqlString = 'insert into agents_paths (ip, id_agent, x, y, z) values (%s, %s, %s, %s, %s);'
-			records = []
-			for po in ag.path:
-				rec = [self.ip, ag.id, po.position.x, po.position.y, po.position.z]
-				records.append(rec)
-
-			cursor.executemany(sqlString, records)
-			self.conn.commit()
-
-			cursor.close()
-			cursor = self.conn.cursor()
-
-		#cells
-		sqlString = 'insert into cells (ip, id, name, x, y, z, radius, density, passedAgents) values (%s, %s, %s, %s, %s, %s, %s, %s, %s);'
-		records = []
-		idc = 0
-		for cl in self.cells:
-			#string for passed agents
-			passed = ""
-			for pa in cl.passedAgents:
-				if passed == "":
-					passed += str(pa)
-				else:
-					passed += "," + str(pa)
-
-			#print(cl.id)
-			rec = [self.ip, idc, cl.id, cl.position.x, cl.position.y, cl.position.z, cl.cellRadius, cl.density, passed]
-			records.append(rec)
-			idc += 1
-
-		#print(sqlString)
-		cursor.executemany(sqlString, records)
-		self.conn.commit()
-
-		cursor.close()
+		if os.path.isfile(self.output_dir + "/trajectories_" + png_str):
+			os.remove(self.output_dir + "/trajectories_" + png_str)
