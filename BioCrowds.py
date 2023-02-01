@@ -8,9 +8,10 @@ from MarkerClass import MarkerClass
 from GoalClass import GoalClass
 from ObstacleClass import ObstacleClass
 from Parsing.ParserJSON import ParserJSON
-import Util.BioCrowdsUtil as BC_Util
+import Util.DataParsing as Parsing_Util
 import Util.HeatmapGeneration as HM_Gen
 import Util.TrajectoriesGeneration as TJ_Gen
+import Util.SimulationMetrics as Metrics_Util
 import pandas as pd
 # import matplotlib.pyplot as plt
 # import matplotlib.patches as mpatches
@@ -60,7 +61,7 @@ class BioCrowdsClass():
 		self.simulation_time:float = 0
 
 		#read the config file
-		BC_Util.parse_config_file(self, "Input/config.txt")
+		Parsing_Util.parse_config_file(self, "Input/config.txt")
 		
 		#goals
 		self.goals = []
@@ -116,16 +117,14 @@ class BioCrowdsClass():
 			print(response.text)
 			jason = json.loads(json.loads(response.text))
 			jason = jason["1"]
-			self.reference_agent = BC_Util.parse_reference_simulation(jason)
+			self.reference_agent = Parsing_Util.parse_reference_simulation_data(jason)
 			#print("dist walked type:", type(self.reference_agent["total_average_distance_walked"]))
 			#print(self.reference_agent["agents_distance_walked"])
 			#print(self.reference_agent)
 		else:
 			#if it is a reference simulation, one agent only
 			#find the agent farther away from the goals
-			thisLittleFucker = BC_Util.find_reference_agent(self.agents, self.goals)
-			self.agents.clear()
-			self.agents.append(thisLittleFucker)
+			self.select_reference_agent()
 
 		# Create and save Markers
 		self.create_markers()
@@ -145,7 +144,7 @@ class BioCrowdsClass():
 			self.find_agents_path_json()
 
 		#open file to write or keep writing
-		result_file = BC_Util.open_result_file(self.output_dir, self.ip, data['terrains'])
+		result_file = Parsing_Util.open_result_file(self.output_dir, self.ip, data['terrains'])
 
 		simulation_frame:int = 0
 
@@ -261,10 +260,57 @@ class BioCrowdsClass():
 		print(f'Total Simulation Time: {self.simulation_time} "seconds. ({simulation_frame+1} frames)')
 
 		#save the cells, for heatmap
-		BC_Util.save_cells_file(self.output_dir, self.ip, self.cells)
+		Parsing_Util.save_cells_file(self.output_dir, self.ip, self.cells)
+		
 		
 		# ---------- Generate Results ----------
-		agent_positions_per_frame, x_data, y_data = BC_Util.parse_agent_position_by_frame(self.output_dir, self.ip)
+		agent_positions_per_frame, x_data, y_data = Parsing_Util.parse_agent_position_per_frame(
+				self.output_dir, self.ip)
+		
+		#calculate densities, distances and velocities
+		#distances
+		total_dist_walked, agent_dist_walked = Metrics_Util.walked_distances(agent_positions_per_frame)
+
+		# how many frames each agent was in the simulation
+		agent_frame_count = { ag: len(pos_list) for ag, pos_list in agent_positions_per_frame.items()}
+		
+		#average walked
+		average_dist_walked = total_dist_walked / (len(agent_frame_count))
+		
+		#with the distance walked, as well as the qnt of frames of each agent (size of each), we can calculate mean speed
+		total_agent_speed, agent_speeds = Metrics_Util.average_agent_speed(self.time_step,
+				agent_frame_count, agent_dist_walked)
+
+		#average speed
+		average_speed = total_agent_speed / (len(agent_frame_count))
+
+		#for densities, we calculate the local densities for each agent, each frame
+		local_density_per_frame = Metrics_Util.agent_local_density_per_frame(agent_frame_count, agent_positions_per_frame)
+
+		#calculate mean values
+		total_density_sum, agent_average_local_density = Metrics_Util.agent_average_local_densities(
+				local_density_per_frame, agent_frame_count)
+
+		#average density
+		average_density = total_density_sum / len(agent_frame_count)
+		#end densities, distances and velocities
+
+		#average simulation time
+		average_simulation_time = (sum(agent_frame_count.values()) * self.time_step)/len(agent_frame_count)
+
+
+		#normalizations
+		if not self.ref_simulation and self.reference_agent:
+			sim_time_nn = self.simulation_time / self.reference_agent["total_simulation_time"]
+			avg_time_NN = average_simulation_time / self.reference_agent["total_simulation_time"]
+			avg_spd_nn = math.exp(self.reference_agent["total_average_speed"] / average_speed)
+			avg_walk_nn = average_dist_walked / self.reference_agent["total_average_distance_walked"]
+		else:
+			sim_time_nn = self.simulation_time
+			avg_time_NN = average_simulation_time
+			avg_spd_nn = average_speed
+			avg_walk_nn = average_dist_walked
+		#end normalizations
 
 		#generate heatmap and trajectories
 		if self.ref_simulation:
@@ -274,212 +320,30 @@ class BioCrowdsClass():
 			write_result.append(HM_Gen.generate_heatmap(self))
 			write_result.append(TJ_Gen.generate_trajectories(self, x_data, y_data))
 
-		#sim time
-		hm = ["simTime", self.simulation_time]
-		write_result.append(hm)
-
-		#densities, distances and velocities
-		#distances
-		distanceWalked = {}
-		qntFrames = {}
-		totalWalked = 0
-
-		#for each agent
-		for ag in agent_positions_per_frame:
-			agentWalked = 0
-			lastPos = -1
-
-			#for each position of this agent
-			for pos in agent_positions_per_frame[ag]:
-				#qnt frames
-				if ag not in qntFrames:
-					qntFrames[ag] = 1
-				else:
-					qntFrames[ag] += 1
-
-				#if no position yet, just continue (need two to calculate)
-				if lastPos == -1:
-					#update lastPos, so we can use later
-					lastPos = pos
-
-					continue
-				#else, calculate
-				else:
-					#distance
-					agentWalked += abs(Vector3.Distance(pos, lastPos))
-					lastPos = pos
-
-			#update the dict. 
-			totalWalked += agentWalked
-			distanceWalked[ag] = agentWalked
-
-		#average walked
-		averageWalked = totalWalked / (len(qntFrames))
-		hm = ["distanceWalked", distanceWalked]
-		write_result.append(hm)
-		hm = ["totalWalked", averageWalked]
-		write_result.append(hm)
-
-		#with the distance walked, as well as the qnt of frames of each agent (size of each), we can calculate mean speed
-		velocities = {}
-		sumVelocity = 0
-		for ag in distanceWalked:
-			vel = distanceWalked[ag] / (qntFrames[ag] * self.time_step)
-			sumVelocity += vel
-			velocities[ag] = vel
-
-		#average velocity
-		averageVelocity = sumVelocity / (len(qntFrames))
-
-		#print(velocities)
-		hm = ["velocities", velocities]
-		write_result.append(hm)
-		hm = ["averageVelocity", averageVelocity]
-		write_result.append(hm)
-
-		#for densities, we calculate the local densities for each agent, each frame
-		localDensities = {}
-
-		#get the maximum amount of frames
-		maxframes = 0
-		for fram in qntFrames:
-			if qntFrames[fram] > maxframes:
-				maxframes = qntFrames[fram]
-		print("max comparison", maxframes, max(qntFrames.values()))
-
-		#for each frame	
-		#if dist is lower or equal sqrt(1/pi) (area of the circle, 1m²ish), update density
-		maxDistance = math.sqrt(1 / math.pi)
-		for frame in range(maxframes):
-			localDensities[frame] = {}
-			#for each agent, we check local density
-			for ag in agent_positions_per_frame:
-				#maybe this agent is not present in the simulation on this frame, so check it
-				if frame >= len(agent_positions_per_frame[ag]):
-					continue
-
-				localDensity = 1
-				for ag2 in agent_positions_per_frame:
-					#maybe this agent is not present in the simulation on this frame, so check it
-					if frame >= len(agent_positions_per_frame[ag2]):
-						continue
-
-					#if ag is equal ag2, it is the same agent
-					if ag != ag2:
-						#check distance
-						distDen = Vector3.Distance(agent_positions_per_frame[ag][frame], agent_positions_per_frame[ag2][frame])
-						#if dist is lower or equal 1/pi (area of the circle, 1m²ish), update density
-						if distDen <= maxDistance:
-							localDensity += 1
-
-				#update local densities
-				localDensities[frame][ag] = localDensity
-		#if not self.refSimulation:
-		#	m = open(self.outputDir + "/localdensities_" + self.ip.replace(":", "_") + ".txt", "w")
-		#	for ld in localDensities:
-		#		m.write(str(localDensities[ld]) + "\n")
-		#	m.close()
-
-		#print(localDensities)
-		#calculate mean values
-		meanLocalDensities = {}
-		for ld in localDensities:
-			for ag in localDensities[ld]:
-				if ag not in meanLocalDensities:
-					meanLocalDensities[ag] = localDensities[ld][ag]
-				else:
-					meanLocalDensities[ag] += localDensities[ld][ag]
+		#write other results
+		write_result.append(["simTime", self.simulation_time])
+		write_result.append(["distanceWalked", agent_dist_walked])
+		write_result.append(["totalWalked", average_dist_walked])
+		write_result.append(["velocities", agent_speeds])
+		write_result.append(["averageVelocity", average_speed])
+		write_result.append(["localDensities", agent_average_local_density])
+		write_result.append(["averageDensity", average_density])
+		write_result.append(["averageTime", average_simulation_time])
 		
-		#if not self.refSimulation:
-		#	m = open(self.outputDir + "/localdensities_" + self.ip.replace(":", "_") + ".txt", "w")
-		#	m.write(str(meanLocalDensities))
-		#	m.close()
-
-		#if not self.refSimulation:
-		#	m = open(self.outputDir + "/qntframes_" + self.ip.replace(":", "_") + ".txt", "w")
-		#	m.write(str(qntFrames))
-		#	m.close()
-
-		mld = {}
-		sumDensity = 0
-		for ld in meanLocalDensities:
-			dnt = meanLocalDensities[ld] / qntFrames[ld]
-			sumDensity += dnt
-			mld[ld] = dnt
-			
-		#print(mld)
-
-		#if not self.refSimulation:
-		#	m = open(self.outputDir + "/meanlocaldensities_" + self.ip.replace(":", "_") + ".txt", "w")
-		#	m.write(str(mld))
-		#	m.close()
-
-		#average density
-		averageDensity = sumDensity / len(qntFrames)
-
-		hm = ["localDensities", mld]
-		write_result.append(hm)
-		hm = ["averageDensity", averageDensity]
-		write_result.append(hm)
-		#end densities, distances and velocities
-
-		#average time
-		avt = sum(qntFrames.values())
-		avt /= len(qntFrames)
-		avt *= self.time_step
-
-		hm = ["averageTime", avt]
-		write_result.append(hm)
-		#end average time
-
-		#normalizations. ReferenceAgent had time on index 0 and speed on index 1
-		if not self.ref_simulation:
-			if self.reference_agent:
-				simTimeNN = self.simulation_time / self.reference_agent["total_simulation_time"]
-				avgTimeNN = avt / self.reference_agent["total_simulation_time"]
-				avgVelNN = math.exp(self.reference_agent["total_average_speed"] / averageVelocity)
-				avgWalNN = averageWalked / self.reference_agent["total_average_distance_walked"]
-			else:
-				simTimeNN = self.simulation_time
-				avgTimeNN = avt
-				avgVelNN = averageVelocity
-				avgWalNN = averageWalked
-		else:
-			simTimeNN = self.simulation_time
-			avgTimeNN = avt
-			avgVelNN = averageVelocity
-			avgWalNN = averageWalked
-		#end normalizations
-
 		#Cassol metric (harmonic mean)
 		#extra: average distance walked
-		cassol = 5 / ((1 / simTimeNN) + (1 / avgTimeNN) + (1 / averageDensity) + (1 / avgVelNN) + + (1 / avgWalNN))
+		cassol = 5 / ((1 / sim_time_nn) + (1 / avg_time_NN) + (1 / average_density) + (1 / avg_spd_nn) + (1 / avg_walk_nn))
 		print ("Cassol: " + str(cassol))
-		hm = ["cassol", cassol]
-		write_result.append(hm)
-		#end Cassol metric (harmonic mean)
-
-		#just to test stuff
-		#if self.refSimulation:
-		#	m = open(self.outputDir + "/metricsRef_" + self.ip.replace(":", "_") + ".txt", "w")
-		#else:
-		#	m = open(self.outputDir + "/metrics_" + self.ip.replace(":", "_") + ".txt", "w")
-		#m.write(str(writeResult))
-		#m.close()
+		write_result.append(["cassol", cassol])
 
 		#clear Database, just to be sure
 		if self.run_on_server:
 			self.database.clear_database(self.ip, close_conn=True)
 
-		# plt.close()
-
-		# resultFile.csv
-		self.remove_result_files()
+		Parsing_Util.remove_result_files(self.output_dir, self.ip)
 		#gc.collect()
 
-		#return plt
 		return pd.DataFrame(write_result)
-
 
 	def create_map(self):
 		i = j = 0
@@ -534,28 +398,15 @@ class BioCrowdsClass():
 		for _agents in self.agents:
 			_agents.FindPathJson(self.cells)
 		
-
-	#remove result files
-	def remove_result_files(self):
-		csv_str = self.ip.replace(":", "_") + ".csv"
-		png_str = self.ip.replace(":", "_") + ".png"
-		txt_str = self.ip.replace(":", "_") + ".txt"
-
-		if os.path.isfile(self.output_dir + "/resultFile_" + csv_str):
-			os.remove(self.output_dir + "/resultFile_" + csv_str)
-
-		# heatmap.png
-		if os.path.isfile(self.output_dir + "/heatmap_" + png_str):
-			os.remove(self.output_dir + "/heatmap_" + png_str)
-
-		# markers.csv
-		if os.path.isfile(self.output_dir + "/markers_" + csv_str):
-			os.remove(self.output_dir + "/markers_" + csv_str)
-
-		# resultCellFile.txt
-		if os.path.isfile(self.output_dir + "/resultCellFile_" + txt_str):
-			os.remove(self.output_dir + "/resultCellFile_" + txt_str)
-
-		# trajectories.png
-		if os.path.isfile(self.output_dir + "/trajectories_" + png_str):
-			os.remove(self.output_dir + "/trajectories_" + png_str)
+	#select the agent with largest distance as a reference agent
+	def select_reference_agent(self):
+		ref_agent:AgentClass = self.agents[0]   
+		maxDist = 0
+		for ag in self.agents:
+			for gl in self.goals:
+				dst = Vector3.Distance(ag.position, gl.position)
+				if dst > maxDist:
+					maxDist = dst
+					ref_agent = ag
+		self.agents.clear()
+		self.agents.append(ref_agent)

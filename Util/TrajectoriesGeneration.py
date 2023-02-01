@@ -88,9 +88,3 @@ def generate_trajectories(bio_crowds:'BioCrowdsClass', x_data, y_data):
     os.remove(bio_crowds.output_dir + "/trajectories_" + bio_crowds.ip.replace(":", "_") + ".png")
 
     return tj
-    #just need to generate the maps when it is not reference agent
-    if not self.ref_simulation:
-        write_result.append(hm)
-    else:
-        write_result.append(["noNeed"])
-    #end trajectories

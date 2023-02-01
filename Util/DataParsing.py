@@ -1,3 +1,4 @@
+import os
 from typing import TYPE_CHECKING
 from AgentClass import AgentClass
 from CellClass import CellClass
@@ -36,7 +37,7 @@ def parse_config_file(bio_crowds:'BioCrowdsClass', file_path:str):
 
         _lineCount += 1
 
-def parse_reference_simulation(reference_data)->dict:
+def parse_reference_simulation_data(reference_data)->dict:
     print("Parsing Reference Agent")
     ref_agent = {
         "response": reference_data,
@@ -77,22 +78,9 @@ def save_cells_file(output_dir:str, ip:str, cells_data:list[CellClass]):
 
     resultCellsFile.close()
 
-
-
-def find_reference_agent(agents:list[AgentClass], goals:list[GoalClass])->AgentClass:
-    ref_agent:AgentClass = agents[0]   
-    maxDist = 0
-    for ag in agents:
-        for gl in goals:
-            dst = Vector3.Distance(ag.position, gl.position)
-            if dst > maxDist:
-                maxDist = dst
-                ref_agent = ag
-    return ref_agent
-
-def parse_agent_position_by_frame(output_dir:str, ip:str):
+def parse_agent_position_per_frame(output_dir:str, ip:str):
     #dictionary to calculate speeds, distances and densities later
-    agentPositionsByFrame:dict[int,list[Vector3]] = {}
+    agent_positions_per_frame:dict[int,list[Vector3]] = {}
     x_data:list[float] = []
     y_data:list[float] = []
     #open file to read
@@ -113,8 +101,31 @@ def parse_agent_position_by_frame(output_dir:str, ip:str):
 
         #agents positions by frame, for density, distance and velocities
         #if not exists yet, create the list
-        if agentId not in agentPositionsByFrame:
-            agentPositionsByFrame[agentId] = []
+        if agentId not in agent_positions_per_frame:
+            agent_positions_per_frame[agentId] = []
+        agent_positions_per_frame[agentId].append(Vector3(agentX, agentY, agentZ))
+    return agent_positions_per_frame, x_data, y_data
 
-        agentPositionsByFrame[agentId].append(Vector3(agentX, agentY, agentZ))
-    return agentPositionsByFrame, x_data, y_data
+def remove_result_files(output_dir:str, ip:str):
+    csv_str = ip.replace(":", "_") + ".csv"
+    png_str = ip.replace(":", "_") + ".png"
+    txt_str = ip.replace(":", "_") + ".txt"
+
+    if os.path.isfile(output_dir + "/resultFile_" + csv_str):
+        os.remove(output_dir + "/resultFile_" + csv_str)
+
+    # heatmap.png
+    if os.path.isfile(output_dir + "/heatmap_" + png_str):
+        os.remove(output_dir + "/heatmap_" + png_str)
+
+    # markers.csv
+    if os.path.isfile(output_dir + "/markers_" + csv_str):
+        os.remove(output_dir + "/markers_" + csv_str)
+
+    # resultCellFile.txt
+    if os.path.isfile(output_dir + "/resultCellFile_" + txt_str):
+        os.remove(output_dir + "/resultCellFile_" + txt_str)
+
+    # trajectories.png
+    if os.path.isfile(output_dir + "/trajectories_" + png_str):
+        os.remove(output_dir + "/trajectories_" + png_str)
