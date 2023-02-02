@@ -20,6 +20,7 @@ class CellClass:
 		self.qntMarkers = 0
 		self.isWall = False
 		self.passedAgents = []
+		self.agents_in_cell:list[int] = []
 
 	def DartThrow(self, obstacles:list[ObstacleClass]):
 		#flag to break the loop if it is taking too long (maybe out of space)
@@ -210,3 +211,6 @@ class CellClass:
 	def AddPassedAgent(self, newAgent):
 		if newAgent not in self.passedAgents:
 			self.passedAgents.append(newAgent)
+
+	def increase_agent_in_cell(self):
+		self.agents_in_cell[-1] += 1

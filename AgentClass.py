@@ -201,19 +201,33 @@ class AgentClass:
 
 			#see distance to this cell
 			#if it is lower, the agent is in another(neighbour) cell
-			distanceToNeighbourCell = Vector3.Distance(self.position, self.cell.neighborCells[i].position)
-			if distanceToNeighbourCell < distanceToCell:
-				distanceToCell = distanceToNeighbourCell
-				cellToChange = self.cell.neighborCells[i]
+			# distanceToNeighbourCell = Vector3.Distance(self.position, self.cell.neighborCells[i].position)
+			# if distanceToNeighbourCell < distanceToCell:
+			# 	distanceToCell = distanceToNeighbourCell
+			# 	cellToChange = self.cell.neighborCells[i]
 
-			self.cell = cellToChange
+			# self.cell = cellToChange
 
-			#add to cell passed agents
-			self.cell.AddPassedAgent(self.id)
+			# #add to cell passed agents
+			# self.cell.AddPassedAgent(self.id)
 
 	#walk
 	def Walk(self, timeStep):
 		self.position = Vector3.Add_vec(self.position, Vector3.Mul_vec(self.speed, timeStep, 1))
+
+	def UpdateCell(self):
+		#distance from agent to cell, to define agent new cell
+		dist_to_cell = Vector3.Distance(self.position, self.cell.position)
+		new_cell = self.cell
+
+		for _neigh in self.cell.neighborCells:
+			dist_to_neightbour = Vector3.Distance(self.position, _neigh.position)
+			if dist_to_neightbour < dist_to_cell:
+				dist_to_cell = dist_to_neightbour
+				new_cell = _neigh
+		self.cell = new_cell
+		#add to cell passed agents
+		self.cell.AddPassedAgent(self.id)
 
 	#check the sub-goal distance
 	def CheckSubGoalDistance(self):

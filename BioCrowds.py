@@ -16,6 +16,7 @@ import pandas as pd
 # import matplotlib.pyplot as plt
 # import matplotlib.patches as mpatches
 # import matplotlib.lines as mlines
+from statistics import fmean
 import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
@@ -154,6 +155,10 @@ class BioCrowdsClass():
 			#if no agents anymore, break
 			if len(self.agents) == 0:
 				break
+			
+			#add new entry for agents in cell
+			for _cell in self.cells:
+				_cell.agents_in_cell.append(0)
 
 			#for each agent, we reset their info
 			for ag in self.agents:
@@ -205,6 +210,9 @@ class BioCrowdsClass():
 				#walk
 				_agent.Walk(self.time_step)
 
+				#update cell after movement
+				_agent.UpdateCell()
+
 				#write in file (agent id, X, Y, Z)
 				result_file.write(str(_agent.id) + ";" + _agent.position.get_formatted_str(";") + "\n")
 
@@ -228,8 +236,13 @@ class BioCrowdsClass():
 						qntFound += 1
 
 				#if distances does not change, assume agent is stuck
-				if qntFound == 5:
+				if qntFound == 50:
+					print("stuck")
 					agents_to_kill.append(_agent)
+
+			#add agents in cell
+			for _agent in self.agents:
+				_agent.cell.increase_agent_in_cell()
 
 			#die!
 			for _to_kill in agents_to_kill:
@@ -284,15 +297,22 @@ class BioCrowdsClass():
 		#average speed
 		average_speed = total_agent_speed / (len(agent_frame_count))
 
-		#for densities, we calculate the local densities for each agent, each frame
-		local_density_per_frame = Metrics_Util.agent_local_density_per_frame(agent_frame_count, agent_positions_per_frame)
+		# using cells
+		total_cell_density, average_cell_density = Metrics_Util.cell_average_local_density(
+				self.cells)
+		average_density = fmean(average_cell_density.values())
+		#print("Cell Density Per Frame", cell_density_per_frame)
 
-		#calculate mean values
-		total_density_sum, agent_average_local_density = Metrics_Util.agent_average_local_densities(
-				local_density_per_frame, agent_frame_count)
-
+		
 		#average density
-		average_density = total_density_sum / len(agent_frame_count)
+		# using agents
+		# #for densities, we calculate the local densities for each agent, each frame
+		# local_density_per_frame = Metrics_Util.agent_local_density_per_frame(agent_frame_count, agent_positions_per_frame)
+
+		# #calculate mean values
+		# total_density_sum, agent_average_local_density = Metrics_Util.agent_average_local_densities(
+		# 		local_density_per_frame, agent_frame_count)
+		# average_density = total_density_sum / len(agent_frame_count)
 		#end densities, distances and velocities
 
 		#average simulation time
@@ -326,7 +346,8 @@ class BioCrowdsClass():
 		write_result.append(["totalWalked", average_dist_walked])
 		write_result.append(["velocities", agent_speeds])
 		write_result.append(["averageVelocity", average_speed])
-		write_result.append(["localDensities", agent_average_local_density])
+		write_result.append(["localDensities", average_cell_density.values()])
+		#write_result.append(["localDensities", agent_average_local_density])
 		write_result.append(["averageDensity", average_density])
 		write_result.append(["averageTime", average_simulation_time])
 		
@@ -340,7 +361,7 @@ class BioCrowdsClass():
 		if self.run_on_server:
 			self.database.clear_database(self.ip, close_conn=True)
 
-		Parsing_Util.remove_result_files(self.output_dir, self.ip)
+		#Parsing_Util.remove_result_files(self.output_dir, self.ip)
 		#gc.collect()
 
 		return pd.DataFrame(write_result)

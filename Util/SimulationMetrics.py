@@ -4,6 +4,7 @@ from AgentClass import AgentClass
 from CellClass import CellClass
 from GoalClass import GoalClass
 from Vector3Class import Vector3
+from statistics import fmean
 
 if TYPE_CHECKING:
     from BioCrowds import BioCrowdsClass
@@ -40,7 +41,7 @@ def walked_distances(agent_pos_per_frame:dict[int,list[Vector3]]):
     return total_distance_walked, agent_distance_walked
 
 def average_agent_speed(time_step:float, agent_frame_quant:dict[int, int], agent_dist_walked:dict[int,float]):
-    print("Calculatin Agent average speed")
+    print("Calculating Agent average speed")
     #with the distance walked, as well as the qnt of frames of each agent (size of each), we can calculate mean speed
     agent_speed:dict[int,float] = {}
     speed_sum:float = 0.0
@@ -50,6 +51,19 @@ def average_agent_speed(time_step:float, agent_frame_quant:dict[int, int], agent
         agent_speed[ag] = vel
 
     return speed_sum, agent_speed
+
+def cell_average_local_density(cell_list:list[CellClass]):
+    # remove frames with value 0 (no agents at frame)
+    valid_cell_densities:dict[CellClass,list[int]] = { }
+    for _cell in cell_list:
+        valid_cell_densities[_cell] = [d for d in _cell.agents_in_cell if d > 0]
+    # remove cells with len 0 (no agents during simulation)
+    valid_cell_densities = {c: d for c, d in valid_cell_densities.items() if len(d) > 0}
+    # average density for valid frames
+    average_cell_density = {c: fmean(d) for c, d in valid_cell_densities.items()}
+    # sum averages
+    total_cell_density = sum([sum(d) for d in valid_cell_densities.values()])
+    return total_cell_density, average_cell_density
 
 def agent_local_density_per_frame(agent_frame_count:dict[int, int], agent_pos_per_frame:dict[int,list[Vector3]]):
     #for densities, we calculate the local densities for each agent, each frame
