@@ -14,12 +14,14 @@ def walked_distances(agent_pos_per_frame:dict[int,list[Vector3]]):
 
     agent_distance_walked:dict[int,float] = {}
     total_distance_walked:float = 0.0
-
+    agents_min_displacement:dict[int,float] = {}
+    agents_max_displacement:dict[int,float] = {}
     #for each agent
     for _agent, _positions in agent_pos_per_frame.items():
         agent_walked = 0 
         last_pos = -1
-
+        min_displacement = 1000
+        max_displacement = -1000
         #for each position of this agent
         for _pos in _positions:
 
@@ -32,13 +34,18 @@ def walked_distances(agent_pos_per_frame:dict[int,list[Vector3]]):
             #else, calculate
             else:
                 #distance
-                agent_walked += abs(Vector3.Distance(_pos, last_pos))
+                displacement = abs(Vector3.Distance(_pos, last_pos))
+                agent_walked += displacement
                 last_pos = _pos
+                min_displacement = min(min_displacement, displacement)
+                max_displacement = max(max_displacement, displacement)
 
         #update the dict. 
         total_distance_walked += agent_walked
         agent_distance_walked[_agent] = agent_walked
-    return total_distance_walked, agent_distance_walked
+        agents_min_displacement[_agent] = min_displacement
+        agents_max_displacement[_agent] = max_displacement
+    return total_distance_walked, agent_distance_walked, agents_min_displacement, agents_max_displacement
 
 def average_agent_speed(time_step:float, agent_frame_quant:dict[int, int], agent_dist_walked:dict[int,float]):
     print("Calculating Agent average speed")
@@ -49,7 +56,6 @@ def average_agent_speed(time_step:float, agent_frame_quant:dict[int, int], agent
         vel = agent_dist_walked[ag] / (agent_frame_quant[ag] * time_step)
         speed_sum += vel
         agent_speed[ag] = vel
-
     return speed_sum, agent_speed
 
 def cell_average_local_density(cell_list:list[CellClass]):
@@ -64,6 +70,19 @@ def cell_average_local_density(cell_list:list[CellClass]):
     # sum averages
     total_cell_density = sum([sum(d) for d in valid_cell_densities.values()])
     return total_cell_density, average_cell_density
+
+def cell_maximum_local_density(cell_list:list[CellClass]):
+    #find max local density per cell and its index (frame)
+    max_cell_density_value = [max(c.agents_in_cell) for c in cell_list]
+    max_cell_density_index = [c.agents_in_cell.index(max(c.agents_in_cell)) for c in cell_list]
+
+    #find the "max max" local density between cell and its index (cell index)
+    max_density_value = max(max_cell_density_value)
+    max_density_index = max_cell_density_value.index(max_density_value)
+    max_density_cell = cell_list[max_density_index]
+
+    # returns the "max max" density value, the frame it occurs, and the cell id
+    return max_density_value, max_cell_density_index[max_density_index], max_density_cell.id
 
 def agent_local_density_per_frame(agent_frame_count:dict[int, int], agent_pos_per_frame:dict[int,list[Vector3]]):
     #for densities, we calculate the local densities for each agent, each frame
