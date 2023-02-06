@@ -1,8 +1,6 @@
 import math
 from typing import TYPE_CHECKING
-from AgentClass import AgentClass
 from CellClass import CellClass
-from GoalClass import GoalClass
 from Vector3Class import Vector3
 from statistics import fmean
 
@@ -70,6 +68,15 @@ def cell_average_local_density(cell_list:list[CellClass]):
     # sum averages
     total_cell_density = sum([sum(d) for d in valid_cell_densities.values()])
     return total_cell_density, average_cell_density
+
+def frame_average_local_density(cell_list:list[CellClass]):
+    local_density_per_frame = []
+    frame_quant = len(cell_list[0].agents_in_cell)
+    for frame in range(frame_quant):
+        frame_densities = [c.agents_in_cell[frame] for c in cell_list]
+        frame_densities = [d for d in frame_densities if d > 0]
+        local_density_per_frame.append(fmean(frame_densities))
+    return local_density_per_frame
 
 def cell_maximum_local_density(cell_list:list[CellClass]):
     #find max local density per cell and its index (frame)

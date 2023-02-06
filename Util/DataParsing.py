@@ -1,8 +1,6 @@
 import os
 from typing import TYPE_CHECKING
-from AgentClass import AgentClass
 from CellClass import CellClass
-from GoalClass import GoalClass
 from Vector3Class import Vector3
 
 
@@ -46,10 +44,10 @@ def parse_reference_simulation_data(reference_data)->dict:
         "total_average_distance_walked": reference_data["4"],
         "agents_speed": list(reference_data["5"].values()),
         "total_average_speed": reference_data["6"],
-        "agents_average_density": list(reference_data["7"].values()),
-        "total_average_density": reference_data["8"],
-        "agents_average_simulation_time": reference_data["9"],
-        "metric": reference_data["10"]
+        "total_average_density": reference_data["7"],
+        "agents_average_simulation_time": reference_data["8"],
+        "new_metric": reference_data["9"],
+        "cassol_metric": reference_data["10"]
     }
     return ref_agent
 
