@@ -16,11 +16,15 @@ class CellClass:
 		self.density = density
 		self.markerRadius = 0.1
 		self.cellRadius = cellRadius
-		self.neighborCells = []
+		self.neighborCells:list[CellClass] = []
 		self.qntMarkers = 0
 		self.isWall = False
 		self.passedAgents = []
 		self.agents_in_cell:list[int] = []
+
+	def get_cell_center(self)->Vector3:
+		return Vector3(self.position.x + (self.cellRadius/2.0),
+					self.position.y + (self.cellRadius/2.0), 0.0 )
 
 	def DartThrow(self, obstacles:list[ObstacleClass]):
 		#flag to break the loop if it is taking too long (maybe out of space)

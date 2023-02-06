@@ -146,9 +146,12 @@ class AgentClass:
 		else:
 			#else, he is idle
 			self.speed = Vector3.Zero()
+			if len(self.markers)>5:
+				print("wtf", self.id, self.speed, len(self.markers), "m", self.m, self.position)
+		
 
 	#check markers on a cell
-	def CheckMarkersCell(self, checkCell):
+	def CheckMarkersCell(self, checkCell:CellClass):
 		#get all markers on cell
 		cellMarkers = checkCell.markers
 
@@ -217,11 +220,11 @@ class AgentClass:
 
 	def UpdateCell(self):
 		#distance from agent to cell, to define agent new cell
-		dist_to_cell = Vector3.Distance(self.position, self.cell.position)
+		dist_to_cell = Vector3.Distance(self.position, self.cell.get_cell_center())
 		new_cell = self.cell
 
 		for _neigh in self.cell.neighborCells:
-			dist_to_neightbour = Vector3.Distance(self.position, _neigh.position)
+			dist_to_neightbour = Vector3.Distance(self.position, _neigh.get_cell_center())
 			if dist_to_neightbour < dist_to_cell:
 				dist_to_cell = dist_to_neightbour
 				new_cell = _neigh
@@ -233,10 +236,14 @@ class AgentClass:
 	def CheckSubGoalDistance(self):
 		#just check if the sub-goal is not the actual goal
 		if self.goalPosition != self.goal.position:
+			#print("CHECKING", self.id, self.cell.id, self.position, self.goal.position)
 			distanceSubGoal = Vector3.Distance(self.position, self.goalPosition)
 			if distanceSubGoal < self.radius and len(self.path) > 1:
+				print(f"Poping Subgoal Before Agent ID:{self.id}\tCell ID:{self.cell.id}\t" +
+					f"AgentPos:{self.position}\tGoalPos{self.goalPosition}\tFinalGoalPost{self.goal.position}\t")
 				self.path.pop(0)
 				self.goalPosition = Vector3(self.path[0].position.x, self.path[0].position.y, self.path[0].position.z)
+				print(f"Poping subgoal after, {self.goalPosition}, path len{len(self.path)}")
 			elif distanceSubGoal < self.radius:
 				self.goalPosition = self.goal.position
 

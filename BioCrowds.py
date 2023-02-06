@@ -120,6 +120,8 @@ class BioCrowdsClass():
 			jason = json.loads(json.loads(response.text))
 			jason = jason["1"]
 			self.reference_agent = Parsing_Util.parse_reference_simulation_data(jason)
+			self.stuck_threshold = int(self.reference_agent["total_simulation_time"]/self.time_step)
+			self.stuck_threshold = max(self.stuck_threshold, 1000)
 			#print("dist walked type:", type(self.reference_agent["total_average_distance_walked"]))
 			#print(self.reference_agent["agents_distance_walked"])
 			#print(self.reference_agent)
@@ -149,7 +151,7 @@ class BioCrowdsClass():
 		result_file = Parsing_Util.open_result_file(self.output_dir, self.ip, data['terrains'])
 
 		simulation_frame:int = 0
-
+		
 		#walking loop
 		timeout = False
 		while True:
@@ -237,9 +239,15 @@ class BioCrowdsClass():
 					if ck == dist:
 						qntFound += 1
 
+				if qntFound > self.stuck_threshold*0.7:
+					print(f"Stuck Frame ({qntFound}/{self.stuck_threshold})\t" + 
+						f"Agent ID:{_agent.id}\tCell ID:{_agent.cell.id}\tMarkers:{len(_agent.markers)}" +
+						f"Dist:{dist}\tAgentPos:{_agent.position}\n\tGoalPos{_agent.goalPosition}\tFinalGoalPos{_agent.goal.position}\t" +
+						f"Speed{_agent.speed}\n\tAgentCount:{len(self.agents)}\tAgents:{[a.id for a in self.agents]}")
+
 				#if distances does not change, assume agent is stuck
 				if qntFound == self.stuck_threshold:
-					print("stuck")
+					print("Agent got Stuck!. Agent ID:", _agent.id)
 					agents_to_kill.append(_agent)
 
 			#add agents in cell
@@ -302,14 +310,13 @@ class BioCrowdsClass():
 		min_agent_speed = min(agents_min_disp.values()) / self.time_step
 		max_agent_speed = max(agents_max_disp.values()) / self.time_step
 
-		#average density
-		# using cells
-		total_cell_density, average_cell_density = Metrics_Util.cell_average_local_density(
-				self.cells)
-		average_density = fmean(average_cell_density.values())
-		max_local_density, max_local_density_frame, max_local_density_cell_id = Metrics_Util.cell_maximum_local_density(self.cells)
-		#print("Cell Density Per Frame", cell_density_per_frame)
-
+		# average density 
+		# using frame
+		average_frame_density = Metrics_Util.frame_average_local_density(self.cells)
+		max_average_density = max(average_frame_density)
+		max_average_density_frame = average_frame_density.index(max_average_density)
+		average_density = fmean(average_frame_density)
+		max_cell_density, max_cell_density_frame, max_cell_density_id = Metrics_Util.cell_maximum_local_density(self.cells)
 		
 		#average density
 		# using agents
@@ -331,7 +338,8 @@ class BioCrowdsClass():
 			sim_time_nn = self.simulation_time / self.reference_agent["total_simulation_time"]
 			avg_time_nn = average_simulation_time / self.reference_agent["total_simulation_time"]
 			avg_spd_nn = math.exp(self.reference_agent["total_average_speed"] / average_speed)
-			avg_walk_nn = average_dist_walked / self.reference_agent["total_average_distance_walked"]
+			#avg_walk_nn = average_dist_walked / self.reference_agent["total_average_distance_walked"]
+			avg_walk_nn = average_dist_walked / (self.map_size.x * self.map_size.y)
 			# avg_walk_nn = average_dist_walked / self.reference_agent["total_average_distance_walked"]
 		else:
 			sim_time_nn = self.simulation_time
@@ -339,8 +347,10 @@ class BioCrowdsClass():
 			avg_spd_nn = average_speed
 			avg_walk_nn = average_dist_walked
 		#end normalizations
-		cassol = 5 / ((1 / sim_time_nn) + (1 / avg_time_nn) + (1 / average_density) + (1 / avg_spd_nn) + (1 / avg_walk_nn))
-		print ("Cassol: " + str(cassol))
+		new_metric = 5 / ((1 / sim_time_nn) + (1 / avg_time_nn) + (1 / average_density) + (1 / avg_spd_nn) + (1 / avg_walk_nn))
+		cassol_metric = 4 / ((1 / sim_time_nn) + (1 / avg_time_nn) + (1 / average_density) + (1 / avg_spd_nn))
+		print ("New Metric: " + str(new_metric))
+		print ("Cassol Metric: " + str(cassol_metric))
 
 		#generate heatmap and trajectories
 		if self.ref_simulation:
@@ -352,15 +362,15 @@ class BioCrowdsClass():
 
 		#write other results
 		write_result.append(["simTime", self.simulation_time])
-		write_result.append(["distanceWalked", agent_dist_walked])
-		write_result.append(["totalWalked", average_dist_walked])
-		write_result.append(["velocities", agent_speeds])
-		write_result.append(["averageVelocity", average_speed])
-		write_result.append(["localDensities", average_cell_density.values()])
-		#write_result.append(["localDensities", agent_average_local_density])
+		write_result.append(["agents_distance_walked", agent_dist_walked])
+		write_result.append(["average_distance_walked", average_dist_walked])
+		write_result.append(["agents_speeds", agent_speeds])
+		write_result.append(["average_speed", average_speed])
+		#write_result.append(["local_densities", average_frame_density])
 		write_result.append(["averageDensity", average_density])
 		write_result.append(["averageTime", average_simulation_time])
-		write_result.append(["cassol", cassol])
+		write_result.append(["new_metric", new_metric])
+		write_result.append(["cassol_metric", cassol_metric])
 		#normalized results for Cassol metric
 		write_result.append(["normalized_total_simulation_time", sim_time_nn])
 		write_result.append(["normalized_average_simulation_time", avg_time_nn])
@@ -368,18 +378,16 @@ class BioCrowdsClass():
 		write_result.append(["normalized_average_distance_walked", avg_walk_nn])
 		#additional results
 		write_result.append(["minimum_simulation_time", min_simulation_time])
-		write_result.append(["maximum_local_density", max_local_density])
-		write_result.append(["maximum_local_density_frame", max_local_density_frame])
-		write_result.append(["maximum_local_density_cell_id", max_local_density_cell_id])
+		write_result.append(["maximum_average_density", max_average_density])
+		write_result.append(["maximum_average_density_frame", max_average_density_frame])
+		write_result.append(["maximum_cell_density", max_cell_density])
+		write_result.append(["maximum_cell_density_frame", max_cell_density_frame])
+		write_result.append(["maximum_cell_density_id", max_cell_density_id])
 		write_result.append(["maximum_agent_speed", max_agent_speed])
 		write_result.append(["minimum_agent_speed", min_agent_speed])
 		write_result.append(["maximum_distance_walked", max_dist_walked])
 		write_result.append(["minimum_distance_walked", min_dist_walked])
-		
-		
-		#Cassol metric (harmonic mean)
-		#extra: average distance walked
-
+	
 		#clear Database, just to be sure
 		if self.run_on_server:
 			self.database.clear_database(self.ip, close_conn=True)
@@ -432,7 +440,7 @@ class BioCrowdsClass():
 		for _agent in self.agents:
 			minDis = 5
 			for _cell in self.cells:
-				dist = Vector3.Distance(_agent.position,_cell.position)
+				dist = Vector3.Distance(_agent.position,_cell.get_cell_center())
 				if dist < minDis:
 					minDis = dist
 					_agent.cell = _cell
