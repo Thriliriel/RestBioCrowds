@@ -4,27 +4,14 @@ from AgentClass import AgentClass
 from BioCrowdsDatabase import BioCrowdsDataBase
 from Vector3Class import Vector3
 from CellClass import CellClass
-from MarkerClass import MarkerClass
 from GoalClass import GoalClass
-from ObstacleClass import ObstacleClass
 from Parsing.ParserJSON import ParserJSON
 import Util.DataParsing as Parsing_Util
 import Util.HeatmapGeneration as HM_Gen
 import Util.TrajectoriesGeneration as TJ_Gen
 import Util.SimulationMetrics as Metrics_Util
 import pandas as pd
-# import matplotlib.pyplot as plt
-# import matplotlib.patches as mpatches
-# import matplotlib.lines as mlines
 from statistics import fmean
-import plotly.express as px
-from plotly.subplots import make_subplots
-import plotly.graph_objects as go
-import numpy as np
-import base64
-#import argparse
-#import mysql.connector
-#from mysql.connector import Error
 import time
 import requests
 import json
@@ -38,6 +25,8 @@ class BioCrowdsClass():
 		Path(self.output_dir).mkdir(parents=True, exist_ok=True)
 		write_result = []
 		start_time = time.time()
+		# simulation id for multiple alternatives
+		self.simulation_id:int = 0 
 		self.stuck_threshold = 50
 		self.reference_agent = {}
 		self.run_on_server = False
@@ -66,10 +55,12 @@ class BioCrowdsClass():
 		Parsing_Util.parse_config_file(self, "Input/config.txt")
 		
 		#goals
-		self.goals = []
+		self.goals:list[GoalClass
+		] = []
 
 		#agents
-		self.agents = []
+		self.agents:list[AgentClass] = []
+		self.removed_agents:list[AgentClass] = []
 
 		#obstacles
 		self.obstacles = []
@@ -100,7 +91,10 @@ class BioCrowdsClass():
 		#if this one is not a reference simulation, we need to simulate it with only one agent (unless it is only one), 
 		#to be able to normalize the metrics later
 		self.reference_agent = {}
-		if not self.ref_simulation and len(self.agents) > 1:
+
+		if self.ref_simulation or len(self.agents) == 1:
+			self.select_reference_agent()
+		else:
 			data["reference_simulation"] = True
 			headers = {'Content-Type': 'application/json'}
 			response = requests.post('http://localhost:5000/runSim', json.dumps(data), headers=headers) 
@@ -118,6 +112,8 @@ class BioCrowdsClass():
 
 			print(response.text)
 			jason = json.loads(json.loads(response.text))
+			self.simulation_id = int(data["simId"])
+			print("Simulation ID", self.simulation_id)
 			jason = jason["1"]
 			self.reference_agent = Parsing_Util.parse_reference_simulation_data(jason)
 			self.stuck_threshold = int(self.reference_agent["total_simulation_time"]/self.time_step)
@@ -125,10 +121,6 @@ class BioCrowdsClass():
 			#print("dist walked type:", type(self.reference_agent["total_average_distance_walked"]))
 			#print(self.reference_agent["agents_distance_walked"])
 			#print(self.reference_agent)
-		else:
-			#if it is a reference simulation, one agent only
-			#find the agent farther away from the goals
-			self.select_reference_agent()
 
 		# Create and save Markers
 		self.create_markers()
@@ -223,32 +215,16 @@ class BioCrowdsClass():
 				dist = Vector3.Distance(_agent.goal.position, _agent.position)
 				#print(_agent.id, " -- Dist: ", dist, " -- Radius: ", _agent.radius, " -- Agent: ", _agent.position.x, _agent.position.y)
 				#print(_agent.speed.x, _agent.speed.y)
-				if dist < _agent.radius / 4:
+				if dist < _agent.radius / 2:
 					agents_to_kill.append(_agent)
 
 				#update lastdist (max = 5)
+				quant = _agent.count_distances_to_goal(dist, self.stuck_threshold)
 				
-				if len(_agent.last_dist) == self.stuck_threshold:
-					_agent.last_dist.pop(0)
-
-				_agent.last_dist.append(dist)
-
-				#check them all
-				qntFound = 0
-				for ck in _agent.last_dist:
-					if ck == dist:
-						qntFound += 1
-
-				if qntFound > self.stuck_threshold*0.7:
-					print(f"Stuck Frame ({qntFound}/{self.stuck_threshold})\t" + 
-						f"Agent ID:{_agent.id}\tCell ID:{_agent.cell.id}\tMarkers:{len(_agent.markers)}" +
-						f"Dist:{dist}\tAgentPos:{_agent.position}\n\tGoalPos{_agent.goalPosition}\tFinalGoalPos{_agent.goal.position}\t" +
-						f"Speed{_agent.speed}\n\tAgentCount:{len(self.agents)}\tAgents:{[a.id for a in self.agents]}")
-
 				#if distances does not change, assume agent is stuck
-				if qntFound == self.stuck_threshold:
-					print("Agent got Stuck!. Agent ID:", _agent.id)
+				if quant == self.stuck_threshold:
 					agents_to_kill.append(_agent)
+					self.removed_agents.append(_agent)
 
 			#add agents in cell
 			for _agent in self.agents:
@@ -281,6 +257,10 @@ class BioCrowdsClass():
 		#otherwise, it is done
 		# Simulation Finished
 		print(f'Total Simulation Time: {self.simulation_time} "seconds. ({simulation_frame+1} frames)')
+
+		# print agents that were stuck
+		for _rem_agent in self.removed_agents:
+			print(f"Agent {_rem_agent.id} was removed at position: {_rem_agent.position}")
 
 		#save the cells, for heatmap
 		Parsing_Util.save_cells_file(self.output_dir, self.ip, self.cells)
@@ -359,16 +339,15 @@ class BioCrowdsClass():
 		else:
 			write_result.append(HM_Gen.generate_heatmap(self))
 			write_result.append(TJ_Gen.generate_trajectories(self, x_data, y_data))
-
+		
 		#write other results
-		write_result.append(["simTime", self.simulation_time])
+		write_result.append(["simulation_time", self.simulation_time])
 		write_result.append(["agents_distance_walked", agent_dist_walked])
 		write_result.append(["average_distance_walked", average_dist_walked])
 		write_result.append(["agents_speeds", agent_speeds])
 		write_result.append(["average_speed", average_speed])
-		#write_result.append(["local_densities", average_frame_density])
-		write_result.append(["averageDensity", average_density])
-		write_result.append(["averageTime", average_simulation_time])
+		write_result.append(["average_density", average_density])
+		write_result.append(["average_time", average_simulation_time])
 		write_result.append(["new_metric", new_metric])
 		write_result.append(["cassol_metric", cassol_metric])
 		#normalized results for Cassol metric
@@ -387,7 +366,7 @@ class BioCrowdsClass():
 		write_result.append(["minimum_agent_speed", min_agent_speed])
 		write_result.append(["maximum_distance_walked", max_dist_walked])
 		write_result.append(["minimum_distance_walked", min_dist_walked])
-	
+
 		#clear Database, just to be sure
 		if self.run_on_server:
 			self.database.clear_database(self.ip, close_conn=True)
@@ -438,27 +417,23 @@ class BioCrowdsClass():
 	#for each agent, find its initial cell
 	def find_agents_initial_cell(self):
 		for _agent in self.agents:
-			minDis = 5
-			for _cell in self.cells:
-				dist = Vector3.Distance(_agent.position,_cell.get_cell_center())
-				if dist < minDis:
-					minDis = dist
-					_agent.cell = _cell
+			_distances = [Vector3.Distance(_agent.position,c.get_cell_center()) for c in self.cells]
+			_agent.cell = self.cells[_distances.index(min(_distances))]
 
 	#calculate the path for each agent
 	def find_agents_path_json(self):
-		for _agents in self.agents:
-			_agents.FindPathJson(self.cells)
+		for _agent in self.agents:
+			_agent.FindPathJson(self.cells)
 		
 	#select the agent with largest distance as a reference agent
 	def select_reference_agent(self):
 		ref_agent:AgentClass = self.agents[0]   
-		maxDist = 0
-		for ag in self.agents:
-			for gl in self.goals:
-				dst = Vector3.Distance(ag.position, gl.position)
-				if dst > maxDist:
-					maxDist = dst
-					ref_agent = ag
+		max_dist = 0
+		for _agent in self.agents:
+			for _goal in self.goals:
+				dst = Vector3.Distance(_agent.position, _goal.position)
+				if dst > max_dist:
+					max_dist = dst
+					ref_agent = _agent
 		self.agents.clear()
 		self.agents.append(ref_agent)

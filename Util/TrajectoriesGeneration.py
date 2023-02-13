@@ -16,7 +16,7 @@ def generate_trajectories(bio_crowds:'BioCrowdsClass', x_data, y_data):
     # Creating trajetories figure
 
     figTrajectories = make_subplots(rows=1, cols=1)
-        
+    
     figTrajectories.add_scatter(x=x_data, 
                                 y=y_data, 
                                 mode='markers', 
@@ -61,12 +61,15 @@ def generate_trajectories(bio_crowds:'BioCrowdsClass', x_data, y_data):
         y_data.append(_goal.position.y)
 
     # plt.plot(x, y, 'bo', markersize=10, label = "Objetivo")
-    figTrajectories.add_scatter(x = x_data, y = y_data, mode = 'markers', name = 'Objetivo', marker = dict( size = 12), marker_color="rgb(255,0,0)")
+    figTrajectories.add_scatter(x = x_data, y = y_data, mode = 'markers', name = 'Goals', marker = dict( size = 12), marker_color="rgb(255,0,0)")
         
     figTrajectories.update_layout(
         template="simple_white",
-        title="Trajetórias dos Agentes",
+        title = f"<b>Simulation {bio_crowds.simulation_id} - Agents' Trajectories</b>",
+        width=700, height=600,
         title_x=0.5,
+        title_font_size = 28,
+        font_size = 18,
         legend = dict(
             orientation="h",
             yanchor="bottom",
@@ -75,6 +78,8 @@ def generate_trajectories(bio_crowds:'BioCrowdsClass', x_data, y_data):
             x=1
         )
     )
+
+    # figTrajectories.update_layout()
 
     # plt.savefig("trajectories.png", dpi=75)
     # plt.savefig(self.outputDir + "/trajectories_" + self.ip.replace(":", "_") + ".png", dpi=75)

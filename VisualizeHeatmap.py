@@ -5,18 +5,19 @@ import numpy as np
 import base64
 
 
-if TYPE_CHECKING:
-    from BioCrowds import BioCrowdsClass
+#if TYPE_CHECKING:
+from BioCrowds import BioCrowdsClass
 
 
-def generate_heatmap(bio_crowds:'BioCrowdsClass'):
+def generate_heatmap():
     print("Generating Heatmap File")
     dataFig = []
     dataTemp = []
-
+    output_dir = os.path.abspath(os.path.dirname(__file__)) + "/OutputData"
+    ip = "54043 PM589"
     #open file to read
     # for line in open("resultCellFile.txt"):
-    for line in open(bio_crowds.output_dir + "/resultCellFile_" + bio_crowds.ip.replace(":", "_") + ".txt"):
+    for line in open(output_dir + "/resultCellFile_" + ip + ".txt"):
         stripLine = line.replace('\n', '')
         strip = stripLine.split(',')
         dataTemp = []
@@ -40,7 +41,7 @@ def generate_heatmap(bio_crowds:'BioCrowdsClass'):
     figHeatmap.update_layout(
         template = "simple_white",
         #title = "Mapa de Densidades",
-        title = f"<b>Simulation {bio_crowds.simulation_id} - Occupancy Map</b>",
+        title = "<b>Simulation 1 - Occupancy Map</b>",
         title_x=0.45,
         #legend_title = "Densidade"
         legend_title = "Occupancy",
@@ -48,20 +49,23 @@ def generate_heatmap(bio_crowds:'BioCrowdsClass'):
         font_size = 18
     )
 
-    figHeatmap.update_xaxes(range=[-0.5, bio_crowds.map_size.x - 0.5], visible = False)
-    figHeatmap.update_yaxes(range=[-0.5, bio_crowds.map_size.y - 0.5], visible = False)
+    figHeatmap.update_xaxes(range=[-0.5, 30 - 0.5], visible = False)
+    figHeatmap.update_yaxes(range=[-0.5, 30 - 0.5], visible = False)
 
     figHeatmap.update_layout(xaxis=dict(tickmode='linear', tick0=0, dtick=1))
     figHeatmap.update_layout(yaxis=dict(tickmode='linear', tick0=0, dtick=1))
 
-    hm_output_file = bio_crowds.output_dir + "/heatmap_" + bio_crowds.ip.replace(":", "_") + ".png"
+    hm_output_file = output_dir + "/heatmap_" + ip.replace(":", "_") + ".png"
 
     figHeatmap.write_image(hm_output_file)
-
-    hm = []
-    # with open("heatmap.png", "rb") as img_file:
-    with open(hm_output_file, "rb") as img_file:
-        hm = ["heatmap", base64.b64encode(img_file.read())]
+    figHeatmap.show()
+    # hm = []
+    # # with open("heatmap.png", "rb") as img_file:
+    # with open(hm_output_file, "rb") as img_file:
+    #     hm = ["heatmap", base64.b64encode(img_file.read())]
     
-    os.remove(hm_output_file)
-    return hm
+    # os.remove(hm_output_file)
+    # return hm
+
+if __name__ == "__main__":
+   generate_heatmap()

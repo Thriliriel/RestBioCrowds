@@ -22,7 +22,7 @@ class AgentClass:
 		self.speed = Vector3.Zero()
 		self.cell:CellClass = None # type: ignore		
 		self.usePathPlanning = usePathPlanning
-		self.last_dist = [] # to check if agent is stuck
+		self.distances_to_goal = [] # to check if agent is stuck
 		self.tempPath = []
 		if self.usePathPlanning:
 			self.pathPlanning = PathPlanningClass(10000) #10000 = max iterations allowed to find a path
@@ -146,8 +146,6 @@ class AgentClass:
 		else:
 			#else, he is idle
 			self.speed = Vector3.Zero()
-			if len(self.markers)>5:
-				print("wtf", self.id, self.speed, len(self.markers), "m", self.m, self.position)
 		
 
 	#check markers on a cell
@@ -186,10 +184,6 @@ class AgentClass:
 
 		#check all markers on agent's cell
 		self.CheckMarkersCell(self.cell)
-
-		#distance from agent to cell, to define agent new cell
-		distanceToCell = Vector3.Distance(self.position, self.cell.position)
-		cellToChange = self.cell
 		
 		#iterate through neighbors of the agent cell
 		for i in range(0, len(self.cell.neighborCells)):
@@ -201,18 +195,6 @@ class AgentClass:
 				self.CheckMarkersCell(self.cell.neighborCells[i])
 			except:
 				print(self.cell.id, len(self.cell.neighborCells), i) 
-
-			#see distance to this cell
-			#if it is lower, the agent is in another(neighbour) cell
-			# distanceToNeighbourCell = Vector3.Distance(self.position, self.cell.neighborCells[i].position)
-			# if distanceToNeighbourCell < distanceToCell:
-			# 	distanceToCell = distanceToNeighbourCell
-			# 	cellToChange = self.cell.neighborCells[i]
-
-			# self.cell = cellToChange
-
-			# #add to cell passed agents
-			# self.cell.AddPassedAgent(self.id)
 
 	#walk
 	def Walk(self, timeStep):
@@ -239,12 +221,15 @@ class AgentClass:
 			#print("CHECKING", self.id, self.cell.id, self.position, self.goal.position)
 			distanceSubGoal = Vector3.Distance(self.position, self.goalPosition)
 			if distanceSubGoal < self.radius and len(self.path) > 1:
-				print(f"Poping Subgoal Before Agent ID:{self.id}\tCell ID:{self.cell.id}\t" +
-					f"AgentPos:{self.position}\tGoalPos{self.goalPosition}\tFinalGoalPost{self.goal.position}\t")
 				self.path.pop(0)
 				self.goalPosition = Vector3(self.path[0].position.x, self.path[0].position.y, self.path[0].position.z)
-				print(f"Poping subgoal after, {self.goalPosition}, path len{len(self.path)}")
 			elif distanceSubGoal < self.radius:
 				self.goalPosition = self.goal.position
 
-				
+	def count_distances_to_goal(self, dist:float, max_len:int):
+		# adds new distance to distances list
+		if len(self.distances_to_goal) == max_len:
+			self.distances_to_goal.pop(0)
+		self.distances_to_goal.append(dist)
+		# returns quantity of elements with same value as the last entry
+		return self.distances_to_goal.count(dist)
