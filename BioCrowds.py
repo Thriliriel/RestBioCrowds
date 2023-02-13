@@ -16,6 +16,8 @@ import time
 import requests
 import json
 import math
+from VisualizeMarkersResults import visualize_markers
+from VisualizeAgentPaths import visualize_agent_paths_python, visualize_agent_paths_unity
 #import gc
 
 class BioCrowdsClass():
@@ -114,6 +116,9 @@ class BioCrowdsClass():
 			jason = json.loads(json.loads(response.text))
 			self.simulation_id = int(data["simId"])
 			print("Simulation ID", self.simulation_id)
+			f = open(f"{self.output_dir}/request_{self.simulation_id}.json", "w")
+			f.write(json.dumps(data))
+			f.close()
 			jason = jason["1"]
 			self.reference_agent = Parsing_Util.parse_reference_simulation_data(jason)
 			self.stuck_threshold = int(self.reference_agent["total_simulation_time"]/self.time_step)
@@ -138,6 +143,10 @@ class BioCrowdsClass():
 		#for each agent, calculate the path, if true (comes from Json, dont need to calculate)
 		if self.path_planning:
 			self.find_agents_path_json()
+
+		if not self.ref_simulation:
+			visualize_agent_paths_python(self.agents, self.simulation_id)
+			visualize_agent_paths_unity(data["agents"], self.simulation_id)
 
 		#open file to write or keep writing
 		result_file = Parsing_Util.open_result_file(self.output_dir, self.ip, data['terrains'])
@@ -371,6 +380,8 @@ class BioCrowdsClass():
 		if self.run_on_server:
 			self.database.clear_database(self.ip, close_conn=True)
 
+		if not self.ref_simulation:
+			visualize_markers(self.ip)
 		#Parsing_Util.remove_result_files(self.output_dir, self.ip)
 		#gc.collect()
 

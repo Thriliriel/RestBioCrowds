@@ -78,7 +78,6 @@ class CellClass:
 		self.qntMarkers = math.floor(dens)
 		#print("Self - " + str(self.qntMarkers))
 		self.DartThrow(obstacles)
-
 		#if the ammount of markers is too low, declare as a wall
 		if len(self.markers) < (self.qntMarkers/2):
 			self.isWall = True
