@@ -57,8 +57,7 @@ class BioCrowdsClass():
 		Parsing_Util.parse_config_file(self, "Input/config.txt")
 		
 		#goals
-		self.goals:list[GoalClass
-		] = []
+		self.goals:list[GoalClass] = []
 
 		#agents
 		self.agents:list[AgentClass] = []
@@ -116,9 +115,7 @@ class BioCrowdsClass():
 			jason = json.loads(json.loads(response.text))
 			self.simulation_id = int(data["simId"])
 			print("Simulation ID", self.simulation_id)
-			f = open(f"{self.output_dir}/request_{self.simulation_id}.json", "w")
-			f.write(json.dumps(data))
-			f.close()
+			self.dump_simulation_json_data(data)
 			jason = jason["1"]
 			self.reference_agent = Parsing_Util.parse_reference_simulation_data(jason)
 			self.stuck_threshold = int(self.reference_agent["total_simulation_time"]/self.time_step)
@@ -381,7 +378,7 @@ class BioCrowdsClass():
 			self.database.clear_database(self.ip, close_conn=True)
 
 		if not self.ref_simulation:
-			visualize_markers(self.ip)
+			visualize_markers(self.ip, self.simulation_id)
 		#Parsing_Util.remove_result_files(self.output_dir, self.ip)
 		#gc.collect()
 
@@ -448,3 +445,8 @@ class BioCrowdsClass():
 					ref_agent = _agent
 		self.agents.clear()
 		self.agents.append(ref_agent)
+
+	def dump_simulation_json_data(self, data) -> None:
+		f = open(f"{self.output_dir}/request_{self.simulation_id}.json", "w")
+		f.write(json.dumps(data))
+		f.close()
