@@ -3,7 +3,8 @@ import plotly.graph_objects as go
 
 from AgentClass import AgentClass
 
-def visualize_agent_paths_python(agents:list[AgentClass], id:int):
+def visualize_agent_paths_python(agents:list[AgentClass], id:int, 
+				 map_width:int = 30, map_height:int = 30):
 	# values on x-axis
 	x = []
 	# values on y-axis
@@ -11,8 +12,8 @@ def visualize_agent_paths_python(agents:list[AgentClass], id:int):
 
 	figTrajectories = make_subplots(rows=1, cols=1)
 	figTrajectories.update_layout(title = f"Agent Path Planning Python - Sim {id}")
-	figTrajectories.update_xaxes(range = [0, 30], showgrid=True, gridwidth=1, gridcolor='Gray')
-	figTrajectories.update_yaxes(range = [0, 30], showgrid=True, gridwidth=1, gridcolor='Gray')
+	figTrajectories.update_xaxes(range = [0, map_width], showgrid=True, gridwidth=1, gridcolor='Gray')
+	figTrajectories.update_yaxes(range = [0, map_height], showgrid=True, gridwidth=1, gridcolor='Gray')
 
 	#open file to read
 	for agent in agents:
@@ -27,7 +28,7 @@ def visualize_agent_paths_python(agents:list[AgentClass], id:int):
 
 	figTrajectories.show()
 
-def visualize_agent_paths_unity(agents, id:int):	
+def visualize_agent_paths_unity(agents, id:int, map_width:int = 30, map_height:int = 30):	
 	# values on x-axis
 	x = []
 	# values on y-axis
@@ -35,8 +36,8 @@ def visualize_agent_paths_unity(agents, id:int):
 
 	figTrajectories = make_subplots(rows=1, cols=1)
 	figTrajectories.update_layout(title = f"Agent Path Planning Unity - Sim {id}")
-	figTrajectories.update_xaxes(range = [0, 30], showgrid=True, gridwidth=1, gridcolor='Gray')
-	figTrajectories.update_yaxes(range = [0, 30], showgrid=True, gridwidth=1, gridcolor='Gray')
+	figTrajectories.update_xaxes(range = [0, map_width], showgrid=True, gridwidth=1, gridcolor='Gray')
+	figTrajectories.update_yaxes(range = [0, map_height], showgrid=True, gridwidth=1, gridcolor='Gray')
 
 	#open file to read
 	for agent in agents:

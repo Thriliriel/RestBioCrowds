@@ -1,6 +1,6 @@
 import plotly.express as px
 
-def visualize_markers(ip, simulation_id:int):
+def visualize_markers(ip, simulation_id:int, map_width:int = 30, map_height:int = 30):
 	# values on x-axis
 	x = []
 	# values on y-axis
@@ -14,9 +14,9 @@ def visualize_markers(ip, simulation_id:int):
 		
 	fig = px.scatter(x=x, y=y)
 
-	fig.update_layout(title = f"Marker Distribution - Sim {id}")
-	fig.update_xaxes(range = [0, 30], showgrid=True, gridwidth=1, gridcolor='Gray')
-	fig.update_yaxes(range = [0, 30], showgrid=True, gridwidth=1, gridcolor='Gray')
+	fig.update_layout(title = f"Marker Distribution - Sim {simulation_id}")
+	fig.update_xaxes(range = [0, map_width], showgrid=True, gridwidth=1, gridcolor='Gray')
+	fig.update_yaxes(range = [0, map_height], showgrid=True, gridwidth=1, gridcolor='Gray')
 
 	fig.show()
 
