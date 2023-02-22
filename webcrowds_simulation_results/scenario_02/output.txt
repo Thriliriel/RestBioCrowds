@@ -1,0 +1,324 @@
+127.0.0.1 - - [22/Feb/2023:13:16:33] "OPTIONS /runSim HTTP/1.1" 200 4 "http://localhost:3000/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+Parsing Config File
+Parsing Config File
+Total Simulation Time: 5.5 "seconds. (275 frames)
+Calculating Walked Distances
+Calculating Agent average speed
+New Metric: 2.0714351415844345
+Cassol Metric: 1.7763347573224413
+Time required to load data: 0.002000570297241211
+Time required to setup: 0.14203381538391113
+Time required to run simulation: 0.6649770736694336
+Time required to generate results: 0.012002706527709961
+                                     0                        1
+0                               noNeed                     None
+1                               noNeed                     None
+2                      simulation_time                      5.5
+3               agents_distance_walked   {5: 6.174453972948304}
+4              average_distance_walked                 6.174454
+5                        agents_speeds  {5: 1.1267251775453109}
+6                        average_speed                 1.126725
+7                      average_density                      1.0
+8                         average_time                     5.48
+9                           new_metric                 2.071435
+10                       cassol_metric                 1.776335
+11    normalized_total_simulation_time                      5.5
+12  normalized_average_simulation_time                     5.48
+13            normalized_average_speed                 1.126725
+14  normalized_average_distance_walked                 6.174454
+15             minimum_simulation_time                     5.48
+16             maximum_average_density                      1.0
+17       maximum_average_density_frame                        0
+18                maximum_cell_density                        1
+19          maximum_cell_density_frame                        0
+20             maximum_cell_density_id                     20-4
+21                 maximum_agent_speed                      1.2
+22                 minimum_agent_speed                 0.824926
+23             maximum_distance_walked                 6.174454
+24             minimum_distance_walked                 6.174454
+127.0.0.1 - - [22/Feb/2023:13:16:36] "POST /runSim HTTP/1.1" 200 1193 "" "python-requests/2.28.2"
+"{\"0\":{\"0\":\"noNeed\",\"1\":\"noNeed\",\"2\":\"simulation_time\",\"3\":\"agents_distance_walked\",\"4\":\"average_distance_walked\",\"5\":\"agents_speeds\",\"6\":\"average_speed\",\"7\":\"average_density\",\"8\":\"average_time\",\"9\":\"new_metric\",\"10\":\"cassol_metric\",\"11\":\"normalized_total_simulation_time\",\"12\":\"normalized_average_simulation_time\",\"13\":\"normalized_average_speed\",\"14\":\"normalized_average_distance_walked\",\"15\":\"minimum_simulation_time\",\"16\":\"maximum_average_density\",\"17\":\"maximum_average_density_frame\",\"18\":\"maximum_cell_density\",\"19\":\"maximum_cell_density_frame\",\"20\":\"maximum_cell_density_id\",\"21\":\"maximum_agent_speed\",\"22\":\"minimum_agent_speed\",\"23\":\"maximum_distance_walked\",\"24\":\"minimum_distance_walked\"},\"1\":{\"0\":null,\"1\":null,\"2\":5.5,\"3\":{\"5\":6.1744539729},\"4\":6.1744539729,\"5\":{\"5\":1.1267251775},\"6\":1.1267251775,\"7\":1.0,\"8\":5.48,\"9\":2.0714351416,\"10\":1.7763347573,\"11\":5.5,\"12\":5.48,\"13\":1.1267251775,\"14\":6.1744539729,\"15\":5.48,\"16\":1.0,\"17\":0,\"18\":1,\"19\":0,\"20\":\"20-4\",\"21\":1.2,\"22\":0.8249257229,\"23\":6.1744539729,\"24\":6.1744539729}}"
+Simulation ID 1
+World Size [30, 10, 0]
+Parsing Reference Agent
+Total Simulation Time: 9.42 "seconds. (471 frames)
+Calculating Walked Distances
+Calculating Agent average speed
+New Metric: 0.10015479435515978
+Cassol Metric: 1.544716468753851
+Generating Heatmap File
+Generating Trajectories File
+Time required to load data: 2.8862667083740234
+Time required to setup: 0.1400306224822998
+Time required to run simulation: 4.371827125549316
+Time required to generate results: 1.1098113059997559
+                                     0                                                  1
+0                              heatmap  b'iVBORw0KGgoAAAANSUhEUgAAArwAAAJYCAYAAACAbzXX...
+1                         trajectories  b'iVBORw0KGgoAAAANSUhEUgAAArwAAAJYCAYAAACAbzXX...
+2                      simulation_time                                               9.42
+3               agents_distance_walked  {0: 5.754369670938083, 1: 7.165210895776814, 2...
+4              average_distance_walked                                           6.338039
+5                        agents_speeds  {0: 0.7358528990969416, 1: 0.9233519195588678,...
+6                        average_speed                                           0.929311
+7                      average_density                                           1.074276
+8                         average_time                                              7.076
+9                           new_metric                                           0.100155
+10                       cassol_metric                                           1.544716
+11    normalized_total_simulation_time                                           1.712727
+12  normalized_average_simulation_time                                           1.286545
+13            normalized_average_speed                                           3.361645
+14  normalized_average_distance_walked                                           0.021127
+15             minimum_simulation_time                                               3.94
+16             maximum_average_density                                                2.5
+17       maximum_average_density_frame                                                  0
+18                maximum_cell_density                                                  5
+19          maximum_cell_density_frame                                                  0
+20             maximum_cell_density_id                                               20-4
+21                 maximum_agent_speed                                                1.2
+22                 minimum_agent_speed                                           0.028672
+23             maximum_distance_walked                                           8.069806
+24             minimum_distance_walked                                           4.613347
+127.0.0.1 - - [22/Feb/2023:13:16:42] "POST /runSim HTTP/1.1" 200 90670 "http://localhost:3000/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+127.0.0.1 - - [22/Feb/2023:13:16:42] "OPTIONS /runSim HTTP/1.1" 200 4 "http://localhost:3000/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+Parsing Config File
+Parsing Config File
+Total Simulation Time: 9.0 "seconds. (450 frames)
+Calculating Walked Distances
+Calculating Agent average speed
+New Metric: 2.277940846245771
+Cassol Metric: 1.9070136246798035
+Time required to load data: 0.0030012130737304688
+Time required to setup: 0.1522660255432129
+Time required to run simulation: 1.0338959693908691
+Time required to generate results: 0.01600337028503418
+                                     0                        1
+0                               noNeed                     None
+1                               noNeed                     None
+2                      simulation_time                      9.0
+3               agents_distance_walked  {5: 10.262262232786311}
+4              average_distance_walked                10.262262
+5                        agents_speeds  {5: 1.1427908945196337}
+6                        average_speed                 1.142791
+7                      average_density                      1.0
+8                         average_time                     8.98
+9                           new_metric                 2.277941
+10                       cassol_metric                 1.907014
+11    normalized_total_simulation_time                      9.0
+12  normalized_average_simulation_time                     8.98
+13            normalized_average_speed                 1.142791
+14  normalized_average_distance_walked                10.262262
+15             minimum_simulation_time                     8.98
+16             maximum_average_density                      1.0
+17       maximum_average_density_frame                        0
+18                maximum_cell_density                        1
+19          maximum_cell_density_frame                        0
+20             maximum_cell_density_id                     16-4
+21                 maximum_agent_speed                      1.2
+22                 minimum_agent_speed                 0.870654
+23             maximum_distance_walked                10.262262
+24             minimum_distance_walked                10.262262
+127.0.0.1 - - [22/Feb/2023:13:16:45] "POST /runSim HTTP/1.1" 200 1198 "" "python-requests/2.28.2"
+"{\"0\":{\"0\":\"noNeed\",\"1\":\"noNeed\",\"2\":\"simulation_time\",\"3\":\"agents_distance_walked\",\"4\":\"average_distance_walked\",\"5\":\"agents_speeds\",\"6\":\"average_speed\",\"7\":\"average_density\",\"8\":\"average_time\",\"9\":\"new_metric\",\"10\":\"cassol_metric\",\"11\":\"normalized_total_simulation_time\",\"12\":\"normalized_average_simulation_time\",\"13\":\"normalized_average_speed\",\"14\":\"normalized_average_distance_walked\",\"15\":\"minimum_simulation_time\",\"16\":\"maximum_average_density\",\"17\":\"maximum_average_density_frame\",\"18\":\"maximum_cell_density\",\"19\":\"maximum_cell_density_frame\",\"20\":\"maximum_cell_density_id\",\"21\":\"maximum_agent_speed\",\"22\":\"minimum_agent_speed\",\"23\":\"maximum_distance_walked\",\"24\":\"minimum_distance_walked\"},\"1\":{\"0\":null,\"1\":null,\"2\":9.0,\"3\":{\"5\":10.2622622328},\"4\":10.2622622328,\"5\":{\"5\":1.1427908945},\"6\":1.1427908945,\"7\":1.0,\"8\":8.98,\"9\":2.2779408462,\"10\":1.9070136247,\"11\":9.0,\"12\":8.98,\"13\":1.1427908945,\"14\":10.2622622328,\"15\":8.98,\"16\":1.0,\"17\":0,\"18\":1,\"19\":0,\"20\":\"16-4\",\"21\":1.2,\"22\":0.8706544111,\"23\":10.2622622328,\"24\":10.2622622328}}"        
+Simulation ID 2
+World Size [30, 10, 0]
+Parsing Reference Agent
+Total Simulation Time: 13.48 "seconds. (674 frames)
+Calculating Walked Distances
+Calculating Agent average speed
+New Metric: 0.15539164222757276
+Cassol Metric: 1.4237089950515989
+Generating Heatmap File
+Generating Trajectories File
+Time required to load data: 3.2614684104919434
+Time required to setup: 0.1449871063232422
+Time required to run simulation: 7.811495780944824
+Time required to generate results: 0.5781288146972656
+                                     0                                                  1
+0                              heatmap  b'iVBORw0KGgoAAAANSUhEUgAAArwAAAJYCAYAAACAbzXX...
+1                         trajectories  b'iVBORw0KGgoAAAANSUhEUgAAArwAAAJYCAYAAACAbzXX...
+2                      simulation_time                                              13.48
+3               agents_distance_walked  {0: 10.623037900270996, 1: 10.215911040850298,...
+4              average_distance_walked                                          10.215479
+5                        agents_speeds  {0: 0.8594690857824431, 1: 0.9236809259358315,...
+6                        average_speed                                           1.005945
+7                      average_density                                           1.048291
+8                         average_time                                             10.382
+9                           new_metric                                           0.155392
+10                       cassol_metric                                           1.423709
+11    normalized_total_simulation_time                                           1.497778
+12  normalized_average_simulation_time                                           1.153556
+13            normalized_average_speed                                           3.114404
+14  normalized_average_distance_walked                                           0.034052
+15             minimum_simulation_time                                               7.28
+16             maximum_average_density                                                2.5
+17       maximum_average_density_frame                                                  0
+18                maximum_cell_density                                                  5
+19          maximum_cell_density_frame                                                  0
+20             maximum_cell_density_id                                               16-4
+21                 maximum_agent_speed                                                1.2
+22                 minimum_agent_speed                                           0.008094
+23             maximum_distance_walked                                          11.613759
+24             minimum_distance_walked                                           8.613653
+127.0.0.1 - - [22/Feb/2023:13:16:54] "POST /runSim HTTP/1.1" 200 95805 "http://localhost:3000/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+127.0.0.1 - - [22/Feb/2023:13:16:54] "OPTIONS /runSim HTTP/1.1" 200 4 "http://localhost:3000/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+Parsing Config File
+Parsing Config File
+Total Simulation Time: 11.72 "seconds. (586 frames)
+Calculating Walked Distances
+Calculating Agent average speed
+New Metric: 2.3236010956378506
+Cassol Metric: 1.928096222496407
+Time required to load data: 0.0019998550415039062
+Time required to setup: 0.13503098487854004
+Time required to run simulation: 1.3002903461456299
+Time required to generate results: 0.021005868911743164
+                                     0                        1
+0                               noNeed                     None
+1                               noNeed                     None
+2                      simulation_time                    11.72
+3               agents_distance_walked  {9: 12.945471647243794}
+4              average_distance_walked                12.945472
+5                        agents_speeds   {9: 1.106450568140495}
+6                        average_speed                 1.106451
+7                      average_density                      1.0
+8                         average_time                     11.7
+9                           new_metric                 2.323601
+10                       cassol_metric                 1.928096
+11    normalized_total_simulation_time                    11.72
+12  normalized_average_simulation_time                     11.7
+13            normalized_average_speed                 1.106451
+14  normalized_average_distance_walked                12.945472
+15             minimum_simulation_time                     11.7
+16             maximum_average_density                      1.0
+17       maximum_average_density_frame                        0
+18                maximum_cell_density                        1
+19          maximum_cell_density_frame                        0
+20             maximum_cell_density_id                     13-4
+21                 maximum_agent_speed                      1.2
+22                 minimum_agent_speed                 0.686753
+23             maximum_distance_walked                12.945472
+24             minimum_distance_walked                12.945472
+127.0.0.1 - - [22/Feb/2023:13:16:57] "POST /runSim HTTP/1.1" 200 1202 "" "python-requests/2.28.2"
+"{\"0\":{\"0\":\"noNeed\",\"1\":\"noNeed\",\"2\":\"simulation_time\",\"3\":\"agents_distance_walked\",\"4\":\"average_distance_walked\",\"5\":\"agents_speeds\",\"6\":\"average_speed\",\"7\":\"average_density\",\"8\":\"average_time\",\"9\":\"new_metric\",\"10\":\"cassol_metric\",\"11\":\"normalized_total_simulation_time\",\"12\":\"normalized_average_simulation_time\",\"13\":\"normalized_average_speed\",\"14\":\"normalized_average_distance_walked\",\"15\":\"minimum_simulation_time\",\"16\":\"maximum_average_density\",\"17\":\"maximum_average_density_frame\",\"18\":\"maximum_cell_density\",\"19\":\"maximum_cell_density_frame\",\"20\":\"maximum_cell_density_id\",\"21\":\"maximum_agent_speed\",\"22\":\"minimum_agent_speed\",\"23\":\"maximum_distance_walked\",\"24\":\"minimum_distance_walked\"},\"1\":{\"0\":null,\"1\":null,\"2\":11.72,\"3\":{\"9\":12.9454716472},\"4\":12.9454716472,\"5\":{\"9\":1.1064505681},\"6\":1.1064505681,\"7\":1.0,\"8\":11.7,\"9\":2.3236010956,\"10\":1.9280962225,\"11\":11.72,\"12\":11.7,\"13\":1.1064505681,\"14\":12.9454716472,\"15\":11.7,\"16\":1.0,\"17\":0,\"18\":1,\"19\":0,\"20\":\"13-4\",\"21\":1.2,\"22\":0.6867525097,\"23\":12.9454716472,\"24\":12.9454716472}}"    
+Simulation ID 3
+World Size [30, 10, 0]
+Parsing Reference Agent
+Total Simulation Time: 16.54 "seconds. (827 frames)
+Calculating Walked Distances
+Calculating Agent average speed
+New Metric: 0.2149481103472958
+Cassol Metric: 1.4084836741719362
+Generating Heatmap File
+Generating Trajectories File
+Time required to load data: 3.5199692249298096
+Time required to setup: 0.14203214645385742
+Time required to run simulation: 10.332357406616211
+Time required to generate results: 0.7110586166381836
+                                     0                                                  1
+0                              heatmap  b'iVBORw0KGgoAAAANSUhEUgAAArwAAAJYCAYAAACAbzXX...
+1                         trajectories  b'iVBORw0KGgoAAAANSUhEUgAAArwAAAJYCAYAAACAbzXX...
+2                      simulation_time                                              16.54
+3               agents_distance_walked  {0: 14.28722153837571, 1: 14.54185245582942, 2...
+4              average_distance_walked                                          14.690404
+5                        agents_speeds  {0: 0.9387136358985355, 1: 0.9825575983668527,...
+6                        average_speed                                           1.050192
+7                      average_density                                           1.051025
+8                         average_time                                               14.1
+9                           new_metric                                           0.214948
+10                       cassol_metric                                           1.408484
+11    normalized_total_simulation_time                                           1.411263
+12  normalized_average_simulation_time                                           1.203072
+13            normalized_average_speed                                           2.867872
+14  normalized_average_distance_walked                                           0.048968
+15             minimum_simulation_time                                              10.98
+16             maximum_average_density                                                2.5
+17       maximum_average_density_frame                                                  0
+18                maximum_cell_density                                                  5
+19          maximum_cell_density_frame                                                  0
+20             maximum_cell_density_id                                               12-4
+21                 maximum_agent_speed                                                1.2
+22                 minimum_agent_speed                                           0.107328
+23             maximum_distance_walked                                          16.538749
+24             minimum_distance_walked                                          12.921646
+127.0.0.1 - - [22/Feb/2023:13:17:08] "POST /runSim HTTP/1.1" 200 104096 "http://localhost:3000/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+127.0.0.1 - - [22/Feb/2023:13:17:08] "OPTIONS /runSim HTTP/1.1" 200 4 "http://localhost:3000/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+Parsing Config File
+Parsing Config File
+Total Simulation Time: 16.68 "seconds. (834 frames)
+Calculating Walked Distances
+Calculating Agent average speed
+New Metric: 2.4336283008497785
+Cassol Metric: 1.9983759760764954
+Time required to load data: 0.0020003318786621094
+Time required to setup: 0.13402986526489258
+Time required to run simulation: 1.944887399673462
+Time required to generate results: 0.02500462532043457
+                                     0                        1
+0                               noNeed                     None
+1                               noNeed                     None
+2                      simulation_time                    16.68
+3               agents_distance_walked  {9: 18.896402549551667}
+4              average_distance_walked                18.896403
+5                        agents_speeds   {9: 1.134237848112345}
+6                        average_speed                 1.134238
+7                      average_density                      1.0
+8                         average_time                    16.66
+9                           new_metric                 2.433628
+10                       cassol_metric                 1.998376
+11    normalized_total_simulation_time                    16.68
+12  normalized_average_simulation_time                    16.66
+13            normalized_average_speed                 1.134238
+14  normalized_average_distance_walked                18.896403
+15             minimum_simulation_time                    16.66
+16             maximum_average_density                      1.0
+17       maximum_average_density_frame                        0
+18                maximum_cell_density                        1
+19          maximum_cell_density_frame                        0
+20             maximum_cell_density_id                      7-4
+21                 maximum_agent_speed                      1.2
+22                 minimum_agent_speed                 0.700621
+23             maximum_distance_walked                18.896403
+24             minimum_distance_walked                18.896403
+127.0.0.1 - - [22/Feb/2023:13:17:13] "POST /runSim HTTP/1.1" 200 1204 "" "python-requests/2.28.2"
+"{\"0\":{\"0\":\"noNeed\",\"1\":\"noNeed\",\"2\":\"simulation_time\",\"3\":\"agents_distance_walked\",\"4\":\"average_distance_walked\",\"5\":\"agents_speeds\",\"6\":\"average_speed\",\"7\":\"average_density\",\"8\":\"average_time\",\"9\":\"new_metric\",\"10\":\"cassol_metric\",\"11\":\"normalized_total_simulation_time\",\"12\":\"normalized_average_simulation_time\",\"13\":\"normalized_average_speed\",\"14\":\"normalized_average_distance_walked\",\"15\":\"minimum_simulation_time\",\"16\":\"maximum_average_density\",\"17\":\"maximum_average_density_frame\",\"18\":\"maximum_cell_density\",\"19\":\"maximum_cell_density_frame\",\"20\":\"maximum_cell_density_id\",\"21\":\"maximum_agent_speed\",\"22\":\"minimum_agent_speed\",\"23\":\"maximum_distance_walked\",\"24\":\"minimum_distance_walked\"},\"1\":{\"0\":null,\"1\":null,\"2\":16.68,\"3\":{\"9\":18.8964025496},\"4\":18.8964025496,\"5\":{\"9\":1.1342378481},\"6\":1.1342378481,\"7\":1.0,\"8\":16.66,\"9\":2.4336283008,\"10\":1.9983759761,\"11\":16.68,\"12\":16.66,\"13\":1.1342378481,\"14\":18.8964025496,\"15\":16.66,\"16\":1.0,\"17\":0,\"18\":1,\"19\":0,\"20\":\"7-4\",\"21\":1.2,\"22\":0.7006213272,\"23\":18.8964025496,\"24\":18.8964025496}}"  
+Simulation ID 4
+World Size [30, 10, 0]
+Parsing Reference Agent
+Total Simulation Time: 22.36 "seconds. (1118 frames)
+Calculating Walked Distances
+Calculating Agent average speed
+New Metric: 0.2847921648176109
+Cassol Metric: 1.37278809605697
+Generating Heatmap File
+Generating Trajectories File
+Time required to load data: 4.162041187286377
+Time required to setup: 0.1424407958984375
+Time required to run simulation: 14.980776309967041
+Time required to generate results: 0.8840000629425049
+                                     0                                                  1
+0                              heatmap  b'iVBORw0KGgoAAAANSUhEUgAAArwAAAJYCAYAAACAbzXX...
+1                         trajectories  b'iVBORw0KGgoAAAANSUhEUgAAArwAAAJYCAYAAACAbzXX...
+2                      simulation_time                                              22.36
+3               agents_distance_walked  {0: 19.95262416166442, 1: 21.221650532404432, ...
+4              average_distance_walked                                          20.487766
+5                        agents_speeds  {0: 1.0773555162885757, 1: 1.0816335643427335,...
+6                        average_speed                                           1.057478
+7                      average_density                                           1.030613
+8                         average_time                                               19.5
+9                           new_metric                                           0.284792
+10                       cassol_metric                                           1.372788
+11    normalized_total_simulation_time                                           1.340528
+12  normalized_average_simulation_time                                           1.169065
+13            normalized_average_speed                                           2.922933
+14  normalized_average_distance_walked                                           0.068293
+15             minimum_simulation_time                                              16.14
+16             maximum_average_density                                                2.5
+17       maximum_average_density_frame                                                  0
+18                maximum_cell_density                                                  4
+19          maximum_cell_density_frame                                                  0
+20             maximum_cell_density_id                                                6-4
+21                 maximum_agent_speed                                                1.2
+22                 minimum_agent_speed                                                0.0
+23             maximum_distance_walked                                          22.216025
+24             minimum_distance_walked                                          18.762015
+127.0.0.1 - - [22/Feb/2023:13:17:29] "POST /runSim HTTP/1.1" 200 106932 "http://localhost:3000/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
