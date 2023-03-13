@@ -28,7 +28,6 @@ def generate_trajectories(bio_crowds:'BioCrowdsClass', x_data, y_data):
         c_w = [(1-_aspect)/2.0, _aspect, (1-_aspect)/2.0]
 
     figure = make_subplots(rows=3, cols=3,
-                    print_grid=True,
                     row_heights=r_h,
                     column_widths=c_w,
                     horizontal_spacing = 0.0,

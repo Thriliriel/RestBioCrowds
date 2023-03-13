@@ -124,7 +124,7 @@ class BioCrowdsClass():
 			self.simulation_id = int(data["simId"])
 			print("Simulation ID", self.simulation_id)
 			print("World Size", self.map_size)
-			self.dump_simulation_json_data(data)
+			# self.dump_simulation_json_data(data)
 			jason = jason["1"]
 			self.reference_agent = Parsing_Util.parse_reference_simulation_data(
 				jason)
@@ -430,7 +430,7 @@ class BioCrowdsClass():
 							  simulation_id=self.simulation_id,
 							  map_width=int(self.map_size.x),
 							  map_height=int(self.map_size.y))
-		# Parsing_Util.remove_result_files(self.output_dir, self.ip)
+		Parsing_Util.remove_result_files(self.output_dir, self.ip)
 		# gc.collect()
 
 		# timing until simulation finished
