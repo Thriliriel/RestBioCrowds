@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import random
 from AgentClass import AgentClass
 from BioCrowdsDatabase import BioCrowdsDataBase
 from Vector3Class import Vector3
@@ -22,13 +23,15 @@ from VisualizeAgentPaths import visualize_agent_paths_python, visualize_agent_pa
 
 
 class BioCrowdsClass():
-	def run(self, data):
+	def run(self, data, seed = 0, reference_simulation = False, reference_output: pd.DataFrame = None):
 		self.ip: str = ""
 		self.output_dir = os.path.abspath(
 			os.path.dirname(__file__)) + "/OutputData"
 		Path(self.output_dir).mkdir(parents=True, exist_ok=True)
 		write_result = []
+		self.seed = seed
 		start_time = time.time()
+		self.agents_removed:int = 0
 		# simulation id for multiple alternatives
 		self.simulation_id: int = 0
 		self.stuck_threshold = 50
@@ -73,12 +76,16 @@ class BioCrowdsClass():
 
 		# cells
 		self.cells: list[CellClass] = []
-
-		# add the reference simulation, if none
-		if "reference_simulation" not in data:
-			data["reference_simulation"] = False
+		
+		# set reference simulation info
+		data["reference_simulation"] = reference_simulation
 		self.ref_simulation = bool(data["reference_simulation"])
 
+		# add the reference simulation, if none
+		#if "reference_simulation" not in data:
+		#	data["reference_simulation"] = False
+		#self.ref_simulation = bool(data["reference_simulation"])
+		
 		# from json
 		# json or database?
 		if data['terrains'] == 'db':
@@ -98,36 +105,18 @@ class BioCrowdsClass():
 		# if this one is not a reference simulation, we need to simulate it with only one agent (unless it is only one),
 		# to be able to normalize the metrics later
 		self.reference_agent = {}
-
+		
 		if self.ref_simulation or len(self.agents) == 1:
 			self.select_reference_agent()
 		else:
-			data["reference_simulation"] = True
-			headers = {'Content-Type': 'application/json'}
-			response = requests.post(
-				'http://localhost:5000/runSim', json.dumps(data), headers=headers)
-			# print("Code status: " + str(response.status_code))
-			# ffs = json.loads(response.text)
-			# print(type(ffs))
-			# print("Return: " + response.text)
-
-			# if the response contains "nope", it means it reached the 30 seconds without finishing
-			# need to run again until done
-			while "nope" in response.text:
-				data["terrains"] = "db"
-				headers = {'Content-Type': 'application/json'}
-				response = requests.post(
-					'http://localhost:5000/runSim', json.dumps(data), headers=headers)
-
-			print(response.text)
-			jason = json.loads(json.loads(response.text))
+			#jason = reference_output.to_json()
+			#jason = json.loads(json.loads(str(reference_output)))
 			self.simulation_id = int(data["simId"])
 			print("Simulation ID", self.simulation_id)
 			print("World Size", self.map_size)
 			# self.dump_simulation_json_data(data)
-			jason = jason["1"]
-			self.reference_agent = Parsing_Util.parse_reference_simulation_data(
-				jason)
+			self.reference_agent = Parsing_Util.parse_reference_simulation_data_int_keys(
+				reference_output.to_dict()[1])
 			self.stuck_threshold = int(
 				self.reference_agent["total_simulation_time"]/self.time_step)
 			self.stuck_threshold = max(self.stuck_threshold, 1000)
@@ -137,7 +126,8 @@ class BioCrowdsClass():
 
 		# timing until parsing
 		self.execution_times.append(time.time())
-
+		
+		random.seed(self.seed)
 		# Create and save Markers
 		self.create_markers()
 		self.save_markers_to_file()
@@ -280,7 +270,7 @@ class BioCrowdsClass():
 		# close file
 		result_file.close()
 
-		self.simulation_time += (simulation_frame+1) * self.time_step
+		self.simulation_time += (simulation_frame) * self.time_step
 
 		# if timeout, need to keep going later
 		if timeout:
@@ -294,6 +284,7 @@ class BioCrowdsClass():
 
 		# print agents that were stuck
 		for _rem_agent in self.removed_agents:
+			self.agents_removed += 1
 			print(
 				f"Agent {_rem_agent.id} was removed at position: {_rem_agent.position}")
 
@@ -444,7 +435,7 @@ class BioCrowdsClass():
 		print("Time required to generate results:",
 			  self.execution_times[4]-self.execution_times[3])
 
-		return pd.DataFrame(write_result)
+		return pd.DataFrame(write_result), self.agents_removed
 
 	def create_map(self):
 		i = j = 0
@@ -503,11 +494,15 @@ class BioCrowdsClass():
 		ref_agent: AgentClass = self.agents[0]
 		max_dist = 0
 		for _agent in self.agents:
-			for _goal in self.goals:
-				dst = Vector3.Distance(_agent.position, _goal.position)
-				if dst > max_dist:
+			dst = _agent.GetAgentEditorPathLenght()
+			if dst > max_dist:
 					max_dist = dst
 					ref_agent = _agent
+			#for _goal in self.goals:
+				#dst = Vector3.Distance(_agent.position, _goal.position)
+				#if dst > max_dist:
+					#max_dist = dst
+					#ref_agent = _agent
 		self.agents.clear()
 		self.agents.append(ref_agent)
 

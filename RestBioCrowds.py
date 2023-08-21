@@ -21,15 +21,16 @@ class RestBioCrowds(object):
 
 		#	# Set up extra headers for a pre-flight OPTIONS request.
 			return cherrypy_cors.preflight(allowed_methods=['GET', 'POST'])
-
+		
 		data = cherrypy.request.json
 		#print(data)
 		#df = pd.DataFrame(data)
 		#output = biocrowds.run(df)
+		print("Data for simulation", data)
 		biocrowds = BioCrowds.BioCrowdsClass()
 
 		output = biocrowds.run(data)
-		print(output)
+		print("output", output)
 		#output.show()
 		
 		gc.collect()

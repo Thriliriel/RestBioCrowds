@@ -1,3 +1,4 @@
+import math
 from os import path
 from CellClass import CellClass
 from GoalClass import GoalClass
@@ -20,13 +21,26 @@ class AgentClass:
 		self.m = Vector3.Zero()
 		self.speedModule = 0
 		self.speed = Vector3.Zero()
-		self.cell:CellClass = None # type: ignore		
+		self.cell:CellClass = None # type: ignore	
+		self.editor_path_planning = []	
 		self.usePathPlanning = usePathPlanning
 		self.distances_to_goal = [] # to check if agent is stuck
 		self.tempPath = []
 		if self.usePathPlanning:
 			self.pathPlanning = PathPlanningClass(10000) #10000 = max iterations allowed to find a path
 			self.path:list[CellClass] = []
+
+	def GetAgentEditorPathLenght(self) -> float:
+		if len(self.editor_path_planning) == 0:
+			print(f"Agent {self.id} has a path lengh of 0")
+		elif len(self.editor_path_planning) == 1:
+			print(f"Agent {self.id} has a path lengh of 1")
+
+		lenght = 0.0
+		for n in range(len(self.editor_path_planning) - 1):
+			lenght += math.dist(self.editor_path_planning[n], self.editor_path_planning[n+1])
+		return lenght
+
 
 	#clear agent´s informations
 	def ClearAgent(self):

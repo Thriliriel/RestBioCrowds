@@ -51,6 +51,22 @@ def parse_reference_simulation_data(reference_data)->dict:
     }
     return ref_agent
 
+def parse_reference_simulation_data_int_keys(reference_data)->dict:
+    print("Parsing Reference Agent")
+    ref_agent = {
+        "response": reference_data,
+        "total_simulation_time": reference_data[2],
+        "agents_distance_walked": list(reference_data[3].values()),
+        "total_average_distance_walked": reference_data[4],
+        "agents_speed": list(reference_data[5].values()),
+        "total_average_speed": reference_data[6],
+        "total_average_density": reference_data[7],
+        "agents_average_simulation_time": reference_data[8],
+        "new_metric": reference_data[9],
+        "cassol_metric": reference_data[10]
+    }
+    return ref_agent
+
 def open_result_file(output_dir:str, ip:str, terrains_data):
     cSVPath = output_dir + "/resultFile_" + (ip.replace(":", "_")) + ".csv"
     if terrains_data == 'db':

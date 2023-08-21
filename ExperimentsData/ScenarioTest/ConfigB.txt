@@ -1,0 +1,235 @@
+{
+    "time_stamp": "6:03:48 PM:322",
+    "terrains": [
+        {
+            "transform": {
+                "position": [
+                    1000,
+                    -0.05,
+                    0
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "localScale": [
+                    1,
+                    1,
+                    1
+                ]
+            },
+            "terrain_size": [
+                30,
+                600,
+                30
+            ]
+        },
+        {
+            "transform": {
+                "position": [
+                    0,
+                    -0.05,
+                    0
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "localScale": [
+                    1,
+                    1,
+                    1
+                ]
+            },
+            "terrain_size": [
+                30,
+                600,
+                30
+            ]
+        }
+    ],
+    "goals": [
+        {
+            "position": [
+                -989.1836,
+                0.5,
+                18.97476
+            ],
+            "scenario_index": 0
+        },
+        {
+            "position": [
+                12.2418823,
+                0.5,
+                26.14032
+            ],
+            "scenario_index": 1
+        }
+    ],
+    "obstacles": [],
+    "spawnAreas": [
+        {
+            "transform": {
+                "position": [
+                    1004.5838,
+                    0.5,
+                    27.031002
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "localScale": [
+                    2,
+                    1,
+                    2
+                ]
+            },
+            "agent_count": 2,
+            "remove_at_goal": true,
+            "goal_list": [
+                1
+            ],
+            "wait_list": [],
+            "cycle_lenght": 0,
+            "cycle_agent_count": 2,
+            "cycle_remove_at_goal": true,
+            "cycle_goal_list": [
+                1
+            ],
+            "cycle_wait_list": []
+        },
+        {
+            "transform": {
+                "position": [
+                    1002.76563,
+                    0.5,
+                    25.30373
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "localScale": [
+                    2,
+                    1,
+                    2
+                ]
+            },
+            "agent_count": 2,
+            "remove_at_goal": true,
+            "goal_list": [
+                1
+            ],
+            "wait_list": [],
+            "cycle_lenght": 0,
+            "cycle_agent_count": 2,
+            "cycle_remove_at_goal": true,
+            "cycle_goal_list": [
+                1
+            ],
+            "cycle_wait_list": []
+        }
+    ],
+    "loaded_models": [],
+    "agents": [
+        {
+            "position": [
+                4.41552734,
+                0,
+                26.8628368
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.41552734,
+                    -0.00843333453,
+                    26.8628368
+                ],
+                [
+                    12.2418823,
+                    -0.00843333453,
+                    26.14032
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.23657227,
+                0,
+                26.4979877
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.23657227,
+                    -0.00843333453,
+                    26.4979877
+                ],
+                [
+                    12.2418823,
+                    -0.00843333453,
+                    26.14032
+                ]
+            ]
+        },
+        {
+            "position": [
+                3.15557861,
+                0,
+                25.0039768
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    3.15557861,
+                    -0.00843333453,
+                    25.0039768
+                ],
+                [
+                    12.2418823,
+                    -0.00843333453,
+                    26.14032
+                ]
+            ]
+        },
+        {
+            "position": [
+                2.46051025,
+                0,
+                25.3000622
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    2.46051025,
+                    -0.00843333453,
+                    25.3000622
+                ],
+                [
+                    12.2418823,
+                    -0.00843333453,
+                    26.14032
+                ]
+            ]
+        }
+    ],
+    "auxins": [],
+    "isCassolValid": true
+}

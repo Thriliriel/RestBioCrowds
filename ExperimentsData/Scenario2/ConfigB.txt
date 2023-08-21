@@ -1,0 +1,2469 @@
+{
+    "time_stamp": "5:42:33 PM:301",
+    "terrains": [
+        {
+            "transform": {
+                "position": [
+                    2000,
+                    -0.05,
+                    0
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "localScale": [
+                    1,
+                    1,
+                    1
+                ]
+            },
+            "terrain_size": [
+                30,
+                600,
+                30
+            ]
+        },
+        {
+            "transform": {
+                "position": [
+                    1000,
+                    -0.05,
+                    0
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "localScale": [
+                    1,
+                    1,
+                    1
+                ]
+            },
+            "terrain_size": [
+                30,
+                600,
+                30
+            ]
+        },
+        {
+            "transform": {
+                "position": [
+                    0,
+                    -0.05,
+                    0
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "localScale": [
+                    1,
+                    1,
+                    1
+                ]
+            },
+            "terrain_size": [
+                30,
+                600,
+                30
+            ]
+        }
+    ],
+    "goals": [
+        {
+            "position": [
+                -989.1836,
+                0.5,
+                18.97476
+            ],
+            "scenario_index": 0
+        },
+        {
+            "position": [
+                27.1746826,
+                0.5,
+                3.1673696
+            ],
+            "scenario_index": 1
+        },
+        {
+            "position": [
+                1015,
+                0.5,
+                15.0684395
+            ],
+            "scenario_index": 2
+        }
+    ],
+    "obstacles": [],
+    "spawnAreas": [
+        {
+            "transform": {
+                "position": [
+                    1000.85651,
+                    0.5,
+                    29.031002
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "localScale": [
+                    2,
+                    1,
+                    2
+                ]
+            },
+            "agent_count": 10,
+            "remove_at_goal": true,
+            "goal_list": [
+                1
+            ],
+            "wait_list": [],
+            "cycle_lenght": 0,
+            "cycle_agent_count": 2,
+            "cycle_remove_at_goal": true,
+            "cycle_goal_list": [
+                1
+            ],
+            "cycle_wait_list": []
+        },
+        {
+            "transform": {
+                "position": [
+                    1002.72015,
+                    0.5,
+                    29.031002
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "localScale": [
+                    2,
+                    1,
+                    2
+                ]
+            },
+            "agent_count": 10,
+            "remove_at_goal": true,
+            "goal_list": [
+                1
+            ],
+            "wait_list": [],
+            "cycle_lenght": 0,
+            "cycle_agent_count": 2,
+            "cycle_remove_at_goal": true,
+            "cycle_goal_list": [
+                1
+            ],
+            "cycle_wait_list": []
+        },
+        {
+            "transform": {
+                "position": [
+                    1004.5838,
+                    0.5,
+                    29.031002
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "localScale": [
+                    2,
+                    1,
+                    2
+                ]
+            },
+            "agent_count": 10,
+            "remove_at_goal": true,
+            "goal_list": [
+                1
+            ],
+            "wait_list": [],
+            "cycle_lenght": 0,
+            "cycle_agent_count": 2,
+            "cycle_remove_at_goal": true,
+            "cycle_goal_list": [
+                1
+            ],
+            "cycle_wait_list": []
+        },
+        {
+            "transform": {
+                "position": [
+                    1000.85651,
+                    0.5,
+                    27.076458
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "localScale": [
+                    2,
+                    1,
+                    2
+                ]
+            },
+            "agent_count": 10,
+            "remove_at_goal": true,
+            "goal_list": [
+                1
+            ],
+            "wait_list": [],
+            "cycle_lenght": 0,
+            "cycle_agent_count": 2,
+            "cycle_remove_at_goal": true,
+            "cycle_goal_list": [
+                1
+            ],
+            "cycle_wait_list": []
+        },
+        {
+            "transform": {
+                "position": [
+                    1002.76563,
+                    0.5,
+                    27.076458
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "localScale": [
+                    2,
+                    1,
+                    2
+                ]
+            },
+            "agent_count": 10,
+            "remove_at_goal": true,
+            "goal_list": [
+                1
+            ],
+            "wait_list": [],
+            "cycle_lenght": 0,
+            "cycle_agent_count": 2,
+            "cycle_remove_at_goal": true,
+            "cycle_goal_list": [
+                1
+            ],
+            "cycle_wait_list": []
+        },
+        {
+            "transform": {
+                "position": [
+                    1004.5838,
+                    0.5,
+                    27.031002
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "localScale": [
+                    2,
+                    1,
+                    2
+                ]
+            },
+            "agent_count": 10,
+            "remove_at_goal": true,
+            "goal_list": [
+                1
+            ],
+            "wait_list": [],
+            "cycle_lenght": 0,
+            "cycle_agent_count": 2,
+            "cycle_remove_at_goal": true,
+            "cycle_goal_list": [
+                1
+            ],
+            "cycle_wait_list": []
+        },
+        {
+            "transform": {
+                "position": [
+                    1000.85651,
+                    0.5,
+                    25.3946381
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "localScale": [
+                    2,
+                    1,
+                    2
+                ]
+            },
+            "agent_count": 10,
+            "remove_at_goal": true,
+            "goal_list": [
+                1
+            ],
+            "wait_list": [],
+            "cycle_lenght": 0,
+            "cycle_agent_count": 2,
+            "cycle_remove_at_goal": true,
+            "cycle_goal_list": [
+                1
+            ],
+            "cycle_wait_list": []
+        },
+        {
+            "transform": {
+                "position": [
+                    1002.76563,
+                    0.5,
+                    25.30373
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "localScale": [
+                    2,
+                    1,
+                    2
+                ]
+            },
+            "agent_count": 10,
+            "remove_at_goal": true,
+            "goal_list": [
+                1
+            ],
+            "wait_list": [],
+            "cycle_lenght": 0,
+            "cycle_agent_count": 2,
+            "cycle_remove_at_goal": true,
+            "cycle_goal_list": [
+                1
+            ],
+            "cycle_wait_list": []
+        },
+        {
+            "transform": {
+                "position": [
+                    1004.67468,
+                    0.5,
+                    25.167366
+                ],
+                "rotation": [
+                    0,
+                    0,
+                    0
+                ],
+                "localScale": [
+                    2,
+                    1,
+                    2
+                ]
+            },
+            "agent_count": 10,
+            "remove_at_goal": true,
+            "goal_list": [
+                1
+            ],
+            "wait_list": [],
+            "cycle_lenght": 0,
+            "cycle_agent_count": 2,
+            "cycle_remove_at_goal": true,
+            "cycle_goal_list": [
+                1
+            ],
+            "cycle_wait_list": []
+        }
+    ],
+    "loaded_models": [],
+    "agents": [
+        {
+            "position": [
+                0.6882324,
+                0,
+                28.8628368
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    0.6882324,
+                    -0.00843333453,
+                    28.8628368
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                0.509277344,
+                0,
+                28.4979877
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    0.509277344,
+                    -0.00843333453,
+                    28.4979877
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.24646,
+                0,
+                28.7312489
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.24646,
+                    -0.00843333453,
+                    28.7312489
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                0.5513916,
+                0,
+                29.0273323
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    0.5513916,
+                    -0.00843333453,
+                    29.0273323
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.29296875,
+                0,
+                29.6666679
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.29296875,
+                    -0.00843333453,
+                    29.6666679
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                0.4071045,
+                0,
+                28.4932823
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    0.4071045,
+                    -0.00843333453,
+                    28.4932823
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                0.44909668,
+                0,
+                29.4101181
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    0.44909668,
+                    -0.00843333453,
+                    29.4101181
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                0.9449463,
+                0,
+                29.475132
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    0.9449463,
+                    -0.00843333453,
+                    29.475132
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.618042,
+                0,
+                28.9337387
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.618042,
+                    -0.00843333453,
+                    28.9337387
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                0.4741211,
+                0,
+                29.0284386
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    0.4741211,
+                    -0.00843333453,
+                    29.0284386
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.76306152,
+                0,
+                29.4863224
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.76306152,
+                    -0.00843333453,
+                    29.4863224
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                2.0927124,
+                0,
+                28.5004463
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    2.0927124,
+                    -0.00843333453,
+                    28.5004463
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                2.83764648,
+                0,
+                29.4099922
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    2.83764648,
+                    -0.00843333453,
+                    29.4099922
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                3.70800781,
+                0,
+                29.3198643
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    3.70800781,
+                    -0.00843333453,
+                    29.3198643
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                2.77191162,
+                0,
+                29.090683
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    2.77191162,
+                    -0.00843333453,
+                    29.090683
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                3.70275879,
+                0,
+                29.4373741
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    3.70275879,
+                    -0.00843333453,
+                    29.4373741
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                2.91552734,
+                0,
+                28.50879
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    2.91552734,
+                    -0.00843333453,
+                    28.50879
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.77874756,
+                0,
+                28.3162746
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.77874756,
+                    -0.00843333453,
+                    28.3162746
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                3.69561768,
+                0,
+                29.666666
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    3.69561768,
+                    -0.00843333453,
+                    29.666666
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                3.11328125,
+                0,
+                28.9787025
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    3.11328125,
+                    -0.00843333453,
+                    28.9787025
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                5.392456,
+                0,
+                29.02344
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    5.392456,
+                    -0.00843333453,
+                    29.02344
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.65148926,
+                0,
+                29.1951046
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.65148926,
+                    -0.00843333453,
+                    29.1951046
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.04260254,
+                0,
+                28.19422
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.04260254,
+                    -0.00843333453,
+                    28.19422
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                3.68139648,
+                0,
+                28.32995
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    3.68139648,
+                    -0.00843333453,
+                    28.32995
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.27697754,
+                0,
+                29.03279
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.27697754,
+                    -0.00843333453,
+                    29.03279
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.639099,
+                0,
+                29.3058987
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.639099,
+                    -0.00843333453,
+                    29.3058987
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.55542,
+                0,
+                28.8257065
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.55542,
+                    -0.00843333453,
+                    28.8257065
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                5.475464,
+                0,
+                29.27965
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    5.475464,
+                    -0.00843333453,
+                    29.27965
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.02032471,
+                0,
+                28.4863014
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.02032471,
+                    -0.00843333453,
+                    28.4863014
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.23681641,
+                0,
+                28.1653423
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.23681641,
+                    -0.00843333453,
+                    28.1653423
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.83453369,
+                0,
+                26.2282734
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.83453369,
+                    -0.00843333453,
+                    26.2282734
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.39379883,
+                0,
+                26.4418411
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.39379883,
+                    -0.00843333453,
+                    26.4418411
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                0.786865234,
+                0,
+                27.4096718
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    0.786865234,
+                    -0.00843333453,
+                    27.4096718
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                0.7480469,
+                0,
+                27.0210838
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    0.7480469,
+                    -0.00843333453,
+                    27.0210838
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                0.366455078,
+                0,
+                26.85656
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    0.366455078,
+                    -0.00843333453,
+                    26.85656
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.13067627,
+                0,
+                27.1157379
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.13067627,
+                    -0.00843333453,
+                    27.1157379
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.49078369,
+                0,
+                28.0401249
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.49078369,
+                    -0.00843333453,
+                    28.0401249
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.17419434,
+                0,
+                26.5342026
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.17419434,
+                    -0.00843333453,
+                    26.5342026
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                0.383911133,
+                0,
+                27.0990334
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    0.383911133,
+                    -0.00843333453,
+                    27.0990334
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.44732666,
+                0,
+                27.5839
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.44732666,
+                    -0.00843333453,
+                    27.5839
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                3.19744873,
+                0,
+                26.6280479
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    3.19744873,
+                    -0.00843333453,
+                    26.6280479
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                2.45507813,
+                0,
+                26.550808
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    2.45507813,
+                    -0.00843333453,
+                    26.550808
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.80645752,
+                0,
+                27.729353
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.80645752,
+                    -0.00843333453,
+                    27.729353
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.944458,
+                0,
+                27.9163055
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.944458,
+                    -0.00843333453,
+                    27.9163055
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                2.12115479,
+                0,
+                27.1627731
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    2.12115479,
+                    -0.00843333453,
+                    27.1627731
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.90319824,
+                0,
+                27.5847969
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.90319824,
+                    -0.00843333453,
+                    27.5847969
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                3.612976,
+                0,
+                27.68392
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    3.612976,
+                    -0.00843333453,
+                    27.68392
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                2.791809,
+                0,
+                27.622242
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    2.791809,
+                    -0.00843333453,
+                    27.622242
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                3.52685547,
+                0,
+                27.3131027
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    3.52685547,
+                    -0.00843333453,
+                    27.3131027
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                3.081543,
+                0,
+                27.6643448
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    3.081543,
+                    -0.00843333453,
+                    27.6643448
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.13659668,
+                0,
+                27.69821
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.13659668,
+                    -0.00843333453,
+                    27.69821
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.602051,
+                0,
+                26.9784737
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.602051,
+                    -0.00843333453,
+                    26.9784737
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.65539551,
+                0,
+                26.2279282
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.65539551,
+                    -0.00843333453,
+                    26.2279282
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.334961,
+                0,
+                26.9014931
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.334961,
+                    -0.00843333453,
+                    26.9014931
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                5.319214,
+                0,
+                27.7921677
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    5.319214,
+                    -0.00843333453,
+                    27.7921677
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.94213867,
+                0,
+                27.0664787
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.94213867,
+                    -0.00843333453,
+                    27.0664787
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.804016,
+                0,
+                27.4991
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.804016,
+                    -0.00843333453,
+                    27.4991
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                3.86669922,
+                0,
+                26.5953064
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    3.86669922,
+                    -0.00843333453,
+                    26.5953064
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                5.55462646,
+                0,
+                26.4022713
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    5.55462646,
+                    -0.00843333453,
+                    26.4022713
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.84594727,
+                0,
+                28.00579
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.84594727,
+                    -0.00843333453,
+                    28.00579
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.61340332,
+                0,
+                25.4514084
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.61340332,
+                    -0.00843333453,
+                    25.4514084
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                0.574707031,
+                0,
+                25.7107735
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    0.574707031,
+                    -0.00843333453,
+                    25.7107735
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                0.476989746,
+                0,
+                25.81325
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    0.476989746,
+                    -0.00843333453,
+                    25.81325
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                0.333313,
+                0,
+                24.6760635
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    0.333313,
+                    -0.00843333453,
+                    24.6760635
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                0.333313,
+                0,
+                25.5899277
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    0.333313,
+                    -0.00843333453,
+                    25.5899277
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.05529785,
+                0,
+                24.535059
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.05529785,
+                    -0.00843333453,
+                    24.535059
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.70214844,
+                0,
+                24.8069649
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.70214844,
+                    -0.00843333453,
+                    24.8069649
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                0.362243652,
+                0,
+                24.997818
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    0.362243652,
+                    -0.00843333453,
+                    24.997818
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.43261719,
+                0,
+                25.9905777
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.43261719,
+                    -0.00843333453,
+                    25.9905777
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.35443115,
+                0,
+                24.8707047
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.35443115,
+                    -0.00843333453,
+                    24.8707047
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                3.41918945,
+                0,
+                25.8725262
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    3.41918945,
+                    -0.00843333453,
+                    25.8725262
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.82275391,
+                0,
+                25.4352188
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.82275391,
+                    -0.00843333453,
+                    25.4352188
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.99853516,
+                0,
+                26.2101231
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.99853516,
+                    -0.00843333453,
+                    26.2101231
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                1.80938721,
+                0,
+                25.9312553
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    1.80938721,
+                    -0.00843333453,
+                    25.9312553
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                3.06280518,
+                0,
+                25.310318
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    3.06280518,
+                    -0.00843333453,
+                    25.310318
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                3.18261719,
+                0,
+                24.9234543
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    3.18261719,
+                    -0.00843333453,
+                    24.9234543
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                2.3571167,
+                0,
+                24.9423923
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    2.3571167,
+                    -0.00843333453,
+                    24.9423923
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                2.6605835,
+                0,
+                25.7095146
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    2.6605835,
+                    -0.00843333453,
+                    25.7095146
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                2.94189453,
+                0,
+                24.5224361
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    2.94189453,
+                    -0.00843333453,
+                    24.5224361
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                2.4864502,
+                0,
+                24.712759
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    2.4864502,
+                    -0.00843333453,
+                    24.712759
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.621338,
+                0,
+                25.143816
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.621338,
+                    -0.00843333453,
+                    25.143816
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                5.043457,
+                0,
+                25.7385941
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    5.043457,
+                    -0.00843333453,
+                    25.7385941
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.850952,
+                0,
+                25.2724857
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.850952,
+                    -0.00843333453,
+                    25.2724857
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                3.765442,
+                0,
+                24.35839
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    3.765442,
+                    -0.00843333453,
+                    24.35839
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.7956543,
+                0,
+                25.0775261
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.7956543,
+                    -0.00843333453,
+                    25.0775261
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                5.4362793,
+                0,
+                25.4363251
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    5.4362793,
+                    -0.00843333453,
+                    25.4363251
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.145874,
+                0,
+                25.5835419
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.145874,
+                    -0.00843333453,
+                    25.5835419
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                5.053955,
+                0,
+                25.3847427
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    5.053955,
+                    -0.00843333453,
+                    25.3847427
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                5.29785156,
+                0,
+                24.220192
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    5.29785156,
+                    -0.00843333453,
+                    24.220192
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        },
+        {
+            "position": [
+                4.814148,
+                0,
+                24.9534225
+            ],
+            "goal_list": [
+                1
+            ],
+            "remove_goal_reach": true,
+            "path_planning_goals": [
+                [
+                    4.814148,
+                    -0.00843333453,
+                    24.9534225
+                ],
+                [
+                    27.1746826,
+                    -0.00843333453,
+                    3.1673696
+                ]
+            ]
+        }
+    ],
+    "auxins": [],
+    "isCassolValid": true
+}
