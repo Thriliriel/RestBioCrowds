@@ -63,6 +63,8 @@ def load_biocrowds_simulation(experiment_path: str,
 	
 
 if __name__ == '__main__':
+	print("Return without running code")
+	return;
 	arg_parser = argparse.ArgumentParser(description="Run a local experiment of webcrowds, requires the data path and a seed range")
 	arg_parser.add_argument('--p', metavar="P", type=str, default = None, help='Scenario path')
 	arg_parser.add_argument('--c', metavar="C", type=int, default = None, help='Number of configurations (1 to 4)')
