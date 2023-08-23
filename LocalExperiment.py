@@ -28,7 +28,7 @@ def load_biocrowds_simulation(experiment_path: str,
 	current_seed = starting_seed
 	
 	for s in range(starting_seed, ending_seed + 1):
-		print("Seed")
+		print("Seed", s)
 		current_seed = s
 		output_path = Path() / "OutputExperiments" / experiment_path.replace("\\ExperimentsData", "") / f"Seed{current_seed}"
 		output_path.mkdir(parents=True, exist_ok=True)
@@ -39,7 +39,7 @@ def load_biocrowds_simulation(experiment_path: str,
 			exp_data = copy.deepcopy(config_data[conf_id])
 			exp_data["simId"] = conf_id + 1
 			biocrowds = BioCrowds.BioCrowdsClass()
-			output_ref, removed_agents = biocrowds.run(exp_data, starting_seed, reference_simulation= True)
+			output_ref, removed_agents = biocrowds.run(exp_data, current_seed, reference_simulation= True)
 			removed_agents_in_ref += removed_agents # type: ignore
 			output_ref.to_csv(output_path / ("Reference-" +config_names[conf_id] + ".csv"), sep=';', encoding='utf-8')
 			reference_results.append(output_ref)
@@ -53,7 +53,7 @@ def load_biocrowds_simulation(experiment_path: str,
 			exp_data["simId"] = conf_id + 1
 			biocrowds = BioCrowds.BioCrowdsClass()
 			output_final, rem = biocrowds.run(exp_data, 
-					starting_seed, 
+					current_seed, 
 					reference_simulation= False, 
 					reference_output=reference_results[conf_id])
 			output_final.to_csv(output_path / ("Final-" +config_names[conf_id] + ".csv"), sep=';', encoding='utf-8')
@@ -63,8 +63,8 @@ def load_biocrowds_simulation(experiment_path: str,
 	
 
 if __name__ == '__main__':
-	print("Return without running code")
-	return;
+	#print("Return without running code")
+	#return;
 	arg_parser = argparse.ArgumentParser(description="Run a local experiment of webcrowds, requires the data path and a seed range")
 	arg_parser.add_argument('--p', metavar="P", type=str, default = None, help='Scenario path')
 	arg_parser.add_argument('--c', metavar="C", type=int, default = None, help='Number of configurations (1 to 4)')
