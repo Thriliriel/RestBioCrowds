@@ -16,7 +16,7 @@ if __name__ == '__main__':
     #scenario_names = ["Scenario1"]
     configs_per_scenario = [3, 3, 3, 4, 3]
     hypotenuse_per_scenario = [42.426406871192, 42.426406871192, 42.426406871192, 42.426406871192, 61.84658438426490824]
-    seeds_per_scenario = [50, 50, 30, 20, 20]
+    seeds_per_scenario = [50, 50, 70, 40, 20]
     config_names = ["ConfigA", "ConfigB", "ConfigC", "ConfigD"]
     base_path = Path() / "OutputExperiments"
 
