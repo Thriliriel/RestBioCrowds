@@ -48,7 +48,6 @@ def load_biocrowds_simulation(experiment_path: str,
 			continue
 
 		for conf_id in range(configuration_count):
-			print("Final", conf_id)
 			exp_data = copy.deepcopy(config_data[conf_id])
 			exp_data["simId"] = conf_id + 1
 			biocrowds = BioCrowds.BioCrowdsClass()

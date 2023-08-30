@@ -107,7 +107,7 @@ class BioCrowdsClass():
 		self.reference_agent = {}
 		
 		if self.ref_simulation or len(self.agents) == 1:
-			self.select_reference_agent()
+			self.select_reference_agent_median()
 		else:
 			#jason = reference_output.to_json()
 			#jason = json.loads(json.loads(str(reference_output)))
@@ -490,7 +490,7 @@ class BioCrowdsClass():
 			_agent.FindPathJson(self.cells)
 
 	# select the agent with largest distance as a reference agent
-	def select_reference_agent(self):
+	def select_reference_agent_furthest(self):
 		ref_agent: AgentClass = self.agents[0]
 		max_dist = 0
 		for _agent in self.agents:
@@ -503,6 +503,20 @@ class BioCrowdsClass():
 				#if dst > max_dist:
 					#max_dist = dst
 					#ref_agent = _agent
+		self.agents.clear()
+		self.agents.append(ref_agent)
+
+	def select_reference_agent_median(self):
+		ref_agent: AgentClass = self.agents[0]
+		agent_lenghs = []
+		for _agent in self.agents:
+			agent_lenghs.append({"agent": _agent, "lenght": _agent.GetAgentEditorPathLenght()})
+
+		newlist = sorted(agent_lenghs, key=lambda d: d['lenght']) 
+		ref_agent = newlist[len(newlist)//2]['agent']
+		# print([x["lenght"] for x in newlist])
+		# print(ref_agent.GetAgentEditorPathLenght())
+		# exit(0)
 		self.agents.clear()
 		self.agents.append(ref_agent)
 
