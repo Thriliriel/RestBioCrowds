@@ -1,0 +1,26 @@
+;0;1
+0;noNeed;
+1;noNeed;
+2;simulation_time;29.580000000000002
+3;agents_distance_walked;{49: 34.035040291226515}
+4;average_distance_walked;34.035040291226515
+5;agents_speeds;{49: 1.1506098813802066}
+6;average_speed;1.1506098813802066
+7;average_density;1.0
+8;average_time;29.580000000000002
+9;new_metric;2.5431068819273226
+10;cassol_metric;2.065350204234951
+11;normalized_total_simulation_time;29.580000000000002
+12;normalized_average_simulation_time;29.580000000000002
+13;normalized_average_speed;1.1506098813802066
+14;normalized_average_distance_walked;34.035040291226515
+15;minimum_simulation_time;29.580000000000002
+16;maximum_average_density;1.0
+17;maximum_average_density_frame;0
+18;maximum_cell_density;1
+19;maximum_cell_density_frame;42
+20;maximum_cell_density_id;3-26
+21;maximum_agent_speed;1.2000000000000888
+22;minimum_agent_speed;0.8438458857153556
+23;maximum_distance_walked;34.035040291226515
+24;minimum_distance_walked;34.035040291226515
