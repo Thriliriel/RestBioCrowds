@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import random
 from AgentClass import AgentClass
 from BioCrowdsDatabase import BioCrowdsDataBase
 from Vector3Class import Vector3
@@ -137,7 +138,7 @@ class BioCrowdsClass():
 
 		# timing until parsing
 		self.execution_times.append(time.time())
-
+		random.seed(10)
 		# Create and save Markers
 		self.create_markers()
 		self.save_markers_to_file()
@@ -503,11 +504,15 @@ class BioCrowdsClass():
 		ref_agent: AgentClass = self.agents[0]
 		max_dist = 0
 		for _agent in self.agents:
-			for _goal in self.goals:
-				dst = Vector3.Distance(_agent.position, _goal.position)
-				if dst > max_dist:
+			dst = _agent.GetAgentEditorPathLenght()
+			if dst > max_dist:
 					max_dist = dst
 					ref_agent = _agent
+			#for _goal in self.goals:
+				#dst = Vector3.Distance(_agent.position, _goal.position)
+				#if dst > max_dist:
+					#max_dist = dst
+					#ref_agent = _agent
 		self.agents.clear()
 		self.agents.append(ref_agent)
 

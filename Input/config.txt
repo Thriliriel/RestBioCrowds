@@ -6,7 +6,7 @@
 # map size (default: 20x20)
 # path planning (true, false) (default: true)
 #############################################
-0.65
+1.00
 0.02
 1
 30,30,0
